@@ -1,0 +1,67 @@
+[project]
+name = "aaop-api"
+version = "0.1.0"
+description = "AAOP — AI Agent Orchestration Platform (API + runtime)"
+requires-python = ">=3.11"
+dependencies = [
+    # Web framework
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+    "websockets>=13.0",
+
+    # Validation
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.0",
+
+    # Database
+    "sqlalchemy[asyncio]>=2.0.35",
+    "asyncpg>=0.29.0",
+    "psycopg[binary]>=3.2.0",   # sync driver for Alembic
+    "alembic>=1.13.0",
+
+    # LLM + agent runtime
+    "langgraph>=0.2.0",
+    "anthropic>=0.39.0",
+
+    # Tools
+    "httpx>=0.27.0",
+    "tavily-python>=0.5.0",     # optional convenience; we use raw httpx
+
+    # Scheduling
+    "croniter>=3.0.0",
+
+    # HTTP retries (used by LLM provider)
+    "tenacity>=9.0.0",
+
+    # Logging
+    "structlog>=24.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "httpx>=0.27.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

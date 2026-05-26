@@ -1,0 +1,46 @@
+# ==========================================
+# AI Agent & LLM Specific Exclusions
+# ==========================================
+# API keys, environmental variables, and local state
+.env
+.env.*
+!.env.example
+secrets/
+credentials.json
+
+# Local agent databases, state histories, and vector embeddings
+.chroma/
+.pinecone/
+faiss_index/
+*.db
+*.sqlite
+
+# LLM execution histories, evaluation traces, and debugging logs
+logs/
+*.log
+mlruns/
+.langchain/
+phoenix/
+.arize/
+traceloop/
+
+# Large model weights, cache files, and datasets
+weights/
+.cache/
+.huggingface/
+datasets/
+*.csv
+*.jsonl
+
+# ==========================================
+# Standard Python/Node.js Build & Environments
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+node_modules/
+dist/
+build/
