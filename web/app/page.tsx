@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,6 @@ import {
   runsApi,
   channelsApi,
   type Run,
-  type Workflow,
 } from '@/lib/api/resources';
 
 function StatChip({ value, label }: { value: string | number; label: string }) {
@@ -62,13 +62,21 @@ export default function Home() {
     staleTime: 60_000,
   });
 
-  const workflowsById: Record<string, Workflow> = {};
-  (workflows ?? []).forEach((w) => { workflowsById[w.id] = w; });
+  const workflowsById = useMemo(
+    () => Object.fromEntries((workflows ?? []).map((w) => [w.id, w])),
+    [workflows],
+  );
 
-  const totalRuns = allRuns?.length ?? 0;
-  const succeeded = allRuns?.filter((r: Run) => r.status === 'succeeded').length ?? 0;
-  const totalCost = allRuns?.reduce((sum: number, r: Run) => sum + (r.total_cost_usd ?? 0), 0) ?? 0;
-  const successRate = totalRuns > 0 ? Math.round((succeeded / totalRuns) * 100) : 0;
+  const { totalRuns, totalCost, successRate } = useMemo(() => {
+    const total = allRuns?.length ?? 0;
+    const succeeded = allRuns?.filter((r) => r.status === 'succeeded').length ?? 0;
+    const cost = allRuns?.reduce((sum, r) => sum + (r.total_cost_usd ?? 0), 0) ?? 0;
+    return {
+      totalRuns: total,
+      totalCost: cost,
+      successRate: total > 0 ? Math.round((succeeded / total) * 100) : 0,
+    };
+  }, [allRuns]);
 
   return (
     <>
@@ -93,9 +101,9 @@ export default function Home() {
             No active runs
           </div>
         )}
-        {!runsLoading && !runsError && (activeRuns?.length ?? 0) > 0 && (
+        {!runsLoading && !runsError && activeRuns && activeRuns.length > 0 && (
           <div className="space-y-2">
-            {activeRuns!.map((run: Run) => (
+            {activeRuns.map((run: Run) => (
               <Link
                 key={run.id}
                 href={`/runs/${run.id}`}
