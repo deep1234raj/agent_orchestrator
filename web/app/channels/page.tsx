@@ -1,26 +1,19 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Cable, Loader2, AlertTriangle, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { Cable, Loader2, AlertTriangle } from 'lucide-react';
 
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
-  AlertDialogTitle, AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { channelsApi, workflowsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
 
 import { CreateChannelDialog } from './create-channel-dialog';
 import { EditChannelDialog } from './edit-channel-dialog';
+import { DeleteChannelButton } from './delete-channel-button';
 
 export default function ChannelsPage() {
-  const qc = useQueryClient();
   const { data: channels, isLoading, error } = useQuery({
     queryKey: ['channels'],
     queryFn: channelsApi.list,
@@ -32,19 +25,6 @@ export default function ChannelsPage() {
   });
 
   const workflowsById = new Map(workflows?.map((w) => [w.id, w]) ?? []);
-
-  const del = useMutation({
-    mutationFn: (id: string) => channelsApi.remove(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['channels'] });
-      toast.success('Channel deleted');
-    },
-    onError: (err) => {
-      toast.error('Could not delete', {
-        description: err instanceof ApiException ? err.detail : 'An error occurred.',
-      });
-    },
-  });
 
   return (
     <>
@@ -125,41 +105,7 @@ export default function ChannelsPage() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <EditChannelDialog channel={channel} />
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Delete channel"
-                            className="text-fg-subtle hover:text-danger"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete this channel?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              The{' '}
-                              <span className="font-mono text-fg">{channel.kind}</span> binding
-                              for <span className="font-mono text-fg">{channel.external_id}</span> will
-                              be removed. The bot and workflow are not affected.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={(e) => {
-                                e.preventDefault();
-                                del.mutate(channel.id);
-                              }}
-                              disabled={del.isPending}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <DeleteChannelButton channel={channel} />
                     </div>
                   </td>
                 </tr>

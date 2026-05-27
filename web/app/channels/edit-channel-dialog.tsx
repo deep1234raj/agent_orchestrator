@@ -9,6 +9,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader,
   DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { channelsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
@@ -55,12 +56,10 @@ export function EditChannelDialog({ channel }: { channel: Channel }) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-3 py-2">
-          <input
+          <Checkbox
             id="ch-enabled"
-            type="checkbox"
             checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-            className="h-4 w-4 accent-amber-400"
+            onCheckedChange={(v) => setEnabled(Boolean(v))}
           />
           <Label htmlFor="ch-enabled">Enabled</Label>
         </div>
