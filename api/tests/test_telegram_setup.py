@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport, Response
+from httpx import AsyncClient, ASGITransport
 
 from app.webhooks.telegram import router
 
@@ -62,3 +62,8 @@ async def test_setup_webhook_success(client: AsyncClient, monkeypatch: pytest.Mo
     data = resp.json()
     assert data["ok"] is True
     assert data["description"] == "Webhook was set"
+
+    call_kwargs = mock_client_instance.post.call_args
+    posted_json = call_kwargs.kwargs["json"]
+    assert posted_json["url"] == "https://abc.ngrok-free.app/webhooks/telegram"
+    assert posted_json["secret_token"] == "test-secret"

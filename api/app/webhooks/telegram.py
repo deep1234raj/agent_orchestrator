@@ -27,6 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.channels.base import get_channel_or_none
+from app.config import settings
 from app.db.session import get_session
 from app.models.channel import Channel
 from app.models.enums import ChannelKind, RunStatus
@@ -134,8 +135,6 @@ class SetupWebhookResponse(BaseModel):
 @router.post("/telegram/setup", response_model=SetupWebhookResponse)
 async def setup_telegram_webhook(body: SetupWebhookRequest) -> SetupWebhookResponse:
     """Call Telegram setWebhook on behalf of the configured bot."""
-    from app.config import settings  # late import avoids circular at module load
-
     if not settings.telegram_bot_token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -154,12 +153,19 @@ async def setup_telegram_webhook(body: SetupWebhookRequest) -> SetupWebhookRespo
                 json=payload,
                 timeout=10.0,
             )
+            resp.raise_for_status()
             data = resp.json()
     except httpx.HTTPError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Telegram API unreachable: {exc}",
         ) from exc
+
+    if not data.get("ok", False):
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=data.get("description", "Telegram rejected the webhook registration"),
+        )
 
     return SetupWebhookResponse(
         ok=data.get("ok", False),
