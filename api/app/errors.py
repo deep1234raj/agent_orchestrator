@@ -7,6 +7,7 @@ focused on the happy path and the error shape consistent.
 Error envelope:
     {"detail": "<message>", "code": "<short-symbol>"}
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI, Request, status
@@ -48,9 +49,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(RequestValidationError)
-    async def _validation_handler(
-        _: Request, exc: RequestValidationError
-    ) -> JSONResponse:
+    async def _validation_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={

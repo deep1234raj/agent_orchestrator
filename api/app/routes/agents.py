@@ -1,4 +1,5 @@
 """Agent CRUD routes."""
+
 from __future__ import annotations
 
 import uuid
@@ -23,9 +24,7 @@ async def list_agents(s: AsyncSession = Depends(get_session)) -> list[Agent]:
 
 
 @router.post("", response_model=AgentRead, status_code=status.HTTP_201_CREATED)
-async def create_agent(
-    body: AgentCreate, s: AsyncSession = Depends(get_session)
-) -> Agent:
+async def create_agent(body: AgentCreate, s: AsyncSession = Depends(get_session)) -> Agent:
     agent = Agent(**body.model_dump())
     s.add(agent)
     try:
@@ -38,9 +37,7 @@ async def create_agent(
 
 
 @router.get("/{agent_id}", response_model=AgentRead)
-async def get_agent(
-    agent_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> Agent:
+async def get_agent(agent_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> Agent:
     agent = await s.get(Agent, agent_id)
     if agent is None:
         raise NotFound(f"Agent {agent_id} not found.")
@@ -71,9 +68,7 @@ async def update_agent(
 
 
 @router.delete("/{agent_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_agent(
-    agent_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> None:
+async def delete_agent(agent_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> None:
     agent = await s.get(Agent, agent_id)
     if agent is None:
         raise NotFound(f"Agent {agent_id} not found.")

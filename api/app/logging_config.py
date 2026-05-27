@@ -7,6 +7,7 @@ We use JSON output in production-like envs and key-value output in
 development — JSON is easier for log aggregators, key-value is easier
 for human eyes.
 """
+
 from __future__ import annotations
 
 import logging

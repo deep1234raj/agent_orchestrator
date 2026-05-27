@@ -12,6 +12,7 @@ If the run's first agent has memory_mode != NONE, it will further see
 this preamble carried through into its own memory selection. The two
 mechanisms compose without coordination.
 """
+
 from __future__ import annotations
 
 from sqlalchemy import desc, select
@@ -64,8 +65,11 @@ async def build_conversation_preamble(
         user_text = r.input.get("input", "")
         # The agent's reply is the last AGENT-role message in the run.
         agent_msg = next(
-            (m for m in reversed(sorted(r.messages, key=lambda m: m.created_at))
-             if m.role == MessageRole.AGENT),
+            (
+                m
+                for m in reversed(sorted(r.messages, key=lambda m: m.created_at))
+                if m.role == MessageRole.AGENT
+            ),
             None,
         )
         agent_text = agent_msg.content if agent_msg else "(no reply)"

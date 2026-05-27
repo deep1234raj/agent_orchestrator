@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Bot, GitBranch, Activity, Radio, LayoutDashboard } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Bot, GitBranch, Activity, Radio, LayoutDashboard } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /*
  * Sidebar.
@@ -18,11 +18,11 @@ import { cn } from '@/lib/utils';
  */
 
 const NAV = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/agents', label: 'Agents', icon: Bot },
-  { href: '/workflows', label: 'Workflows', icon: GitBranch },
-  { href: '/runs', label: 'Runs', icon: Activity },
-  { href: '/channels', label: 'Channels', icon: Radio },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/agents", label: "Agents", icon: Bot },
+  { href: "/workflows", label: "Workflows", icon: GitBranch },
+  { href: "/runs", label: "Runs", icon: Activity },
+  { href: "/channels", label: "Channels", icon: Radio },
 ] as const;
 
 export function Sidebar() {
@@ -45,8 +45,8 @@ export function Sidebar() {
       <nav className="flex-1 px-2 space-y-0.5">
         {NAV.map((item) => {
           const active =
-            item.href === '/'
-              ? pathname === '/'
+            item.href === "/"
+              ? pathname === "/"
               : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
@@ -54,10 +54,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
+                "relative flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
                 active
-                  ? 'bg-elevated text-fg'
-                  : 'text-fg-muted hover:text-fg hover:bg-elevated/40',
+                  ? "bg-elevated text-fg"
+                  : "text-fg-muted hover:text-fg hover:bg-elevated/40",
               )}
             >
               {active && (

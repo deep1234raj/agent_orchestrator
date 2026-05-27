@@ -12,7 +12,11 @@ import { workflowsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
 
 export default function WorkflowsPage() {
-  const { data: workflows, isLoading, error } = useQuery({
+  const {
+    data: workflows,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['workflows'],
     queryFn: workflowsApi.list,
   });
@@ -25,19 +29,21 @@ export default function WorkflowsPage() {
       />
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-fg-muted text-sm py-12 justify-center">
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-fg-muted">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading workflows…
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 p-5 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <h3 className="text-fg font-medium">Couldn't load workflows</h3>
+            <h3 className="font-medium text-fg">Couldn't load workflows</h3>
             <p className="mt-1 text-sm text-fg-muted">
-              {error instanceof ApiException ? error.detail : 'Is the backend running?'}
+              {error instanceof ApiException
+                ? error.detail
+                : 'Is the backend running?'}
             </p>
           </div>
         </div>
@@ -52,45 +58,45 @@ export default function WorkflowsPage() {
       )}
 
       {workflows && workflows.length > 0 && (
-        <div className="rounded-lg border border-border bg-surface/40 overflow-hidden animate-fade-in">
+        <div className="animate-fade-in overflow-hidden rounded-lg border border-border bg-surface/40">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg/30">
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Name
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Description
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Type
                 </th>
-                <th className="px-4 py-3 w-24" />
+                <th className="w-24 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {workflows.map((wf) => (
                 <tr
                   key={wf.id}
-                  className="border-b border-border last:border-0 hover:bg-elevated/30 transition-colors"
+                  className="border-b border-border transition-colors last:border-0 hover:bg-elevated/30"
                 >
                   <td className="px-4 py-3">
                     <Link
                       href={`/workflows/${wf.id}`}
-                      className="group inline-flex items-center gap-1.5 font-medium text-fg hover:text-accent transition-colors"
+                      className="group inline-flex items-center gap-1.5 font-medium text-fg transition-colors hover:text-accent"
                     >
                       {wf.name}
-                      <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-fg-muted max-w-xs truncate">
+                  <td className="max-w-xs truncate px-4 py-3 text-fg-muted">
                     {wf.description || '—'}
                   </td>
                   <td className="px-4 py-3">
                     {wf.is_template ? (
                       <Badge
                         variant="outline"
-                        className="border-accent/30 text-accent bg-accent/10 text-xs"
+                        className="border-accent/30 bg-accent/10 text-xs text-accent"
                       >
                         Template
                       </Badge>

@@ -9,6 +9,7 @@ of truth: agents read from it and write to it, never call each other
 directly. The runtime broadcasts inserts via WebSocket so the UI sees
 them as they happen.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -45,8 +46,14 @@ class Message(Base, UUIDPKMixin, TimestampMixin):
     )
 
     role: Mapped[MessageRole] = mapped_column(
-        SAEnum(MessageRole, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
-        nullable=False, index=True,
+        SAEnum(
+            MessageRole,
+            native_enum=False,
+            length=20,
+            values_callable=lambda e: [m.value for m in e],
+        ),
+        nullable=False,
+        index=True,
     )
 
     content: Mapped[str] = mapped_column(Text, nullable=False)

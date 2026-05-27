@@ -1,4 +1,5 @@
 """Tests for POST /webhooks/telegram/setup."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -30,7 +31,9 @@ async def test_setup_webhook_no_token(client: AsyncClient, monkeypatch: pytest.M
     assert "TELEGRAM_BOT_TOKEN" in resp.json()["detail"]
 
 
-async def test_setup_webhook_rejects_http_url(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_setup_webhook_rejects_http_url(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr("app.config.settings.telegram_bot_token", "test-token")
     resp = await client.post(
         "/webhooks/telegram/setup",

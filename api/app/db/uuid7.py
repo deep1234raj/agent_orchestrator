@@ -7,6 +7,7 @@ column.
 
 Reference: RFC 9562.
 """
+
 from __future__ import annotations
 
 import os

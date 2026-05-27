@@ -1,4 +1,5 @@
 """Runtime nodes."""
+
 from __future__ import annotations
 
 from app.runtime.nodes.agent_node import AgentNode

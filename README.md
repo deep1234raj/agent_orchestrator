@@ -3,6 +3,7 @@
 > Build, configure, and orchestrate collaborative AI agents that run on a real runtime, execute real tools, and talk to humans through Telegram.
 
 <!-- Replace with a real GIF once recorded -->
+
 <!-- ![demo](docs/demo.gif) -->
 
 ---
@@ -18,7 +19,7 @@
 - [Configuration](#configuration)
 - [Extending the platform](#extending-the-platform)
 - [Testing](#testing)
-- [What I'd build next](#what-id-build-next)
+- [What I&#39;d build next](#what-id-build-next)
 
 ---
 
@@ -118,18 +119,18 @@ Both are editable in the UI; seeding never overwrites changes you make.
 
 ## Technology choices
 
-| Layer | Choice | Why this, not the alternative |
-|---|---|---|
-| **Agent runtime** | LangGraph | Graph-based with conditional edges and cycles — maps 1:1 to a visual workflow builder. CrewAI is role-based and harder to visualize as a graph. AutoGen is conversation-centric, awkward for structured flows. LangGraph also has the strongest checkpointing story. |
-| **Backend** | Python + FastAPI | LangGraph is Python-native. FastAPI gives async, WebSockets, OpenAPI docs out of the box. |
-| **Frontend** | Next.js (App Router) + TypeScript | Server components for the dashboard, client components for the interactive builder. Familiar to any reviewer. |
-| **UI kit** | Tailwind + shadcn/ui | Production-grade components without the bloat of a full framework. |
-| **Graph editor** | React Flow (xyflow) | Industry standard. Building this from scratch is a time sink with no upside. |
-| **Persistence** | Postgres + SQLAlchemy + Alembic | One database for everything — config, history, message bus. No Redis until proven necessary. |
-| **Real-time** | WebSockets (FastAPI) | Native, simple, no extra service. |
-| **Messaging channel** | Telegram | Zero friction: bot in 60s via BotFather, ngrok for local webhooks. WhatsApp requires Meta Business approval. Slack works but is more setup. |
-| **LLM** | Anthropic Claude (default) + OpenAI (configurable per agent) + Ollama | Per-agent model choice is a hard requirement; defaulting to Claude shows the platform working with itself. |
-| **Packaging** | Docker Compose | Single command, runs anywhere Docker runs. |
+| Layer                       | Choice                                                                | Why this, not the alternative                                                                                                                                                                                                                                         |
+| --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Agent runtime**     | LangGraph                                                             | Graph-based with conditional edges and cycles — maps 1:1 to a visual workflow builder. CrewAI is role-based and harder to visualize as a graph. AutoGen is conversation-centric, awkward for structured flows. LangGraph also has the strongest checkpointing story. |
+| **Backend**           | Python + FastAPI                                                      | LangGraph is Python-native. FastAPI gives async, WebSockets, OpenAPI docs out of the box.                                                                                                                                                                             |
+| **Frontend**          | Next.js (App Router) + TypeScript                                     | Server components for the dashboard, client components for the interactive builder. Familiar to any reviewer.                                                                                                                                                         |
+| **UI kit**            | Tailwind + shadcn/ui                                                  | Production-grade components without the bloat of a full framework.                                                                                                                                                                                                    |
+| **Graph editor**      | React Flow (xyflow)                                                   | Industry standard. Building this from scratch is a time sink with no upside.                                                                                                                                                                                          |
+| **Persistence**       | Postgres + SQLAlchemy + Alembic                                       | One database for everything — config, history, message bus. No Redis until proven necessary.                                                                                                                                                                         |
+| **Real-time**         | WebSockets (FastAPI)                                                  | Native, simple, no extra service.                                                                                                                                                                                                                                     |
+| **Messaging channel** | Telegram                                                              | Zero friction: bot in 60s via BotFather, ngrok for local webhooks. WhatsApp requires Meta Business approval. Slack works but is more setup.                                                                                                                           |
+| **LLM**               | Anthropic Claude (default) + OpenAI (configurable per agent) + Ollama | Per-agent model choice is a hard requirement; defaulting to Claude shows the platform working with itself.                                                                                                                                                            |
+| **Packaging**         | Docker Compose                                                        | Single command, runs anywhere Docker runs.                                                                                                                                                                                                                            |
 
 ---
 
@@ -192,14 +193,15 @@ aaop/
 ├── CLAUDE.md                       # Operating manual for AI-assisted dev
 └── README.md
 ```
- 
+
 ---
- 
+
 ## Implementation status
- 
+
 This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's planned — useful for reviewers and for AI-assisted continuation.
- 
+
 **Done end-to-end**
+
 - Postgres schema (7 tables) + Alembic migration + UUID v7 PKs
 - LangGraph runtime: compiler, executor, agent node with tool-calling loop, condition node, terminal node
 - Memory strategies (none / windowed / summary)
@@ -222,11 +224,12 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 - Web: Channels page — list, create, edit (toggle enabled), delete with confirmation
 - Web: Dashboard — live active-runs section (5s polling), system health counts, all-time stats (total runs, cost, success rate), quick-action buttons including Setup Telegram dialog
 - Docker Compose with health checks; one-command boot
-**Stubbed (interface in place, body deferred)**
+  **Stubbed (interface in place, body deferred)**
 - OpenAI LLM provider — `get_provider("openai")` raises clearly; Anthropic works
 - Slack / WhatsApp channels — registered in the enum, not implemented
-**Not built yet (planned next)**
+  **Not built yet (planned next)**
 - Pytest suite (smoke tests exist but aren't running in CI)
+
 ---
 
 ## Key flows

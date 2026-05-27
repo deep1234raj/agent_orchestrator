@@ -7,6 +7,7 @@ behavior on the message log so updates accumulate rather than replace.
 Keep this model minimal. Anything node-specific goes in `context` rather
 than as a top-level field — it keeps the schema stable as we add nodes.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -30,9 +31,7 @@ class StateMessage(BaseModel):
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
-def _append_messages(
-    left: list[StateMessage], right: list[StateMessage]
-) -> list[StateMessage]:
+def _append_messages(left: list[StateMessage], right: list[StateMessage]) -> list[StateMessage]:
     """Reducer: concatenate message lists. Used by LangGraph's state merger."""
     return left + right
 
@@ -55,9 +54,7 @@ class RunState(BaseModel):
     input: dict[str, Any] = Field(default_factory=dict)
 
     # Annotated with the reducer so LangGraph merges, not overwrites.
-    messages: Annotated[list[StateMessage], _append_messages] = Field(
-        default_factory=list
-    )
+    messages: Annotated[list[StateMessage], _append_messages] = Field(default_factory=list)
 
     context: dict[str, Any] = Field(default_factory=dict)
     next_hint: str | None = None

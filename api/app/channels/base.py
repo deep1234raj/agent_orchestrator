@@ -8,6 +8,7 @@ ChannelMessage and the registered channel for that kind does the work.
 Implementations register themselves via `register_channel()`. There's
 one instance per kind, constructed lazily from environment config.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -24,10 +25,10 @@ class ChannelMessage:
     For outbound: produced by the `send_message` tool.
     """
 
-    chat_id: str          # provider-side conversation identifier
-    text: str             # the message body
-    sender_id: str | None = None     # who sent it (inbound only)
-    sender_name: str | None = None   # display name (inbound only)
+    chat_id: str  # provider-side conversation identifier
+    text: str  # the message body
+    sender_id: str | None = None  # who sent it (inbound only)
+    sender_name: str | None = None  # display name (inbound only)
 
 
 class Channel(Protocol):

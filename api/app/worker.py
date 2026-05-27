@@ -16,6 +16,7 @@ FAILED (orphaned by a previous process crash).
 The SKIP LOCKED pattern means we can run multiple workers without
 coordination — Postgres handles it. We run one in v1.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -50,9 +51,7 @@ async def orphan_sweep() -> None:
     crash. We can't recover it, but we shouldn't leave it visibly stuck
     in the UI either.
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(
-        minutes=settings.orphan_run_after_minutes
-    )
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=settings.orphan_run_after_minutes)
     async with session_scope() as s:
         result = await s.execute(
             update(Run)

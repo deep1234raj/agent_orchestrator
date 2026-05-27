@@ -16,6 +16,7 @@ A node returns a state patch: new messages get appended to RunState.messages
 via the reducer. `iterations` is incremented so the executor can enforce
 the workflow-level guardrail.
 """
+
 from __future__ import annotations
 
 import json
@@ -148,9 +149,7 @@ class AgentNode:
             "iterations": state.iterations + 1,
         }
 
-    async def _execute_tool_uses(
-        self, tool_uses: list[ToolUseRequest]
-    ) -> list[ToolResult]:
+    async def _execute_tool_uses(self, tool_uses: list[ToolUseRequest]) -> list[ToolResult]:
         """Run each tool call, recording results to DB and broadcasting events."""
         results: list[ToolResult] = []
         for tu in tool_uses:
@@ -179,9 +178,7 @@ class AgentNode:
             except Exception as e:  # noqa: BLE001
                 duration_ms = (time.perf_counter() - t0) * 1000
                 err_msg = f"{type(e).__name__}: {e}"
-                await self.emitter.tool_call_finish(
-                    tc_id, error=err_msg, duration_ms=duration_ms
-                )
+                await self.emitter.tool_call_finish(tc_id, error=err_msg, duration_ms=duration_ms)
                 results.append(
                     ToolResult(
                         tool_use_id=tu.id,

@@ -5,6 +5,7 @@ output. Workflows that need a richer final shape (e.g. structured JSON)
 can add a node before this one to populate `state.context["output"]`,
 which we'll prefer when present.
 """
+
 from __future__ import annotations
 
 from typing import Any

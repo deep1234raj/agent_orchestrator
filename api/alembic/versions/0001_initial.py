@@ -8,6 +8,7 @@ Creates the seven core tables in dependency order:
   agents, workflows, runs, messages, tool_calls, usage_events,
   channels, schedules.
 """
+
 from __future__ import annotations
 
 from typing import Sequence
@@ -27,22 +28,21 @@ def upgrade() -> None:
     op.create_table(
         "agents",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("name", sa.String(120), nullable=False, unique=True),
         sa.Column("role", sa.String(120), nullable=False),
         sa.Column("system_prompt", sa.Text(), nullable=False),
-        sa.Column("provider", sa.String(40), nullable=False,
-                  server_default="anthropic"),
-        sa.Column("model", sa.String(80), nullable=False,
-                  server_default="claude-sonnet-4-5"),
+        sa.Column("provider", sa.String(40), nullable=False, server_default="anthropic"),
+        sa.Column("model", sa.String(80), nullable=False, server_default="claude-sonnet-4-5"),
         sa.Column("temperature", sa.Float(), nullable=False, server_default="0.7"),
         sa.Column("max_tokens", sa.Integer(), nullable=False, server_default="2048"),
         sa.Column("tools", JSON(), nullable=False, server_default="[]"),
-        sa.Column("memory_mode", sa.String(20), nullable=False,
-                  server_default="summary"),
+        sa.Column("memory_mode", sa.String(20), nullable=False, server_default="summary"),
         sa.Column("memory_window", sa.Integer(), nullable=False, server_default="10"),
         sa.Column("guardrails", JSON(), nullable=False, server_default="{}"),
     )
@@ -51,10 +51,12 @@ def upgrade() -> None:
     op.create_table(
         "workflows",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("name", sa.String(120), nullable=False, unique=True),
         sa.Column("description", sa.Text(), nullable=False, server_default=""),
         sa.Column("graph", JSON(), nullable=False, server_default="{}"),
@@ -65,12 +67,18 @@ def upgrade() -> None:
     op.create_table(
         "runs",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("workflow_id", UUID(as_uuid=True),
-                  sa.ForeignKey("workflows.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "workflow_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("workflows.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("status", sa.String(20), nullable=False, server_default="pending"),
         sa.Column("trigger", sa.String(40), nullable=False),
         sa.Column("input", JSON(), nullable=False, server_default="{}"),
@@ -88,14 +96,24 @@ def upgrade() -> None:
     op.create_table(
         "messages",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("run_id", UUID(as_uuid=True),
-                  sa.ForeignKey("runs.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("agent_id", UUID(as_uuid=True),
-                  sa.ForeignKey("agents.id", ondelete="SET NULL"), nullable=True),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "run_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("runs.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "agent_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("agents.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
         sa.Column("role", sa.String(20), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("meta", JSON(), nullable=False, server_default="{}"),
@@ -108,14 +126,24 @@ def upgrade() -> None:
     op.create_table(
         "tool_calls",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("run_id", UUID(as_uuid=True),
-                  sa.ForeignKey("runs.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("agent_id", UUID(as_uuid=True),
-                  sa.ForeignKey("agents.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "run_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("runs.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "agent_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("agents.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("tool_name", sa.String(80), nullable=False),
         sa.Column("arguments", JSON(), nullable=False, server_default="{}"),
         sa.Column("result", JSON(), nullable=True),
@@ -130,14 +158,24 @@ def upgrade() -> None:
     op.create_table(
         "usage_events",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("run_id", UUID(as_uuid=True),
-                  sa.ForeignKey("runs.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("agent_id", UUID(as_uuid=True),
-                  sa.ForeignKey("agents.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "run_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("runs.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "agent_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("agents.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("provider", sa.String(40), nullable=False),
         sa.Column("model", sa.String(80), nullable=False),
         sa.Column("input_tokens", sa.Integer(), nullable=False, server_default="0"),
@@ -151,18 +189,23 @@ def upgrade() -> None:
     op.create_table(
         "channels",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("workflow_id", UUID(as_uuid=True),
-                  sa.ForeignKey("workflows.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "workflow_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("workflows.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("kind", sa.String(20), nullable=False),
         sa.Column("external_id", sa.String(120), nullable=False),
         sa.Column("config", JSON(), nullable=False, server_default="{}"),
         sa.Column("enabled", sa.Boolean(), nullable=False, server_default="true"),
-        sa.UniqueConstraint("kind", "external_id",
-                            name="uq_channel_kind_external_id"),
+        sa.UniqueConstraint("kind", "external_id", name="uq_channel_kind_external_id"),
     )
     op.create_index("ix_channels_workflow_id", "channels", ["workflow_id"])
 
@@ -170,12 +213,18 @@ def upgrade() -> None:
     op.create_table(
         "schedules",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-        sa.Column("workflow_id", UUID(as_uuid=True),
-                  sa.ForeignKey("workflows.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "workflow_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("workflows.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("name", sa.String(120), nullable=False),
         sa.Column("cron", sa.String(80), nullable=False),
         sa.Column("timezone", sa.String(60), nullable=False, server_default="UTC"),

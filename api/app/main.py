@@ -11,6 +11,7 @@ Wires everything together:
 
 The app instance is exported as `app` so uvicorn finds it at `app.main:app`.
 """
+
 from __future__ import annotations
 
 import asyncio

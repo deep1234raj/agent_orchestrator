@@ -5,9 +5,15 @@ import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
 
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
-  AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { channelsApi } from '@/lib/api/resources';
@@ -20,10 +26,13 @@ export function DeleteChannelButton({ channel }: { channel: Channel }) {
     mutationFn: () => channelsApi.remove(channel.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['channels'] });
-      toast.success('Channel deleted', { description: `${channel.kind} / ${channel.external_id}` });
+      toast.success('Channel deleted', {
+        description: `${channel.kind} / ${channel.external_id}`,
+      });
     },
     onError: (err) => {
-      const msg = err instanceof ApiException ? err.detail : 'Failed to delete channel.';
+      const msg =
+        err instanceof ApiException ? err.detail : 'Failed to delete channel.';
       toast.error('Could not delete', { description: msg });
     },
   });
@@ -44,10 +53,10 @@ export function DeleteChannelButton({ channel }: { channel: Channel }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this channel?</AlertDialogTitle>
           <AlertDialogDescription>
-            The{' '}
-            <span className="font-mono text-fg">{channel.kind}</span> binding
-            for <span className="font-mono text-fg">{channel.external_id}</span> will
-            be removed. The bot and workflow are not affected.
+            The <span className="font-mono text-fg">{channel.kind}</span>{' '}
+            binding for{' '}
+            <span className="font-mono text-fg">{channel.external_id}</span>{' '}
+            will be removed. The bot and workflow are not affected.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

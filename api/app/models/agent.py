@@ -4,6 +4,7 @@ The agent row is the single source of truth for an agent's behavior.
 At workflow execution time, the runtime materializes a LangGraph node
 from this configuration. Nothing about the agent lives in code.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -40,7 +41,9 @@ class Agent(Base, UUIDPKMixin, TimestampMixin):
 
     # Memory
     memory_mode: Mapped[MemoryMode] = mapped_column(
-        SAEnum(MemoryMode, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        SAEnum(
+            MemoryMode, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]
+        ),
         nullable=False,
         default=MemoryMode.SUMMARY,
     )

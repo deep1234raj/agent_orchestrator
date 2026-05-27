@@ -4,6 +4,7 @@ Provides a single engine and a session factory used everywhere that needs
 database access. Routes get sessions via FastAPI dependency injection;
 the runtime opens them directly via `session_scope()`.
 """
+
 from __future__ import annotations
 
 import os

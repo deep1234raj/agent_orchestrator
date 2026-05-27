@@ -22,7 +22,10 @@ interface TriggerRunDialogProps {
   workflowName: string;
 }
 
-export function TriggerRunDialog({ workflowId, workflowName }: TriggerRunDialogProps) {
+export function TriggerRunDialog({
+  workflowId,
+  workflowName,
+}: TriggerRunDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -38,7 +41,8 @@ export function TriggerRunDialog({ workflowId, workflowName }: TriggerRunDialogP
       router.push(`/runs/${run.id}`);
     },
     onError: (err) => {
-      const msg = err instanceof ApiException ? err.detail : 'Failed to start run';
+      const msg =
+        err instanceof ApiException ? err.detail : 'Failed to start run';
       toast.error(msg);
     },
   });
@@ -64,7 +68,7 @@ export function TriggerRunDialog({ workflowId, workflowName }: TriggerRunDialogP
               </span>
             </label>
             <textarea
-              className="w-full min-h-[100px] rounded-md border border-border bg-elevated px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+              className="min-h-[100px] w-full resize-none rounded-md border border-border bg-elevated px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-accent"
               placeholder="e.g. lithium battery recycling market"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -72,10 +76,18 @@ export function TriggerRunDialog({ workflowId, workflowName }: TriggerRunDialogP
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isPending}
+            >
               Cancel
             </Button>
-            <Button onClick={() => mutate()} disabled={isPending} className="gap-2">
+            <Button
+              onClick={() => mutate()}
+              disabled={isPending}
+              className="gap-2"
+            >
               {isPending ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

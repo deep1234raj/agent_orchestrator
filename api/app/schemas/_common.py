@@ -5,6 +5,7 @@ attribute reading so we can return SQLAlchemy rows directly, and
 emits clean camelCase-free dicts (we use snake_case on the wire to
 match Python — the TS client honors that).
 """
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict

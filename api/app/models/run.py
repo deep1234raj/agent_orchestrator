@@ -7,6 +7,7 @@ message, tool call, and usage event that happens during that execution.
 Runs are immutable history once finished. The only mutation during a
 run is status transitions and the `finished_at` timestamp.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -38,8 +39,12 @@ class Run(Base, UUIDPKMixin, TimestampMixin):
     )
 
     status: Mapped[RunStatus] = mapped_column(
-        SAEnum(RunStatus, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
-        nullable=False, default=RunStatus.PENDING, index=True,
+        SAEnum(
+            RunStatus, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]
+        ),
+        nullable=False,
+        default=RunStatus.PENDING,
+        index=True,
     )
 
     # What kicked this off. Examples: "ui", "telegram", "schedule".
@@ -55,12 +60,8 @@ class Run(Base, UUIDPKMixin, TimestampMixin):
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Lifecycle timestamps. `started_at` is set when the worker picks it up.
-    started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    finished_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Denormalized totals, updated as the run progresses. Saves the UI from
     # aggregating across the messages/usage tables on every poll.

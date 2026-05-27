@@ -14,6 +14,7 @@ The executor does not pick runs off a queue itself — that's the worker's
 job. The executor is the unit of "run one workflow now" and is reused
 across UI, Telegram, and schedule triggers.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -82,9 +83,7 @@ async def _execute(run_id: uuid.UUID, emitter: EventEmitter) -> None:
     # Compile in its own session (compiler needs to read agent rows).
     async with session_scope() as s:
         try:
-            compiled = await compile_workflow(
-                graph_doc=workflow.graph, session=s, emitter=emitter
-            )
+            compiled = await compile_workflow(graph_doc=workflow.graph, session=s, emitter=emitter)
         except CompileError as e:
             await emitter.status(RunStatus.FAILED, error=f"CompileError: {e}")
             return
@@ -145,6 +144,7 @@ async def _execute(run_id: uuid.UUID, emitter: EventEmitter) -> None:
     if _channel and _chat_id and _reply:
         from app.channels.base import ChannelMessage, dispatch_send  # local to avoid cycle
         from app.models.enums import ChannelKind
+
         try:
             await dispatch_send(
                 ChannelKind(_channel),

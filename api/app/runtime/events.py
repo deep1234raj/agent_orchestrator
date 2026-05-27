@@ -13,6 +13,7 @@ The pub/sub is intentionally trivial — a dict of asyncio.Queues keyed by
 run_id. The WS gateway subscribes by appending its queue; the emitter
 publishes by put-ing into every subscriber's queue. No Redis required.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -109,9 +110,7 @@ class EventEmitter:
         self.run_id = run_id
 
     # ── status ────────────────────────────────────────────────────────────
-    async def status(
-        self, status: RunStatus, *, error: str | None = None
-    ) -> None:
+    async def status(self, status: RunStatus, *, error: str | None = None) -> None:
         async with session_scope() as s:
             values: dict[str, Any] = {"status": status}
             now = datetime.now(timezone.utc)

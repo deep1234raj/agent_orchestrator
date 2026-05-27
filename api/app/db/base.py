@@ -4,6 +4,7 @@ All models inherit from `Base`. Timestamp and UUID-v7 primary key behavior
 are provided by mixins so individual model files stay focused on their
 own concerns.
 """
+
 from __future__ import annotations
 
 import uuid

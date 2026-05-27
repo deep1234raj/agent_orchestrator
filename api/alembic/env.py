@@ -4,6 +4,7 @@ Reads the DATABASE_URL from the environment so the same migrations work
 inside Docker and on the host. The target metadata is the unioned
 metadata of every model registered in app.models.
 """
+
 from __future__ import annotations
 
 import os

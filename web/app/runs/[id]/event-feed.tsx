@@ -19,15 +19,15 @@ interface EventFeedProps {
 
 function RoleBadge({ role }: { role: string }) {
   const cfg: Record<string, string> = {
-    user:   'bg-fg-subtle/20 text-fg-muted',
-    agent:  'bg-accent/20 text-accent',
+    user: 'bg-fg-subtle/20 text-fg-muted',
+    agent: 'bg-accent/20 text-accent',
     system: 'bg-elevated text-fg-subtle',
-    tool:   'bg-green-500/20 text-green-400',
+    tool: 'bg-green-500/20 text-green-400',
   };
   return (
     <span
       className={cn(
-        'inline-block px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider shrink-0',
+        'inline-block shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider',
         cfg[role] ?? cfg.system,
       )}
     >
@@ -36,7 +36,12 @@ function RoleBadge({ role }: { role: string }) {
   );
 }
 
-export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: EventFeedProps) {
+export function EventFeed({
+  messages,
+  toolCalls,
+  liveEvents,
+  agentsById,
+}: EventFeedProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,7 +62,7 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
   ].sort((a, b) => a.ts - b.ts);
 
   return (
-    <div className="flex flex-col gap-3 overflow-y-auto h-full pr-1">
+    <div className="flex h-full flex-col gap-3 overflow-y-auto pr-1">
       {historicalItems.map((item) => {
         if (item.kind === 'history-message') {
           const m = item.data;
@@ -70,11 +75,11 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
                     {agentsById.get(m.agent_id) ?? m.agent_id.slice(0, 8)}
                   </span>
                 )}
-                <span className="text-xs text-fg-subtle ml-auto font-mono">
+                <span className="ml-auto font-mono text-xs text-fg-subtle">
                   {new Date(m.created_at).toLocaleTimeString()}
                 </span>
               </div>
-              <p className="text-sm text-fg leading-relaxed whitespace-pre-wrap break-words">
+              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-fg">
                 {m.content}
               </p>
             </div>
@@ -86,18 +91,20 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
           return (
             <div
               key={t.id}
-              className="rounded-md border border-border bg-elevated/50 px-3 py-2 text-xs font-mono"
+              className="rounded-md border border-border bg-elevated/50 px-3 py-2 font-mono text-xs"
             >
-              <div className="flex items-center gap-2 mb-1">
+              <div className="mb-1 flex items-center gap-2">
                 <span className="text-green-400">⚙ {t.tool_name}</span>
                 {t.duration_ms != null && (
-                  <span className="text-fg-subtle ml-auto">{Math.round(t.duration_ms)}ms</span>
+                  <span className="ml-auto text-fg-subtle">
+                    {Math.round(t.duration_ms)}ms
+                  </span>
                 )}
               </div>
-              <p className="text-fg-muted truncate">
+              <p className="truncate text-fg-muted">
                 {JSON.stringify(t.arguments).slice(0, 120)}
               </p>
-              {t.error && <p className="text-danger mt-1">Error: {t.error}</p>}
+              {t.error && <p className="mt-1 text-danger">Error: {t.error}</p>}
             </div>
           );
         }
@@ -110,17 +117,22 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
         if (ev.type === 'message') {
           const p = ev.payload;
           return (
-            <div key={`live-${i}`} className="flex flex-col gap-1 animate-fade-in">
+            <div
+              key={`live-${i}`}
+              className="flex animate-fade-in flex-col gap-1"
+            >
               <div className="flex items-center gap-2">
                 <RoleBadge role={p.role as string} />
                 {Boolean(p.agent_name) && (
-                  <span className="text-xs text-fg-subtle">{p.agent_name as string}</span>
+                  <span className="text-xs text-fg-subtle">
+                    {p.agent_name as string}
+                  </span>
                 )}
-                <span className="text-xs text-fg-subtle ml-auto font-mono">
+                <span className="ml-auto font-mono text-xs text-fg-subtle">
                   {new Date(ev.ts).toLocaleTimeString()}
                 </span>
               </div>
-              <p className="text-sm text-fg leading-relaxed whitespace-pre-wrap break-words">
+              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-fg">
                 {p.content as string}
               </p>
             </div>
@@ -132,10 +144,10 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
           return (
             <div
               key={`live-${i}`}
-              className="rounded-md border border-border bg-elevated/50 px-3 py-2 text-xs font-mono animate-fade-in"
+              className="animate-fade-in rounded-md border border-border bg-elevated/50 px-3 py-2 font-mono text-xs"
             >
               <span className="text-green-400">⚙ {p.tool_name as string}</span>
-              <p className="text-fg-muted mt-1 truncate">
+              <p className="mt-1 truncate text-fg-muted">
                 {JSON.stringify(p.arguments).slice(0, 120)}
               </p>
             </div>
@@ -144,7 +156,10 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
 
         if (ev.type === 'agent_started') {
           return (
-            <p key={`live-${i}`} className="text-xs text-fg-subtle italic animate-fade-in">
+            <p
+              key={`live-${i}`}
+              className="animate-fade-in text-xs italic text-fg-subtle"
+            >
               → {(ev.payload.agent_name as string) ?? 'Agent'} started
             </p>
           );
@@ -152,7 +167,10 @@ export function EventFeed({ messages, toolCalls, liveEvents, agentsById }: Event
 
         if (ev.type === 'agent_finished') {
           return (
-            <p key={`live-${i}`} className="text-xs text-fg-subtle italic animate-fade-in">
+            <p
+              key={`live-${i}`}
+              className="animate-fade-in text-xs italic text-fg-subtle"
+            >
               ✓ {(ev.payload.agent_name as string) ?? 'Agent'} finished
             </p>
           );

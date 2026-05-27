@@ -54,8 +54,8 @@ export default function RootLayout({
         <QueryProvider>
           <div className="flex min-h-screen">
             <Sidebar />
-            <main className="flex-1 min-w-0">
-              <div className="mx-auto max-w-6xl px-6 sm:px-10 py-10">
+            <main className="min-w-0 flex-1">
+              <div className="mx-auto max-w-6xl px-6 py-10 sm:px-10">
                 {children}
               </div>
             </main>

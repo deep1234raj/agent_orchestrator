@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 /*
  * Empty state.
@@ -23,9 +23,9 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center text-center',
-        'border border-dashed border-border rounded-lg',
-        'py-16 px-6',
+        "flex flex-col items-center justify-center text-center",
+        "border border-dashed border-border rounded-lg",
+        "py-16 px-6",
         className,
       )}
     >

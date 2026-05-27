@@ -10,6 +10,7 @@ than raising — the agent can then choose to give up gracefully instead
 of looping. That's important when reviewers run the project without
 configuring every key.
 """
+
 from __future__ import annotations
 
 import os

@@ -15,6 +15,7 @@ quickly and only return errors when something is genuinely broken
 (verification failure, bad payload). When a chat has no bound workflow,
 we 200-and-ignore — silence is the right behavior for unintended bots.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -59,8 +60,9 @@ async def telegram_webhook(
     }
     if not channel.verify_webhook(headers):
         log.warning("telegram_webhook_verification_failed")
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="webhook verification failed")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="webhook verification failed"
+        )
 
     # 2. Parse the payload.
     update = await request.json()
@@ -111,8 +113,12 @@ async def telegram_webhook(
     s.add(run)
     await s.commit()
 
-    log.info("telegram_run_enqueued", chat_id=chat_id,
-             workflow_id=str(binding.workflow_id), run_id=str(run.id))
+    log.info(
+        "telegram_run_enqueued",
+        chat_id=chat_id,
+        workflow_id=str(binding.workflow_id),
+        run_id=str(run.id),
+    )
     return {"status": "queued", "run_id": str(run.id)}
 
 

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Toaster as SonnerToaster } from 'sonner';
+import { Toaster as SonnerToaster } from "sonner";
 
 /*
  * AAOP toast configuration.
@@ -18,9 +18,9 @@ export function Toaster() {
       toastOptions={{
         classNames: {
           toast:
-            'bg-elevated border border-border text-fg font-sans text-sm shadow-xl shadow-black/40',
-          title: 'text-fg font-medium',
-          description: 'text-fg-muted',
+            "bg-elevated border border-border text-fg font-sans text-sm shadow-xl shadow-black/40",
+          title: "text-fg font-medium",
+          description: "text-fg-muted",
         },
       }}
     />

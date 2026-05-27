@@ -16,8 +16,7 @@ interface ApiError {
   errors?: unknown;
 }
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export class ApiException extends Error {
   status: number;
@@ -31,11 +30,11 @@ export class ApiException extends Error {
     this.code = body.code;
     this.detail = body.detail;
     this.errors = body.errors;
-    this.name = 'ApiException';
+    this.name = "ApiException";
   }
 }
 
-type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 export interface ApiOptions {
   method?: Method;
@@ -48,13 +47,13 @@ export async function api<T = unknown>(
   path: string,
   opts: ApiOptions = {},
 ): Promise<T> {
-  const { method = 'GET', body, query, signal } = opts;
+  const { method = "GET", body, query, signal } = opts;
 
   let url = `${API_URL}${path}`;
   if (query) {
     const qs = new URLSearchParams();
     for (const [k, v] of Object.entries(query)) {
-      if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+      if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
     }
     const q = qs.toString();
     if (q) url += `?${q}`;
@@ -63,12 +62,12 @@ export async function api<T = unknown>(
   const init: RequestInit = {
     method,
     headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
     signal,
     // Default to no caching — this is a live tool, not content.
-    cache: 'no-store',
+    cache: "no-store",
   };
   if (body !== undefined) init.body = JSON.stringify(body);
 
@@ -83,7 +82,7 @@ export async function api<T = unknown>(
   if (!resp.ok) {
     const errBody = (data ?? {
       detail: resp.statusText,
-      code: 'unknown',
+      code: "unknown",
     }) as ApiError;
     throw new ApiException(resp.status, errBody);
   }

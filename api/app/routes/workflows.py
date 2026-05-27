@@ -1,4 +1,5 @@
 """Workflow CRUD + run-trigger routes."""
+
 from __future__ import annotations
 
 import uuid
@@ -31,9 +32,7 @@ async def list_workflows(s: AsyncSession = Depends(get_session)) -> list[Workflo
 
 
 @router.post("", response_model=WorkflowRead, status_code=status.HTTP_201_CREATED)
-async def create_workflow(
-    body: WorkflowCreate, s: AsyncSession = Depends(get_session)
-) -> Workflow:
+async def create_workflow(body: WorkflowCreate, s: AsyncSession = Depends(get_session)) -> Workflow:
     workflow = Workflow(**body.model_dump())
     s.add(workflow)
     try:
@@ -46,9 +45,7 @@ async def create_workflow(
 
 
 @router.get("/{workflow_id}", response_model=WorkflowRead)
-async def get_workflow(
-    workflow_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> Workflow:
+async def get_workflow(workflow_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> Workflow:
     workflow = await s.get(Workflow, workflow_id)
     if workflow is None:
         raise NotFound(f"Workflow {workflow_id} not found.")
@@ -78,9 +75,7 @@ async def update_workflow(
 
 
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_workflow(
-    workflow_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> None:
+async def delete_workflow(workflow_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> None:
     workflow = await s.get(Workflow, workflow_id)
     if workflow is None:
         raise NotFound(f"Workflow {workflow_id} not found.")

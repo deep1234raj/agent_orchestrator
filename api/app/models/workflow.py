@@ -5,6 +5,7 @@ The `graph` JSON column holds the serialized React Flow document
 LangGraph at execution time. We store the raw editor format so the UI
 can round-trip without lossy transforms.
 """
+
 from __future__ import annotations
 
 import uuid

@@ -112,7 +112,7 @@ export function AgentForm({
             aria-invalid={!!form.formState.errors.name}
           />
           {form.formState.errors.name && (
-            <p className="text-xs text-danger mt-1">
+            <p className="mt-1 text-xs text-danger">
               {form.formState.errors.name.message}
             </p>
           )}
@@ -126,7 +126,7 @@ export function AgentForm({
             {...form.register('role')}
           />
           {form.formState.errors.role && (
-            <p className="text-xs text-danger mt-1">
+            <p className="mt-1 text-xs text-danger">
               {form.formState.errors.role.message}
             </p>
           )}
@@ -144,7 +144,7 @@ export function AgentForm({
           className="font-mono text-[13px] leading-relaxed"
         />
         {form.formState.errors.system_prompt && (
-          <p className="text-xs text-danger mt-1">
+          <p className="mt-1 text-xs text-danger">
             {form.formState.errors.system_prompt.message}
           </p>
         )}
@@ -154,7 +154,7 @@ export function AgentForm({
       <section className="space-y-4">
         <div className="flex items-baseline justify-between">
           <h3 className="font-display text-lg text-fg">Model</h3>
-          <span className="text-[10px] uppercase tracking-wider font-mono text-fg-subtle">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
             inference
           </span>
         </div>
@@ -209,12 +209,12 @@ export function AgentForm({
       <section className="space-y-4">
         <div className="flex items-baseline justify-between">
           <h3 className="font-display text-lg text-fg">Tools</h3>
-          <span className="text-[10px] uppercase tracking-wider font-mono text-fg-subtle">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
             capabilities
           </span>
         </div>
         {!tools && (
-          <div className="text-xs text-fg-subtle font-mono">Loading tools…</div>
+          <div className="font-mono text-xs text-fg-subtle">Loading tools…</div>
         )}
         {tools && tools.length === 0 && (
           <div className="text-xs text-fg-subtle">
@@ -228,7 +228,7 @@ export function AgentForm({
               return (
                 <li key={tool.name}>
                   <label
-                    className={`flex items-start gap-3 rounded-md border p-3 cursor-pointer transition-colors ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${
                       checked
                         ? 'border-accent/40 bg-accent/5'
                         : 'border-border bg-bg/40 hover:bg-elevated/40'
@@ -248,7 +248,7 @@ export function AgentForm({
                       <div className="font-mono text-xs text-fg">
                         {tool.name}
                       </div>
-                      <div className="mt-0.5 text-xs text-fg-muted leading-snug">
+                      <div className="mt-0.5 text-xs leading-snug text-fg-muted">
                         {tool.description}
                       </div>
                     </div>
@@ -264,7 +264,7 @@ export function AgentForm({
       <section className="space-y-4">
         <div className="flex items-baseline justify-between">
           <h3 className="font-display text-lg text-fg">Memory</h3>
-          <span className="text-[10px] uppercase tracking-wider font-mono text-fg-subtle">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
             within a run
           </span>
         </div>
@@ -282,8 +282,12 @@ export function AgentForm({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">none — agent is stateless</SelectItem>
-                <SelectItem value="windowed">windowed — last N turns</SelectItem>
-                <SelectItem value="summary">summary — rolling digest + tail</SelectItem>
+                <SelectItem value="windowed">
+                  windowed — last N turns
+                </SelectItem>
+                <SelectItem value="summary">
+                  summary — rolling digest + tail
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -304,7 +308,7 @@ export function AgentForm({
       <section className="space-y-4">
         <div className="flex items-baseline justify-between">
           <h3 className="font-display text-lg text-fg">Guardrails</h3>
-          <span className="text-[10px] uppercase tracking-wider font-mono text-fg-subtle">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
             per run
           </span>
         </div>
@@ -340,7 +344,7 @@ export function AgentForm({
       </section>
 
       {/* ACTIONS */}
-      <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+      <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
         <Button type="submit" variant="primary" disabled={submitting}>
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {submitLabel}

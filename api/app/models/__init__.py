@@ -3,6 +3,7 @@
 All model classes are re-exported here so Alembic's autogenerate sees
 the full metadata when running `alembic revision --autogenerate`.
 """
+
 from __future__ import annotations
 
 from app.db.base import Base

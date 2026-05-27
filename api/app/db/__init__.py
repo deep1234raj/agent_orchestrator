@@ -1,4 +1,5 @@
 """Database package — base, session factory, UUID v7."""
+
 from __future__ import annotations
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin

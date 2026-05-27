@@ -4,1450 +4,1450 @@
  */
 
 export interface paths {
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health */
-        get: operations["health_health_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  "/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/agents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Agents */
-        get: operations["list_agents_agents_get"];
-        put?: never;
-        /** Create Agent */
-        post: operations["create_agent_agents_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Health */
+    get: operations["health_health_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/agents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/agents/{agent_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Agent */
-        get: operations["get_agent_agents__agent_id__get"];
-        put?: never;
-        post?: never;
-        /** Delete Agent */
-        delete: operations["delete_agent_agents__agent_id__delete"];
-        options?: never;
-        head?: never;
-        /** Update Agent */
-        patch: operations["update_agent_agents__agent_id__patch"];
-        trace?: never;
+    /** List Agents */
+    get: operations["list_agents_agents_get"];
+    put?: never;
+    /** Create Agent */
+    post: operations["create_agent_agents_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/agents/{agent_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/workflows": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Workflows */
-        get: operations["list_workflows_workflows_get"];
-        put?: never;
-        /** Create Workflow */
-        post: operations["create_workflow_workflows_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Agent */
+    get: operations["get_agent_agents__agent_id__get"];
+    put?: never;
+    post?: never;
+    /** Delete Agent */
+    delete: operations["delete_agent_agents__agent_id__delete"];
+    options?: never;
+    head?: never;
+    /** Update Agent */
+    patch: operations["update_agent_agents__agent_id__patch"];
+    trace?: never;
+  };
+  "/workflows": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/workflows/{workflow_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Workflow */
-        get: operations["get_workflow_workflows__workflow_id__get"];
-        put?: never;
-        post?: never;
-        /** Delete Workflow */
-        delete: operations["delete_workflow_workflows__workflow_id__delete"];
-        options?: never;
-        head?: never;
-        /** Update Workflow */
-        patch: operations["update_workflow_workflows__workflow_id__patch"];
-        trace?: never;
+    /** List Workflows */
+    get: operations["list_workflows_workflows_get"];
+    put?: never;
+    /** Create Workflow */
+    post: operations["create_workflow_workflows_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/workflows/{workflow_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/workflows/{workflow_id}/run": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Trigger Run
-         * @description Create a PENDING run. The worker picks it up shortly afterwards.
-         *
-         *     Returns 202 with the run object — the caller subscribes to the WS
-         *     for live updates rather than waiting on this response.
-         */
-        post: operations["trigger_run_workflows__workflow_id__run_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Workflow */
+    get: operations["get_workflow_workflows__workflow_id__get"];
+    put?: never;
+    post?: never;
+    /** Delete Workflow */
+    delete: operations["delete_workflow_workflows__workflow_id__delete"];
+    options?: never;
+    head?: never;
+    /** Update Workflow */
+    patch: operations["update_workflow_workflows__workflow_id__patch"];
+    trace?: never;
+  };
+  "/workflows/{workflow_id}/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/runs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Runs */
-        get: operations["list_runs_runs_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Trigger Run
+     * @description Create a PENDING run. The worker picks it up shortly afterwards.
+     *
+     *     Returns 202 with the run object — the caller subscribes to the WS
+     *     for live updates rather than waiting on this response.
+     */
+    post: operations["trigger_run_workflows__workflow_id__run_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/runs/{run_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Run
-         * @description Returns the run plus its full message log, tool calls, and usage.
-         */
-        get: operations["get_run_runs__run_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** List Runs */
+    get: operations["list_runs_runs_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/runs/{run_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/runs/{run_id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancel Run
-         * @description Request cancellation.
-         *
-         *     PENDING runs are cancelled immediately. RUNNING runs are marked
-         *     CANCELLED and the executor notices between graph steps.
-         */
-        post: operations["cancel_run_runs__run_id__cancel_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get Run
+     * @description Returns the run plus its full message log, tool calls, and usage.
+     */
+    get: operations["get_run_runs__run_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/runs/{run_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/tools": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Registered Tools */
-        get: operations["list_registered_tools_tools_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Cancel Run
+     * @description Request cancellation.
+     *
+     *     PENDING runs are cancelled immediately. RUNNING runs are marked
+     *     CANCELLED and the executor notices between graph steps.
+     */
+    post: operations["cancel_run_runs__run_id__cancel_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tools": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/channels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Channels */
-        get: operations["list_channels_channels_get"];
-        put?: never;
-        /** Create Channel */
-        post: operations["create_channel_channels_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** List Registered Tools */
+    get: operations["list_registered_tools_tools_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/channels": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/channels/{channel_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete Channel */
-        delete: operations["delete_channel_channels__channel_id__delete"];
-        options?: never;
-        head?: never;
-        /** Update Channel */
-        patch: operations["update_channel_channels__channel_id__patch"];
-        trace?: never;
+    /** List Channels */
+    get: operations["list_channels_channels_get"];
+    put?: never;
+    /** Create Channel */
+    post: operations["create_channel_channels_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/channels/{channel_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/webhooks/telegram": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Telegram Webhook
-         * @description Receive a Telegram Update and enqueue a run.
-         */
-        post: operations["telegram_webhook_webhooks_telegram_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete Channel */
+    delete: operations["delete_channel_channels__channel_id__delete"];
+    options?: never;
+    head?: never;
+    /** Update Channel */
+    patch: operations["update_channel_channels__channel_id__patch"];
+    trace?: never;
+  };
+  "/webhooks/telegram": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/webhooks/telegram/setup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Setup Telegram Webhook
-         * @description Call Telegram setWebhook on behalf of the configured bot.
-         */
-        post: operations["setup_telegram_webhook_webhooks_telegram_setup_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Telegram Webhook
+     * @description Receive a Telegram Update and enqueue a run.
+     */
+    post: operations["telegram_webhook_webhooks_telegram_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/webhooks/telegram/setup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Setup Telegram Webhook
+     * @description Call Telegram setWebhook on behalf of the configured bot.
+     */
+    post: operations["setup_telegram_webhook_webhooks_telegram_setup_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** AgentCreate */
-        AgentCreate: {
-            /** Name */
-            name: string;
-            /** Role */
-            role: string;
-            /** System Prompt */
-            system_prompt: string;
-            /**
-             * Provider
-             * @default anthropic
-             */
-            provider: string;
-            /**
-             * Model
-             * @default claude-sonnet-4-5
-             */
-            model: string;
-            /**
-             * Temperature
-             * @default 0.7
-             */
-            temperature: number;
-            /**
-             * Max Tokens
-             * @default 2048
-             */
-            max_tokens: number;
-            /** Tools */
-            tools?: string[];
-            /** @default summary */
-            memory_mode: components["schemas"]["MemoryMode"];
-            /**
-             * Memory Window
-             * @default 10
-             */
-            memory_window: number;
-            /** Guardrails */
-            guardrails?: {
-                [key: string]: unknown;
-            };
-        };
-        /** AgentRead */
-        AgentRead: {
-            /** Name */
-            name: string;
-            /** Role */
-            role: string;
-            /** System Prompt */
-            system_prompt: string;
-            /**
-             * Provider
-             * @default anthropic
-             */
-            provider: string;
-            /**
-             * Model
-             * @default claude-sonnet-4-5
-             */
-            model: string;
-            /**
-             * Temperature
-             * @default 0.7
-             */
-            temperature: number;
-            /**
-             * Max Tokens
-             * @default 2048
-             */
-            max_tokens: number;
-            /** Tools */
-            tools?: string[];
-            /** @default summary */
-            memory_mode: components["schemas"]["MemoryMode"];
-            /**
-             * Memory Window
-             * @default 10
-             */
-            memory_window: number;
-            /** Guardrails */
-            guardrails?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
-        /**
-         * AgentUpdate
-         * @description All fields optional — only what's present is updated.
-         */
-        AgentUpdate: {
-            /** Name */
-            name?: string | null;
-            /** Role */
-            role?: string | null;
-            /** System Prompt */
-            system_prompt?: string | null;
-            /** Provider */
-            provider?: string | null;
-            /** Model */
-            model?: string | null;
-            /** Temperature */
-            temperature?: number | null;
-            /** Max Tokens */
-            max_tokens?: number | null;
-            /** Tools */
-            tools?: string[] | null;
-            memory_mode?: components["schemas"]["MemoryMode"] | null;
-            /** Memory Window */
-            memory_window?: number | null;
-            /** Guardrails */
-            guardrails?: {
-                [key: string]: unknown;
-            } | null;
-        };
-        /** ChannelCreate */
-        ChannelCreate: {
-            /**
-             * Workflow Id
-             * Format: uuid
-             */
-            workflow_id: string;
-            kind: components["schemas"]["ChannelKind"];
-            /** External Id */
-            external_id: string;
-            /** Config */
-            config?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled: boolean;
-        };
-        /**
-         * ChannelKind
-         * @enum {string}
-         */
-        ChannelKind: "telegram" | "slack" | "whatsapp";
-        /** ChannelRead */
-        ChannelRead: {
-            /**
-             * Workflow Id
-             * Format: uuid
-             */
-            workflow_id: string;
-            kind: components["schemas"]["ChannelKind"];
-            /** External Id */
-            external_id: string;
-            /** Config */
-            config?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled: boolean;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
-        /** ChannelUpdate */
-        ChannelUpdate: {
-            /** Workflow Id */
-            workflow_id?: string | null;
-            /** Config */
-            config?: {
-                [key: string]: unknown;
-            } | null;
-            /** Enabled */
-            enabled?: boolean | null;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * MemoryMode
-         * @enum {string}
-         */
-        MemoryMode: "none" | "windowed" | "summary";
-        /** MessageRead */
-        MessageRead: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Role */
-            role: string;
-            /** Content */
-            content: string;
-            /** Agent Id */
-            agent_id: string | null;
-            /** Meta */
-            meta: {
-                [key: string]: unknown;
-            };
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-        };
-        /**
-         * RunDetail
-         * @description Run plus its full message log and tool calls.
-         */
-        RunDetail: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Workflow Id
-             * Format: uuid
-             */
-            workflow_id: string;
-            status: components["schemas"]["RunStatus"];
-            /** Trigger */
-            trigger: string;
-            /** Input */
-            input: {
-                [key: string]: unknown;
-            };
-            /** Output */
-            output: {
-                [key: string]: unknown;
-            } | null;
-            /** Error */
-            error: string | null;
-            /** Started At */
-            started_at: string | null;
-            /** Finished At */
-            finished_at: string | null;
-            /** Total Tokens */
-            total_tokens: number;
-            /** Total Cost Usd */
-            total_cost_usd: number;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /**
-             * Messages
-             * @default []
-             */
-            messages: components["schemas"]["MessageRead"][];
-            /**
-             * Tool Calls
-             * @default []
-             */
-            tool_calls: components["schemas"]["ToolCallRead"][];
-            /**
-             * Usage Events
-             * @default []
-             */
-            usage_events: components["schemas"]["UsageEventRead"][];
-        };
-        /** RunRead */
-        RunRead: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Workflow Id
-             * Format: uuid
-             */
-            workflow_id: string;
-            status: components["schemas"]["RunStatus"];
-            /** Trigger */
-            trigger: string;
-            /** Input */
-            input: {
-                [key: string]: unknown;
-            };
-            /** Output */
-            output: {
-                [key: string]: unknown;
-            } | null;
-            /** Error */
-            error: string | null;
-            /** Started At */
-            started_at: string | null;
-            /** Finished At */
-            finished_at: string | null;
-            /** Total Tokens */
-            total_tokens: number;
-            /** Total Cost Usd */
-            total_cost_usd: number;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
-        /**
-         * RunStatus
-         * @enum {string}
-         */
-        RunStatus: "pending" | "running" | "succeeded" | "failed" | "cancelled";
-        /** SetupWebhookRequest */
-        SetupWebhookRequest: {
-            /** Base Url */
-            base_url: string;
-        };
-        /** SetupWebhookResponse */
-        SetupWebhookResponse: {
-            /** Ok */
-            ok: boolean;
-            /** Description */
-            description?: string | null;
-        };
-        /** ToolCallRead */
-        ToolCallRead: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Tool Name */
-            tool_name: string;
-            /**
-             * Agent Id
-             * Format: uuid
-             */
-            agent_id: string;
-            /** Arguments */
-            arguments: {
-                [key: string]: unknown;
-            };
-            /** Result */
-            result: {
-                [key: string]: unknown;
-            } | null;
-            /** Error */
-            error: string | null;
-            /** Duration Ms */
-            duration_ms: number | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-        };
-        /** ToolRead */
-        ToolRead: {
-            /** Name */
-            name: string;
-            /** Description */
-            description: string;
-            /** Input Schema */
-            input_schema: {
-                [key: string]: unknown;
-            };
-        };
-        /** UsageEventRead */
-        UsageEventRead: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Agent Id
-             * Format: uuid
-             */
-            agent_id: string;
-            /** Provider */
-            provider: string;
-            /** Model */
-            model: string;
-            /** Input Tokens */
-            input_tokens: number;
-            /** Output Tokens */
-            output_tokens: number;
-            /** Cost Usd */
-            cost_usd: number;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
-        };
-        /** WorkflowCreate */
-        WorkflowCreate: {
-            /** Name */
-            name: string;
-            /**
-             * Description
-             * @default
-             */
-            description: string;
-            /** Graph */
-            graph?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Is Template
-             * @default false
-             */
-            is_template: boolean;
-        };
-        /** WorkflowRead */
-        WorkflowRead: {
-            /** Name */
-            name: string;
-            /**
-             * Description
-             * @default
-             */
-            description: string;
-            /** Graph */
-            graph?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Is Template
-             * @default false
-             */
-            is_template: boolean;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
-        /**
-         * WorkflowRunRequest
-         * @description Body of POST /workflows/{id}/run.
-         */
-        WorkflowRunRequest: {
-            /** Input */
-            input?: {
-                [key: string]: unknown;
-            };
-        };
-        /** WorkflowUpdate */
-        WorkflowUpdate: {
-            /** Name */
-            name?: string | null;
-            /** Description */
-            description?: string | null;
-            /** Graph */
-            graph?: {
-                [key: string]: unknown;
-            } | null;
-            /** Is Template */
-            is_template?: boolean | null;
-        };
+  schemas: {
+    /** AgentCreate */
+    AgentCreate: {
+      /** Name */
+      name: string;
+      /** Role */
+      role: string;
+      /** System Prompt */
+      system_prompt: string;
+      /**
+       * Provider
+       * @default anthropic
+       */
+      provider: string;
+      /**
+       * Model
+       * @default claude-sonnet-4-5
+       */
+      model: string;
+      /**
+       * Temperature
+       * @default 0.7
+       */
+      temperature: number;
+      /**
+       * Max Tokens
+       * @default 2048
+       */
+      max_tokens: number;
+      /** Tools */
+      tools?: string[];
+      /** @default summary */
+      memory_mode: components["schemas"]["MemoryMode"];
+      /**
+       * Memory Window
+       * @default 10
+       */
+      memory_window: number;
+      /** Guardrails */
+      guardrails?: {
+        [key: string]: unknown;
+      };
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** AgentRead */
+    AgentRead: {
+      /** Name */
+      name: string;
+      /** Role */
+      role: string;
+      /** System Prompt */
+      system_prompt: string;
+      /**
+       * Provider
+       * @default anthropic
+       */
+      provider: string;
+      /**
+       * Model
+       * @default claude-sonnet-4-5
+       */
+      model: string;
+      /**
+       * Temperature
+       * @default 0.7
+       */
+      temperature: number;
+      /**
+       * Max Tokens
+       * @default 2048
+       */
+      max_tokens: number;
+      /** Tools */
+      tools?: string[];
+      /** @default summary */
+      memory_mode: components["schemas"]["MemoryMode"];
+      /**
+       * Memory Window
+       * @default 10
+       */
+      memory_window: number;
+      /** Guardrails */
+      guardrails?: {
+        [key: string]: unknown;
+      };
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /**
+     * AgentUpdate
+     * @description All fields optional — only what's present is updated.
+     */
+    AgentUpdate: {
+      /** Name */
+      name?: string | null;
+      /** Role */
+      role?: string | null;
+      /** System Prompt */
+      system_prompt?: string | null;
+      /** Provider */
+      provider?: string | null;
+      /** Model */
+      model?: string | null;
+      /** Temperature */
+      temperature?: number | null;
+      /** Max Tokens */
+      max_tokens?: number | null;
+      /** Tools */
+      tools?: string[] | null;
+      memory_mode?: components["schemas"]["MemoryMode"] | null;
+      /** Memory Window */
+      memory_window?: number | null;
+      /** Guardrails */
+      guardrails?: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /** ChannelCreate */
+    ChannelCreate: {
+      /**
+       * Workflow Id
+       * Format: uuid
+       */
+      workflow_id: string;
+      kind: components["schemas"]["ChannelKind"];
+      /** External Id */
+      external_id: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /**
+       * Enabled
+       * @default true
+       */
+      enabled: boolean;
+    };
+    /**
+     * ChannelKind
+     * @enum {string}
+     */
+    ChannelKind: "telegram" | "slack" | "whatsapp";
+    /** ChannelRead */
+    ChannelRead: {
+      /**
+       * Workflow Id
+       * Format: uuid
+       */
+      workflow_id: string;
+      kind: components["schemas"]["ChannelKind"];
+      /** External Id */
+      external_id: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /**
+       * Enabled
+       * @default true
+       */
+      enabled: boolean;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /** ChannelUpdate */
+    ChannelUpdate: {
+      /** Workflow Id */
+      workflow_id?: string | null;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      } | null;
+      /** Enabled */
+      enabled?: boolean | null;
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components["schemas"]["ValidationError"][];
+    };
+    /**
+     * MemoryMode
+     * @enum {string}
+     */
+    MemoryMode: "none" | "windowed" | "summary";
+    /** MessageRead */
+    MessageRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Role */
+      role: string;
+      /** Content */
+      content: string;
+      /** Agent Id */
+      agent_id: string | null;
+      /** Meta */
+      meta: {
+        [key: string]: unknown;
+      };
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /**
+     * RunDetail
+     * @description Run plus its full message log and tool calls.
+     */
+    RunDetail: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Workflow Id
+       * Format: uuid
+       */
+      workflow_id: string;
+      status: components["schemas"]["RunStatus"];
+      /** Trigger */
+      trigger: string;
+      /** Input */
+      input: {
+        [key: string]: unknown;
+      };
+      /** Output */
+      output: {
+        [key: string]: unknown;
+      } | null;
+      /** Error */
+      error: string | null;
+      /** Started At */
+      started_at: string | null;
+      /** Finished At */
+      finished_at: string | null;
+      /** Total Tokens */
+      total_tokens: number;
+      /** Total Cost Usd */
+      total_cost_usd: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /**
+       * Messages
+       * @default []
+       */
+      messages: components["schemas"]["MessageRead"][];
+      /**
+       * Tool Calls
+       * @default []
+       */
+      tool_calls: components["schemas"]["ToolCallRead"][];
+      /**
+       * Usage Events
+       * @default []
+       */
+      usage_events: components["schemas"]["UsageEventRead"][];
+    };
+    /** RunRead */
+    RunRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Workflow Id
+       * Format: uuid
+       */
+      workflow_id: string;
+      status: components["schemas"]["RunStatus"];
+      /** Trigger */
+      trigger: string;
+      /** Input */
+      input: {
+        [key: string]: unknown;
+      };
+      /** Output */
+      output: {
+        [key: string]: unknown;
+      } | null;
+      /** Error */
+      error: string | null;
+      /** Started At */
+      started_at: string | null;
+      /** Finished At */
+      finished_at: string | null;
+      /** Total Tokens */
+      total_tokens: number;
+      /** Total Cost Usd */
+      total_cost_usd: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /**
+     * RunStatus
+     * @enum {string}
+     */
+    RunStatus: "pending" | "running" | "succeeded" | "failed" | "cancelled";
+    /** SetupWebhookRequest */
+    SetupWebhookRequest: {
+      /** Base Url */
+      base_url: string;
+    };
+    /** SetupWebhookResponse */
+    SetupWebhookResponse: {
+      /** Ok */
+      ok: boolean;
+      /** Description */
+      description?: string | null;
+    };
+    /** ToolCallRead */
+    ToolCallRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Tool Name */
+      tool_name: string;
+      /**
+       * Agent Id
+       * Format: uuid
+       */
+      agent_id: string;
+      /** Arguments */
+      arguments: {
+        [key: string]: unknown;
+      };
+      /** Result */
+      result: {
+        [key: string]: unknown;
+      } | null;
+      /** Error */
+      error: string | null;
+      /** Duration Ms */
+      duration_ms: number | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** ToolRead */
+    ToolRead: {
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+      /** Input Schema */
+      input_schema: {
+        [key: string]: unknown;
+      };
+    };
+    /** UsageEventRead */
+    UsageEventRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Agent Id
+       * Format: uuid
+       */
+      agent_id: string;
+      /** Provider */
+      provider: string;
+      /** Model */
+      model: string;
+      /** Input Tokens */
+      input_tokens: number;
+      /** Output Tokens */
+      output_tokens: number;
+      /** Cost Usd */
+      cost_usd: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
+    };
+    /** WorkflowCreate */
+    WorkflowCreate: {
+      /** Name */
+      name: string;
+      /**
+       * Description
+       * @default
+       */
+      description: string;
+      /** Graph */
+      graph?: {
+        [key: string]: unknown;
+      };
+      /**
+       * Is Template
+       * @default false
+       */
+      is_template: boolean;
+    };
+    /** WorkflowRead */
+    WorkflowRead: {
+      /** Name */
+      name: string;
+      /**
+       * Description
+       * @default
+       */
+      description: string;
+      /** Graph */
+      graph?: {
+        [key: string]: unknown;
+      };
+      /**
+       * Is Template
+       * @default false
+       */
+      is_template: boolean;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /**
+     * WorkflowRunRequest
+     * @description Body of POST /workflows/{id}/run.
+     */
+    WorkflowRunRequest: {
+      /** Input */
+      input?: {
+        [key: string]: unknown;
+      };
+    };
+    /** WorkflowUpdate */
+    WorkflowUpdate: {
+      /** Name */
+      name?: string | null;
+      /** Description */
+      description?: string | null;
+      /** Graph */
+      graph?: {
+        [key: string]: unknown;
+      } | null;
+      /** Is Template */
+      is_template?: boolean | null;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    health_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
+  health_health_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    list_agents_agents_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentRead"][];
-                };
-            };
+        content: {
+          "application/json": {
+            [key: string]: string;
+          };
         };
+      };
     };
-    create_agent_agents_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AgentCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  list_agents_agents_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    get_agent_agents__agent_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                agent_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["AgentRead"][];
         };
+      };
     };
-    delete_agent_agents__agent_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  create_agent_agents_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    update_agent_agents__agent_id__patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AgentUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AgentCreate"];
+      };
     };
-    list_workflows_workflows_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkflowRead"][];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["AgentRead"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    create_workflow_workflows_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkflowCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkflowRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_agent_agents__agent_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
     };
-    get_workflow_workflows__workflow_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workflow_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkflowRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["AgentRead"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    delete_workflow_workflows__workflow_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workflow_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  delete_agent_agents__agent_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
     };
-    update_workflow_workflows__workflow_id__patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workflow_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkflowUpdate"];
-            };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkflowRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
     };
-    trigger_run_workflows__workflow_id__run_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workflow_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkflowRunRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  update_agent_agents__agent_id__patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
     };
-    list_runs_runs_get: {
-        parameters: {
-            query?: {
-                workflow_id?: string | null;
-                status?: components["schemas"]["RunStatus"] | null;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunRead"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AgentUpdate"];
+      };
     };
-    get_run_runs__run_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                run_id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["AgentRead"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    cancel_run_runs__run_id__cancel_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                run_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  list_workflows_workflows_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    list_registered_tools_tools_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ToolRead"][];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["WorkflowRead"][];
         };
+      };
     };
-    list_channels_channels_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelRead"][];
-                };
-            };
-        };
+  };
+  create_workflow_workflows_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    create_channel_channels_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChannelCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkflowCreate"];
+      };
     };
-    delete_channel_channels__channel_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                channel_id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["WorkflowRead"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    update_channel_channels__channel_id__patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                channel_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChannelUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelRead"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_workflow_workflows__workflow_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
     };
-    telegram_webhook_webhooks_telegram_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-telegram-bot-api-secret-token"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["WorkflowRead"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    setup_telegram_webhook_webhooks_telegram_setup_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetupWebhookRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SetupWebhookResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  delete_workflow_workflows__workflow_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
     };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_workflow_workflows__workflow_id__patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkflowUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trigger_run_workflows__workflow_id__run_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkflowRunRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_runs_runs_get: {
+    parameters: {
+      query?: {
+        workflow_id?: string | null;
+        status?: components["schemas"]["RunStatus"] | null;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunRead"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_run_runs__run_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        run_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cancel_run_runs__run_id__cancel_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        run_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_registered_tools_tools_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ToolRead"][];
+        };
+      };
+    };
+  };
+  list_channels_channels_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChannelRead"][];
+        };
+      };
+    };
+  };
+  create_channel_channels_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChannelCreate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChannelRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_channel_channels__channel_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        channel_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_channel_channels__channel_id__patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        channel_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChannelUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChannelRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  telegram_webhook_webhooks_telegram_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-telegram-bot-api-secret-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: string;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  setup_telegram_webhook_webhooks_telegram_setup_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetupWebhookRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SetupWebhookResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
 }

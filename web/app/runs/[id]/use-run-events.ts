@@ -32,7 +32,10 @@ export interface UseRunEventsResult {
   isConnected: boolean;
 }
 
-export function useRunEvents(runId: string, initialStatus: string): UseRunEventsResult {
+export function useRunEvents(
+  runId: string,
+  initialStatus: string,
+): UseRunEventsResult {
   const [liveEvents, setLiveEvents] = useState<WsEvent[]>([]);
   const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
   const [liveCostDelta, setLiveCostDelta] = useState(0);
@@ -78,7 +81,10 @@ export function useRunEvents(runId: string, initialStatus: string): UseRunEvents
       try {
         const event = JSON.parse(msg.data) as WsEvent;
         handleEvent(event);
-        if (event.type === 'status' && TERMINAL.has(event.payload.status as string)) {
+        if (
+          event.type === 'status' &&
+          TERMINAL.has(event.payload.status as string)
+        ) {
           ws.close();
         }
       } catch {
@@ -92,5 +98,12 @@ export function useRunEvents(runId: string, initialStatus: string): UseRunEvents
     };
   }, [runId, initialStatus, handleEvent]);
 
-  return { liveEvents, activeAgentId, liveCostDelta, liveTokensDelta, liveStatus, isConnected };
+  return {
+    liveEvents,
+    activeAgentId,
+    liveCostDelta,
+    liveTokensDelta,
+    liveStatus,
+    isConnected,
+  };
 }

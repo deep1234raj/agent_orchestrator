@@ -16,6 +16,7 @@ before the client connected), the client just sits there. That's
 correct — they should use the REST endpoint to detect terminal status.
 The UI does both: opens the WS *and* polls the run row once on mount.
 """
+
 from __future__ import annotations
 
 import uuid

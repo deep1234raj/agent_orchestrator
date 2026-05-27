@@ -25,6 +25,7 @@ Compilation is per-run by design (see docs/architecture.md). We always
 read the latest agent rows from the DB so config edits take effect on
 the next run with no restart.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -54,8 +55,8 @@ class CompileError(Exception):
 class CompiledWorkflow:
     """The compiled graph plus the metadata the executor needs."""
 
-    graph: Any                       # langgraph compiled graph
-    agent_node_ids: list[str]        # for max_iterations bookkeeping
+    graph: Any  # langgraph compiled graph
+    agent_node_ids: list[str]  # for max_iterations bookkeeping
 
 
 async def compile_workflow(
@@ -128,7 +129,12 @@ async def compile_workflow(
 
     for src, dst in plain_edges:
         src_lg = START if src == start_node["id"] else src
-        dst_lg = END if nodes_by_id.get(dst, {}).get("type") == "end" and dst not in [n["id"] for n in nodes if n["type"] == "end"] else dst
+        dst_lg = (
+            END
+            if nodes_by_id.get(dst, {}).get("type") == "end"
+            and dst not in [n["id"] for n in nodes if n["type"] == "end"]
+            else dst
+        )
         # If dst is an end node, route to LangGraph's END.
         if nodes_by_id.get(dst, {}).get("type") == "end":
             # We still added the named end node above for graph clarity,
@@ -151,11 +157,11 @@ async def compile_workflow(
             on_false = data["on_false"]
             _validate_target(on_true, nodes_by_id)
             _validate_target(on_false, nodes_by_id)
-            router = make_expression_router(
-                expr=data["expr"], on_true=on_true, on_false=on_false
-            )
-            mapping = {on_true: _to_lg_target(on_true, nodes_by_id),
-                       on_false: _to_lg_target(on_false, nodes_by_id)}
+            router = make_expression_router(expr=data["expr"], on_true=on_true, on_false=on_false)
+            mapping = {
+                on_true: _to_lg_target(on_true, nodes_by_id),
+                on_false: _to_lg_target(on_false, nodes_by_id),
+            }
             sg.add_conditional_edges(nid, router, mapping)
         elif "routes" in data:
             routes = data["routes"]
@@ -163,8 +169,7 @@ async def compile_workflow(
             for tgt in [*routes.values(), default]:
                 _validate_target(tgt, nodes_by_id)
             router = make_hint_router(routes=routes, default=default)
-            mapping = {tgt: _to_lg_target(tgt, nodes_by_id)
-                       for tgt in {*routes.values(), default}}
+            mapping = {tgt: _to_lg_target(tgt, nodes_by_id) for tgt in {*routes.values(), default}}
             sg.add_conditional_edges(nid, router, mapping)
         else:
             raise CompileError(f"Condition node {nid!r} has no 'expr' or 'routes'.")

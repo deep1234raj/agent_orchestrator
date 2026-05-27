@@ -1,4 +1,5 @@
 """Run routes — read-only plus cancel."""
+
 from __future__ import annotations
 
 import uuid
@@ -40,9 +41,7 @@ async def list_runs(
 
 
 @router.get("/{run_id}", response_model=RunDetail)
-async def get_run(
-    run_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> RunDetail:
+async def get_run(run_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> RunDetail:
     """Returns the run plus its full message log, tool calls, and usage."""
     result = await s.execute(
         select(Run)
@@ -73,19 +72,22 @@ async def get_run(
         total_cost_usd=run.total_cost_usd,
         created_at=run.created_at,
         updated_at=run.updated_at,
-        messages=[MessageRead.model_validate(m) for m in
-                  sorted(run.messages, key=lambda m: m.created_at)],
-        tool_calls=[ToolCallRead.model_validate(tc) for tc in
-                    sorted(run.tool_calls, key=lambda t: t.created_at)],
-        usage_events=[UsageEventRead.model_validate(u) for u in
-                      sorted(run.usage_events, key=lambda u: u.created_at)],
+        messages=[
+            MessageRead.model_validate(m) for m in sorted(run.messages, key=lambda m: m.created_at)
+        ],
+        tool_calls=[
+            ToolCallRead.model_validate(tc)
+            for tc in sorted(run.tool_calls, key=lambda t: t.created_at)
+        ],
+        usage_events=[
+            UsageEventRead.model_validate(u)
+            for u in sorted(run.usage_events, key=lambda u: u.created_at)
+        ],
     )
 
 
 @router.post("/{run_id}/cancel", response_model=RunRead)
-async def cancel_run(
-    run_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> Run:
+async def cancel_run(run_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> Run:
     """Request cancellation.
 
     PENDING runs are cancelled immediately. RUNNING runs are marked
@@ -95,9 +97,7 @@ async def cancel_run(
     if run is None:
         raise NotFound(f"Run {run_id} not found.")
     if run.status not in (RunStatus.PENDING, RunStatus.RUNNING):
-        raise BadRequest(
-            f"Run is in terminal state {run.status.value}; cannot cancel."
-        )
+        raise BadRequest(f"Run is in terminal state {run.status.value}; cannot cancel.")
     run.status = RunStatus.CANCELLED
     await s.commit()
     await s.refresh(run)

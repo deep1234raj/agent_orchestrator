@@ -10,6 +10,7 @@ Update prices manually when providers change them. The system tolerates
 unknown models by charging $0 rather than failing — the cost meter just
 under-reports, which is the safer failure mode.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

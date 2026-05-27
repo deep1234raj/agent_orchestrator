@@ -3,6 +3,7 @@
 Uses Python's `ast` module to evaluate only arithmetic — no name lookups,
 no function calls, no attribute access. Safe to expose to an LLM.
 """
+
 from __future__ import annotations
 
 import ast

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ReactFlow,
   Background,
@@ -13,26 +13,36 @@ import {
   type Node,
   type Edge,
   BackgroundVariant,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { cn } from '@/lib/utils';
-import type { Agent } from '@/lib/api/resources';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { cn } from "@/lib/utils";
+import type { Agent } from "@/lib/api/resources";
 
 /* ── Graph document shape (matches backend compiler output) ── */
 export interface GraphNode {
   id: string;
-  type: 'start' | 'agent' | 'condition' | 'end';
+  type: "start" | "agent" | "condition" | "end";
   data: Record<string, unknown>;
   position: { x: number; y: number };
 }
 export interface GraphDocument {
   nodes: GraphNode[];
-  edges: Array<{ id: string; source: string; target: string; [k: string]: unknown }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    [k: string]: unknown;
+  }>;
   viewport?: { x: number; y: number; zoom: number };
 }
 
 /* ── Shared handle style — small, subtle, non-interactive ── */
-const handleStyle = { width: 8, height: 8, background: 'rgb(var(--border))', border: '1px solid rgb(var(--border))' };
+const handleStyle = {
+  width: 8,
+  height: 8,
+  background: "rgb(var(--border))",
+  border: "1px solid rgb(var(--border))",
+};
 
 /* ── Custom node components ── */
 function StartNode() {
@@ -58,16 +68,18 @@ function AgentNode({ data }: { data: Record<string, unknown> }) {
   return (
     <div
       className={cn(
-        'min-w-[140px] rounded-lg border bg-elevated px-4 py-3 shadow-sm',
+        "min-w-[140px] rounded-lg border bg-elevated px-4 py-3 shadow-sm",
         isActive
-          ? 'border-accent/70 ring-2 ring-accent/40 ring-offset-1 ring-offset-bg'
-          : 'border-border',
+          ? "border-accent/70 ring-2 ring-accent/40 ring-offset-1 ring-offset-bg"
+          : "border-border",
       )}
     >
       <Handle type="target" position={Position.Left} style={handleStyle} />
-      <p className="text-[10px] font-mono uppercase tracking-wider text-fg-subtle mb-0.5">Agent</p>
+      <p className="text-[10px] font-mono uppercase tracking-wider text-fg-subtle mb-0.5">
+        Agent
+      </p>
       <p className="text-sm font-medium text-fg leading-tight">
-        {(data.agent_name as string) ?? 'Unknown'}
+        {(data.agent_name as string) ?? "Unknown"}
       </p>
       <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
@@ -82,7 +94,7 @@ function ConditionNode({ data }: { data: Record<string, unknown> }) {
         Condition
       </p>
       <p className="text-xs text-amber-300 font-mono leading-tight truncate max-w-[160px]">
-        {(data.expr as string) ?? '—'}
+        {(data.expr as string) ?? "—"}
       </p>
       <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
@@ -115,7 +127,10 @@ export function WorkflowCanvas({
   onGraphChange,
   className,
 }: WorkflowCanvasProps) {
-  const agentsById = useMemo(() => new Map(agents.map((a) => [a.id, a])), [agents]);
+  const agentsById = useMemo(
+    () => new Map(agents.map((a) => [a.id, a])),
+    [agents],
+  );
 
   const buildNodes = useCallback(
     (doc: GraphDocument): Node[] =>
@@ -131,7 +146,9 @@ export function WorkflowCanvas({
               ? (agentsById.get(data.agent_id as string)?.name ?? data.agent_id)
               : undefined,
             isActive:
-              n.type === 'agent' && activeAgentId != null && data.agent_id === activeAgentId,
+              n.type === "agent" &&
+              activeAgentId != null &&
+              data.agent_id === activeAgentId,
           },
           draggable: editable,
           selectable: editable,
@@ -141,69 +158,82 @@ export function WorkflowCanvas({
     [agentsById, activeAgentId, editable],
   );
 
-  const buildEdges = useCallback(
-    (doc: GraphDocument): Edge[] => {
-      // Map "sourceId→targetId" to on_true/on_false for all condition nodes.
-      // Used to style both explicitly stored edges and derived edges uniformly.
-      const condEdgeType = new Map<string, 'on_true' | 'on_false'>();
-      for (const node of doc.nodes ?? []) {
-        if (node.type !== 'condition') continue;
-        const d = node.data ?? {};
-        if (d.on_true) condEdgeType.set(`${node.id}→${d.on_true}`, 'on_true');
-        if (d.on_false) condEdgeType.set(`${node.id}→${d.on_false}`, 'on_false');
-      }
+  const buildEdges = useCallback((doc: GraphDocument): Edge[] => {
+    // Map "sourceId→targetId" to on_true/on_false for all condition nodes.
+    // Used to style both explicitly stored edges and derived edges uniformly.
+    const condEdgeType = new Map<string, "on_true" | "on_false">();
+    for (const node of doc.nodes ?? []) {
+      if (node.type !== "condition") continue;
+      const d = node.data ?? {};
+      if (d.on_true) condEdgeType.set(`${node.id}→${d.on_true}`, "on_true");
+      if (d.on_false) condEdgeType.set(`${node.id}→${d.on_false}`, "on_false");
+    }
 
-      const condStyle = (key: 'on_true' | 'on_false') => ({
-        type: 'smoothstep' as const,
-        label: key === 'on_true' ? 'true' : 'false',
-        labelStyle: { fill: key === 'on_true' ? '#34d399' : '#f87171', fontSize: 10, fontFamily: 'monospace' },
-        labelBgStyle: { fill: 'rgb(var(--bg))', fillOpacity: 0.85 },
-        style: { stroke: key === 'on_true' ? '#34d399' : '#f87171', strokeWidth: 1.5 },
-        animated: false,
-      });
+    const condStyle = (key: "on_true" | "on_false") => ({
+      type: "smoothstep" as const,
+      label: key === "on_true" ? "true" : "false",
+      labelStyle: {
+        fill: key === "on_true" ? "#34d399" : "#f87171",
+        fontSize: 10,
+        fontFamily: "monospace",
+      },
+      labelBgStyle: { fill: "rgb(var(--bg))", fillOpacity: 0.85 },
+      style: {
+        stroke: key === "on_true" ? "#34d399" : "#f87171",
+        strokeWidth: 1.5,
+      },
+      animated: false,
+    });
 
-      const explicit: Edge[] = (doc.edges ?? []).map((e) => {
-        const condKey = condEdgeType.get(`${e.source}→${e.target}`);
-        if (condKey) {
-          return { id: e.id, source: e.source, target: e.target, ...condStyle(condKey) };
-        }
+    const explicit: Edge[] = (doc.edges ?? []).map((e) => {
+      const condKey = condEdgeType.get(`${e.source}→${e.target}`);
+      if (condKey) {
         return {
           id: e.id,
           source: e.source,
           target: e.target,
-          label: (e.label as string | undefined) ?? undefined,
-          style: { stroke: 'rgb(var(--border))', strokeWidth: 1.5 },
-          animated: false,
+          ...condStyle(condKey),
         };
-      });
-
-      const existingPairs = new Set(explicit.map((e) => `${e.source}→${e.target}`));
-      const derived: Edge[] = [];
-      for (const node of doc.nodes ?? []) {
-        if (node.type !== 'condition') continue;
-        const data = node.data ?? {};
-        const branches: [string, 'on_true' | 'on_false'][] = [
-          [data.on_true as string, 'on_true'],
-          [data.on_false as string, 'on_false'],
-        ];
-        for (const [target, key] of branches) {
-          if (!target || existingPairs.has(`${node.id}→${target}`)) continue;
-          derived.push({
-            id: `derived-${node.id}-${key}`,
-            source: node.id,
-            target,
-            ...condStyle(key),
-          });
-        }
       }
+      return {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        label: (e.label as string | undefined) ?? undefined,
+        style: { stroke: "rgb(var(--border))", strokeWidth: 1.5 },
+        animated: false,
+      };
+    });
 
-      return [...explicit, ...derived];
-    },
-    [],
-  );
+    const existingPairs = new Set(
+      explicit.map((e) => `${e.source}→${e.target}`),
+    );
+    const derived: Edge[] = [];
+    for (const node of doc.nodes ?? []) {
+      if (node.type !== "condition") continue;
+      const data = node.data ?? {};
+      const branches: [string, "on_true" | "on_false"][] = [
+        [data.on_true as string, "on_true"],
+        [data.on_false as string, "on_false"],
+      ];
+      for (const [target, key] of branches) {
+        if (!target || existingPairs.has(`${node.id}→${target}`)) continue;
+        derived.push({
+          id: `derived-${node.id}-${key}`,
+          source: node.id,
+          target,
+          ...condStyle(key),
+        });
+      }
+    }
+
+    return [...explicit, ...derived];
+  }, []);
 
   const initDoc = graph as unknown as GraphDocument | undefined;
-  const [nodes, setNodes, onNodesChange] = useNodesState(initDoc ? buildNodes(initDoc) : []);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    initDoc ? buildNodes(initDoc) : [],
+  );
   const [edges, setEdges] = useEdgesState(initDoc ? buildEdges(initDoc) : []);
 
   // Reset when server graph changes (tracked by JSON key to avoid object identity churn)
@@ -226,9 +256,9 @@ export function WorkflowCanvas({
         data: {
           ...(n.data ?? {}),
           isActive:
-            n.type === 'agent' &&
+            n.type === "agent" &&
             activeAgentId != null &&
-            (n.data?.['agent_id'] as string | undefined) === activeAgentId,
+            (n.data?.["agent_id"] as string | undefined) === activeAgentId,
         },
       })),
     );
@@ -246,10 +276,11 @@ export function WorkflowCanvas({
           ...doc,
           nodes: nodes.map((n) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { agent_name, isActive, ...originalData } = (n.data ?? {}) as Record<string, unknown>;
+            const { agent_name, isActive, ...originalData } = (n.data ??
+              {}) as Record<string, unknown>;
             return {
               id: n.id,
-              type: (n.type ?? 'agent') as GraphNode['type'],
+              type: (n.type ?? "agent") as GraphNode["type"],
               position: n.position,
               data: originalData,
             };
@@ -262,14 +293,24 @@ export function WorkflowCanvas({
 
   if (!graph || nodes.length === 0) {
     return (
-      <div className={cn('flex items-center justify-center text-fg-subtle text-sm', className)}>
+      <div
+        className={cn(
+          "flex items-center justify-center text-fg-subtle text-sm",
+          className,
+        )}
+      >
         No graph data
       </div>
     );
   }
 
   return (
-    <div className={cn('rounded-lg border border-border overflow-hidden bg-bg', className)}>
+    <div
+      className={cn(
+        "rounded-lg border border-border overflow-hidden bg-bg",
+        className,
+      )}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

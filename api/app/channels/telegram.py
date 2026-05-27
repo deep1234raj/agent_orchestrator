@@ -5,6 +5,7 @@ optional secret header.
 
 Bot API reference: https://core.telegram.org/bots/api
 """
+
 from __future__ import annotations
 
 import httpx
@@ -61,8 +62,7 @@ class TelegramChannel:
                 # Failure to deliver is logged but not raised — the run
                 # itself has already produced its output; we don't want
                 # to fail a run because the outbound message dropped.
-                log.error("telegram_send_failed",
-                          chat_id=message.chat_id, error=str(e))
+                log.error("telegram_send_failed", chat_id=message.chat_id, error=str(e))
 
     def verify_webhook(self, headers: dict[str, str]) -> bool:
         """Verify the X-Telegram-Bot-Api-Secret-Token header.

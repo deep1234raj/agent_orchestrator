@@ -4,6 +4,7 @@ Trivial but genuinely useful: it lets an agent answer "what day is it"
 without making up an answer, which matters for scheduling and freshness
 reasoning.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -13,7 +14,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from app.tools.registry import tool
 
 
-@tool(description="Return the current date and time in an IANA timezone (e.g. 'UTC', 'Asia/Singapore').")
+@tool(
+    description="Return the current date and time in an IANA timezone (e.g. 'UTC', 'Asia/Singapore')."
+)
 async def get_time(timezone: str = "UTC") -> dict[str, Any]:
     """Returns {iso: str, timezone: str, error: str|None}."""
     try:

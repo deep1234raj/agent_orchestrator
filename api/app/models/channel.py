@@ -7,6 +7,7 @@ workflow, and creates a run with the message as input.
 One Channel row per (kind, external_id). A workflow can have many channels
 (e.g. Telegram + Slack), but the v1 implementation only fulfills Telegram.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -25,9 +26,7 @@ if TYPE_CHECKING:
 
 class Channel(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "channels"
-    __table_args__ = (
-        UniqueConstraint("kind", "external_id", name="uq_channel_kind_external_id"),
-    )
+    __table_args__ = (UniqueConstraint("kind", "external_id", name="uq_channel_kind_external_id"),)
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -37,7 +36,12 @@ class Channel(Base, UUIDPKMixin, TimestampMixin):
     )
 
     kind: Mapped[ChannelKind] = mapped_column(
-        SAEnum(ChannelKind, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        SAEnum(
+            ChannelKind,
+            native_enum=False,
+            length=20,
+            values_callable=lambda e: [m.value for m in e],
+        ),
         nullable=False,
     )
 

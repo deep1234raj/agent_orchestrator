@@ -17,14 +17,14 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-danger/30 bg-danger/5 p-6 max-w-xl mx-auto mt-12">
+    <div className="mx-auto mt-12 max-w-xl rounded-lg border border-danger/30 bg-danger/5 p-6">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
         <div className="min-w-0">
           <h2 className="font-display text-xl text-fg">Something went wrong</h2>
           <p className="mt-2 text-sm text-fg-muted">{error.message}</p>
           {error.digest && (
-            <p className="mt-2 text-xs font-mono text-fg-subtle">
+            <p className="mt-2 font-mono text-xs text-fg-subtle">
               digest: {error.digest}
             </p>
           )}

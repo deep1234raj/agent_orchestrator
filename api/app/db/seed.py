@@ -27,6 +27,7 @@ The seeder resolves `data.agent` (a name) into `data.agent_id` (a UUID)
 before persisting the workflow, so the compiler — which expects UUIDs —
 sees a normal workflow document with no template-specific knowledge.
 """
+
 from __future__ import annotations
 
 import json
@@ -103,9 +104,7 @@ async def _seed_one(s: AsyncSession, path: Path) -> None:
     log.info("workflow_seeded", name=name)
 
 
-async def _upsert_agent_by_name(
-    s: AsyncSession, data: dict[str, Any]
-) -> uuid.UUID:
+async def _upsert_agent_by_name(s: AsyncSession, data: dict[str, Any]) -> uuid.UUID:
     """Return the id of an agent with this name. Creates it if missing."""
     name = data["name"]
     result = await s.execute(select(Agent).where(Agent.name == name))
@@ -135,9 +134,7 @@ async def _upsert_agent_by_name(
     return agent.id
 
 
-def _rewrite_graph(
-    graph: dict[str, Any], agent_id_by_name: dict[str, uuid.UUID]
-) -> dict[str, Any]:
+def _rewrite_graph(graph: dict[str, Any], agent_id_by_name: dict[str, uuid.UUID]) -> dict[str, Any]:
     """Replace `data.agent` (name) with `data.agent_id` (UUID string) on each agent node."""
     nodes = []
     for n in graph.get("nodes", []):

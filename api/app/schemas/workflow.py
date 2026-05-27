@@ -5,6 +5,7 @@ React Flow schema — the editor format evolves and we don't want every
 upstream tweak forcing a schema change here. The compiler validates the
 parts it cares about at run time.
 """
+
 from __future__ import annotations
 
 import uuid

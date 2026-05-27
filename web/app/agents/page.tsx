@@ -24,7 +24,11 @@ import { DeleteAgentButton } from './delete-agent-button';
  */
 
 export default function AgentsPage() {
-  const { data: agents, isLoading, error } = useQuery({
+  const {
+    data: agents,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
   });
@@ -38,21 +42,21 @@ export default function AgentsPage() {
       />
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-fg-muted text-sm py-12 justify-center">
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-fg-muted">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading agents…
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 p-5 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <h3 className="text-fg font-medium">Couldn't load agents</h3>
+            <h3 className="font-medium text-fg">Couldn't load agents</h3>
             <p className="mt-1 text-sm text-fg-muted">
               {error instanceof ApiException
                 ? error.detail
-                : 'The API didn\'t respond. Is the backend running at the configured URL?'}
+                : "The API didn't respond. Is the backend running at the configured URL?"}
             </p>
           </div>
         </div>
@@ -68,41 +72,41 @@ export default function AgentsPage() {
       )}
 
       {agents && agents.length > 0 && (
-        <div className="rounded-lg border border-border bg-surface/40 overflow-hidden animate-fade-in">
+        <div className="animate-fade-in overflow-hidden rounded-lg border border-border bg-surface/40">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg/30">
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Name
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Role
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Model
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Tools
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Memory
                 </th>
-                <th className="px-4 py-3 w-24"></th>
+                <th className="w-24 px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
               {agents.map((agent) => (
                 <tr
                   key={agent.id}
-                  className="border-b border-border last:border-0 hover:bg-elevated/30 transition-colors"
+                  className="border-b border-border transition-colors last:border-0 hover:bg-elevated/30"
                 >
                   <td className="px-4 py-3">
                     <Link
                       href={`/agents/${agent.id}`}
-                      className="group inline-flex items-center gap-1.5 font-medium text-fg hover:text-accent transition-colors"
+                      className="group inline-flex items-center gap-1.5 font-medium text-fg transition-colors hover:text-accent"
                     >
                       {agent.name}
-                      <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-fg-muted">{agent.role}</td>
@@ -113,7 +117,7 @@ export default function AgentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     {(agent.tools ?? []).length === 0 ? (
-                      <span className="text-fg-subtle text-xs">—</span>
+                      <span className="text-xs text-fg-subtle">—</span>
                     ) : (
                       <div className="flex flex-wrap gap-1">
                         {(agent.tools ?? []).slice(0, 3).map((t) => (

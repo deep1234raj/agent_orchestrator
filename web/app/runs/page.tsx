@@ -11,7 +11,10 @@ import { RunStatusBadge } from '@/components/run-status-badge';
 import { runsApi, workflowsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
 
-function formatDuration(startedAt: string | null, finishedAt: string | null): string {
+function formatDuration(
+  startedAt: string | null,
+  finishedAt: string | null,
+): string {
   if (!startedAt) return '—';
   const start = new Date(startedAt).getTime();
   const end = finishedAt ? new Date(finishedAt).getTime() : Date.now();
@@ -21,7 +24,11 @@ function formatDuration(startedAt: string | null, finishedAt: string | null): st
 }
 
 export default function RunsPage() {
-  const { data: runs, isLoading, error } = useQuery({
+  const {
+    data: runs,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['runs'],
     queryFn: () => runsApi.list({ limit: 50 }),
     refetchInterval: 5000,
@@ -42,19 +49,21 @@ export default function RunsPage() {
       />
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-fg-muted text-sm py-12 justify-center">
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-fg-muted">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading runs…
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 p-5 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <h3 className="text-fg font-medium">Couldn't load runs</h3>
+            <h3 className="font-medium text-fg">Couldn't load runs</h3>
             <p className="mt-1 text-sm text-fg-muted">
-              {error instanceof ApiException ? error.detail : 'Is the backend running?'}
+              {error instanceof ApiException
+                ? error.detail
+                : 'Is the backend running?'}
             </p>
           </div>
         </div>
@@ -69,36 +78,36 @@ export default function RunsPage() {
       )}
 
       {runs && runs.length > 0 && (
-        <div className="rounded-lg border border-border bg-surface/40 overflow-hidden animate-fade-in">
+        <div className="animate-fade-in overflow-hidden rounded-lg border border-border bg-surface/40">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg/30">
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Status
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Workflow
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Trigger
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Duration
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Cost
                 </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Tokens
                 </th>
-                <th className="px-4 py-3 w-20" />
+                <th className="w-20 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {runs.map((run) => (
                 <tr
                   key={run.id}
-                  className="border-b border-border last:border-0 hover:bg-elevated/30 transition-colors"
+                  className="border-b border-border transition-colors last:border-0 hover:bg-elevated/30"
                 >
                   <td className="px-4 py-3">
                     <RunStatusBadge status={run.status} />
@@ -106,12 +115,15 @@ export default function RunsPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/workflows/${run.workflow_id}`}
-                      className="text-fg-muted hover:text-accent transition-colors text-xs"
+                      className="text-xs text-fg-muted transition-colors hover:text-accent"
                     >
-                      {workflowsById.get(run.workflow_id)?.name ?? run.workflow_id.slice(0, 8)}
+                      {workflowsById.get(run.workflow_id)?.name ??
+                        run.workflow_id.slice(0, 8)}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-fg-muted">{run.trigger}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-fg-muted">
+                    {run.trigger}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-fg-muted">
                     {formatDuration(run.started_at, run.finished_at)}
                   </td>
@@ -124,7 +136,7 @@ export default function RunsPage() {
                   <td className="px-4 py-3 text-right">
                     <Button asChild variant="ghost" size="sm">
                       <Link href={`/runs/${run.id}`}>
-                        <ArrowUpRight className="h-3.5 w-3.5 mr-1" />
+                        <ArrowUpRight className="mr-1 h-3.5 w-3.5" />
                         View
                       </Link>
                     </Button>

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 /*
  * Page header.
@@ -21,7 +21,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-border mb-8',
+        "flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-border mb-8",
         className,
       )}
     >

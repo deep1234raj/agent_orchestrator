@@ -7,6 +7,7 @@ a Run for each. The next fire time is recomputed from the cron expression.
 `croniter` is the parser; we don't ship a full job scheduler — too heavy
 for v1 scope.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -46,17 +47,22 @@ class Schedule(Base, UUIDPKMixin, TimestampMixin):
     input: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     status: Mapped[ScheduleStatus] = mapped_column(
-        SAEnum(ScheduleStatus, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
-        nullable=False, default=ScheduleStatus.ACTIVE, index=True,
+        SAEnum(
+            ScheduleStatus,
+            native_enum=False,
+            length=20,
+            values_callable=lambda e: [m.value for m in e],
+        ),
+        nullable=False,
+        default=ScheduleStatus.ACTIVE,
+        index=True,
     )
 
     # Computed at creation and after every fire. The scheduler tick polls on this.
     next_fire_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
     )
-    last_fired_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    last_fired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     workflow: Mapped["Workflow"] = relationship(back_populates="schedules")

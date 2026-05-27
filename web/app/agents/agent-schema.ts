@@ -11,17 +11,9 @@ import { z } from 'zod';
 export const memoryModes = ['none', 'windowed', 'summary'] as const;
 
 export const agentFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(120, 'Name is too long'),
-  role: z
-    .string()
-    .min(1, 'Role is required')
-    .max(120, 'Role is too long'),
-  system_prompt: z
-    .string()
-    .min(1, 'System prompt is required'),
+  name: z.string().min(1, 'Name is required').max(120, 'Name is too long'),
+  role: z.string().min(1, 'Role is required').max(120, 'Role is too long'),
+  system_prompt: z.string().min(1, 'System prompt is required'),
   provider: z.string().min(1).default('anthropic'),
   model: z.string().min(1).default('claude-sonnet-4-5'),
   temperature: z.coerce.number().min(0).max(2).default(0.7),

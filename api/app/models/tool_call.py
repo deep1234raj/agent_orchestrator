@@ -5,6 +5,7 @@ Recorded separately from messages so we can:
   - Track tool latency and failure rates
   - Replay a run by re-executing tools in order (future)
 """
+
 from __future__ import annotations
 
 import uuid

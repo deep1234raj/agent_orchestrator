@@ -14,6 +14,7 @@ If the run wasn't triggered by an external channel (e.g. UI-triggered),
 the tool returns a structured error — the agent can recover by simply
 ending its turn without sending.
 """
+
 from __future__ import annotations
 
 from contextvars import ContextVar

@@ -3,11 +3,7 @@
 import Link from 'next/link';
 import { use } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ArrowLeft,
-  Loader2,
-  AlertTriangle,
-} from 'lucide-react';
+import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/page-header';
@@ -36,7 +32,11 @@ export default function EditAgentPage({
   const { id } = use(params);
   const qc = useQueryClient();
 
-  const { data: agent, isLoading, error } = useQuery({
+  const {
+    data: agent,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['agents', id],
     queryFn: () => agentsApi.get(id),
   });
@@ -60,28 +60,28 @@ export default function EditAgentPage({
     <>
       <Link
         href="/agents"
-        className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-fg-subtle hover:text-fg transition-colors mb-4"
+        className="mb-4 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-fg-subtle transition-colors hover:text-fg"
       >
         <ArrowLeft className="h-3 w-3" />
         Agents
       </Link>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-fg-muted text-sm py-12 justify-center">
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-fg-muted">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading agent…
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 p-5 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <h3 className="text-fg font-medium">Couldn't load this agent</h3>
+            <h3 className="font-medium text-fg">Couldn't load this agent</h3>
             <p className="mt-1 text-sm text-fg-muted">
               {error instanceof ApiException
                 ? error.detail
-                : 'The API didn\'t respond.'}
+                : "The API didn't respond."}
             </p>
           </div>
         </div>
@@ -109,8 +109,8 @@ export default function EditAgentPage({
             submitting={update.isPending}
           />
 
-          <div className="mt-10 pt-6 border-t border-border">
-            <div className="flex items-center gap-6 text-xs font-mono text-fg-subtle">
+          <div className="mt-10 border-t border-border pt-6">
+            <div className="flex items-center gap-6 font-mono text-xs text-fg-subtle">
               <span>
                 ID: <span className="text-fg-muted">{agent.id}</span>
               </span>
@@ -129,7 +129,7 @@ export default function EditAgentPage({
             </div>
           </div>
 
-          <div className="flex justify-start mt-6">
+          <div className="mt-6 flex justify-start">
             <Button asChild variant="ghost" size="sm">
               <Link href="/agents">
                 <ArrowLeft className="h-3 w-3" />

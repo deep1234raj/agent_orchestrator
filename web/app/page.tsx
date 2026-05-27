@@ -18,7 +18,7 @@ import {
 function StatChip({ value, label }: { value: string | number; label: string }) {
   return (
     <div className="rounded-lg border border-border bg-surface/40 p-4 text-center">
-      <div className="text-3xl font-display text-fg">{value}</div>
+      <div className="font-display text-3xl text-fg">{value}</div>
       <div className="mt-1 text-sm text-fg-muted">{label}</div>
     </div>
   );
@@ -32,7 +32,11 @@ function elapsed(createdAt: string): string {
 }
 
 export default function Home() {
-  const { data: activeRuns, isLoading: runsLoading, isError: runsError } = useQuery({
+  const {
+    data: activeRuns,
+    isLoading: runsLoading,
+    isError: runsError,
+  } = useQuery({
     queryKey: ['runs', 'running'],
     queryFn: () => runsApi.list({ status: 'running', limit: 20 }),
     refetchInterval: 5000,
@@ -69,8 +73,10 @@ export default function Home() {
 
   const { totalRuns, totalCost, successRate } = useMemo(() => {
     const total = allRuns?.length ?? 0;
-    const succeeded = allRuns?.filter((r) => r.status === 'succeeded').length ?? 0;
-    const cost = allRuns?.reduce((sum, r) => sum + (r.total_cost_usd ?? 0), 0) ?? 0;
+    const succeeded =
+      allRuns?.filter((r) => r.status === 'succeeded').length ?? 0;
+    const cost =
+      allRuns?.reduce((sum, r) => sum + (r.total_cost_usd ?? 0), 0) ?? 0;
     return {
       totalRuns: total,
       totalCost: cost,
@@ -83,7 +89,9 @@ export default function Home() {
       <PageHeader title="Dashboard" subtitle="Live status and quick actions." />
 
       <section className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">Active Runs</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">
+          Active Runs
+        </h2>
         {runsLoading && (
           <div className="flex items-center gap-2 text-fg-muted">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -91,7 +99,7 @@ export default function Home() {
           </div>
         )}
         {runsError && (
-          <div className="flex items-center gap-2 text-destructive">
+          <div className="text-destructive flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm">Failed to load runs.</span>
           </div>
@@ -107,14 +115,16 @@ export default function Home() {
               <Link
                 key={run.id}
                 href={`/runs/${run.id}`}
-                className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 px-4 py-3 text-sm hover:bg-surface transition-colors"
+                className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 px-4 py-3 text-sm transition-colors hover:bg-surface"
               >
-                <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400 animate-pulse" />
+                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-amber-400" />
                 <span className="flex-1 font-medium text-fg">
                   {workflowsById[run.workflow_id]?.name ?? run.workflow_id}
                 </span>
                 <span className="text-fg-muted">{run.trigger}</span>
-                <span className="font-mono text-xs text-fg-subtle">{elapsed(run.created_at)}</span>
+                <span className="font-mono text-xs text-fg-subtle">
+                  {elapsed(run.created_at)}
+                </span>
               </Link>
             ))}
           </div>
@@ -123,7 +133,9 @@ export default function Home() {
 
       <div className="mb-6 grid gap-4 md:grid-cols-2">
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">System Health</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">
+            System Health
+          </h2>
           <div className="grid grid-cols-3 gap-3">
             <StatChip value={agents?.length ?? '—'} label="Agents" />
             <StatChip value={workflows?.length ?? '—'} label="Workflows" />
@@ -132,7 +144,9 @@ export default function Home() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">All-Time Stats</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">
+            All-Time Stats
+          </h2>
           <div className="grid grid-cols-3 gap-3">
             <StatChip value={totalRuns} label="Total Runs" />
             <StatChip value={`$${totalCost.toFixed(2)}`} label="Total Cost" />
@@ -142,7 +156,9 @@ export default function Home() {
       </div>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">Quick Actions</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">
+          Quick Actions
+        </h2>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="primary">
             <Link href="/agents">+ New Agent</Link>
@@ -150,7 +166,9 @@ export default function Home() {
           <Button asChild variant="ghost">
             <Link href="/workflows">Open Workflows</Link>
           </Button>
-          <TelegramSetupDialog trigger={<Button variant="ghost">Setup Telegram</Button>} />
+          <TelegramSetupDialog
+            trigger={<Button variant="ghost">Setup Telegram</Button>}
+          />
         </div>
       </section>
     </>

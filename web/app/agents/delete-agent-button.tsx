@@ -51,10 +51,10 @@ export function DeleteAgentButton({ agent }: { agent: Agent }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this agent?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="text-fg font-medium">{agent.name}</span> will be
+            <span className="font-medium text-fg">{agent.name}</span> will be
             permanently removed. Any messages it authored will remain in run
-            history, but workflows referencing it will fail to compile until
-            you update them.
+            history, but workflows referencing it will fail to compile until you
+            update them.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

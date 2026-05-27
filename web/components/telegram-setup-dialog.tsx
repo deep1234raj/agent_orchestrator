@@ -1,25 +1,34 @@
-'use client';
+"use client";
 
-import { type ReactNode, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
-import { api, ApiException } from '@/lib/api/client';
+import { type ReactNode, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { api, ApiException } from "@/lib/api/client";
 
 type SetupResponse = { ok: boolean; description?: string };
 
 export function TelegramSetupDialog({ trigger }: { trigger: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [baseUrl, setBaseUrl] = useState('');
+  const [baseUrl, setBaseUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
+  const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(
+    null,
+  );
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (!next) {
-      setBaseUrl('');
+      setBaseUrl("");
       setStatus(null);
     }
   }
@@ -28,14 +37,19 @@ export function TelegramSetupDialog({ trigger }: { trigger: ReactNode }) {
     setLoading(true);
     setStatus(null);
     try {
-      const data = await api<SetupResponse>('/webhooks/telegram/setup', {
-        method: 'POST',
+      const data = await api<SetupResponse>("/webhooks/telegram/setup", {
+        method: "POST",
         body: { base_url: baseUrl },
       });
-      setStatus({ ok: true, message: `Webhook registered: ${data.description ?? baseUrl}` });
+      setStatus({
+        ok: true,
+        message: `Webhook registered: ${data.description ?? baseUrl}`,
+      });
     } catch (err) {
       const message =
-        err instanceof ApiException ? err.detail : 'Failed to register webhook.';
+        err instanceof ApiException
+          ? err.detail
+          : "Failed to register webhook.";
       setStatus({ ok: false, message });
     } finally {
       setLoading(false);
@@ -48,7 +62,9 @@ export function TelegramSetupDialog({ trigger }: { trigger: ReactNode }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Register Telegram Webhook</DialogTitle>
-          <DialogDescription>Point Telegram at this server&apos;s webhook endpoint.</DialogDescription>
+          <DialogDescription>
+            Point Telegram at this server&apos;s webhook endpoint.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div className="space-y-1.5">
@@ -61,10 +77,15 @@ export function TelegramSetupDialog({ trigger }: { trigger: ReactNode }) {
             />
           </div>
           <Button onClick={handleSubmit} disabled={loading || !baseUrl.trim()}>
-            {loading ? 'Registering…' : 'Register Webhook'}
+            {loading ? "Registering…" : "Register Webhook"}
           </Button>
           {status && (
-            <p className={cn('text-sm', status.ok ? 'text-green-600' : 'text-red-600')}>
+            <p
+              className={cn(
+                "text-sm",
+                status.ok ? "text-green-600" : "text-red-600",
+              )}
+            >
               {status.message}
             </p>
           )}

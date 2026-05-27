@@ -23,7 +23,11 @@ export default function WorkflowDetailPage() {
   const queryClient = useQueryClient();
   const [pendingGraph, setPendingGraph] = useState<GraphDocument | null>(null);
 
-  const { data: workflow, isLoading, error } = useQuery({
+  const {
+    data: workflow,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['workflow', id],
     queryFn: () => workflowsApi.get(id),
   });
@@ -41,7 +45,9 @@ export default function WorkflowDetailPage() {
 
   const { mutate: saveLayout, isPending: isSaving } = useMutation({
     mutationFn: (graph: GraphDocument) =>
-      workflowsApi.update(id, { graph: graph as unknown as Record<string, unknown> }),
+      workflowsApi.update(id, {
+        graph: graph as unknown as Record<string, unknown>,
+      }),
     onSuccess: () => {
       toast.success('Layout saved');
       setPendingGraph(null);
@@ -59,7 +65,7 @@ export default function WorkflowDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-fg-muted text-sm py-12 justify-center">
+      <div className="flex items-center justify-center gap-2 py-12 text-sm text-fg-muted">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading workflow…
       </div>
@@ -68,12 +74,14 @@ export default function WorkflowDetailPage() {
 
   if (error || !workflow) {
     return (
-      <div className="rounded-lg border border-danger/30 bg-danger/5 p-5 flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
         <div>
-          <h3 className="text-fg font-medium">Couldn't load workflow</h3>
+          <h3 className="font-medium text-fg">Couldn't load workflow</h3>
           <p className="mt-1 text-sm text-fg-muted">
-            {error instanceof ApiException ? error.detail : 'Check the backend connection.'}
+            {error instanceof ApiException
+              ? error.detail
+              : 'Check the backend connection.'}
           </p>
         </div>
       </div>
@@ -85,18 +93,23 @@ export default function WorkflowDetailPage() {
       <PageHeader
         title={workflow.name}
         subtitle={workflow.description || 'No description.'}
-        actions={<TriggerRunDialog workflowId={id} workflowName={workflow.name} />}
+        actions={
+          <TriggerRunDialog workflowId={id} workflowName={workflow.name} />
+        }
       />
 
-      <div className="flex items-center gap-2 mb-6 -mt-2">
+      <div className="-mt-2 mb-6 flex items-center gap-2">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href="/workflows">
-            <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+            <ArrowLeft className="mr-1 h-3.5 w-3.5" />
             Workflows
           </Link>
         </Button>
         {workflow.is_template && (
-          <Badge variant="outline" className="border-accent/30 text-accent bg-accent/10 text-xs">
+          <Badge
+            variant="outline"
+            className="border-accent/30 bg-accent/10 text-xs text-accent"
+          >
             Template
           </Badge>
         )}
@@ -104,8 +117,10 @@ export default function WorkflowDetailPage() {
 
       {/* Canvas */}
       <section className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-mono text-[11px] uppercase tracking-wider text-fg-subtle">Graph</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-mono text-[11px] uppercase tracking-wider text-fg-subtle">
+            Graph
+          </h2>
           {pendingGraph && (
             <Button
               size="sm"
@@ -131,57 +146,64 @@ export default function WorkflowDetailPage() {
           className="h-[380px]"
         />
         <p className="mt-1.5 text-xs text-fg-subtle">
-          Drag nodes to reposition. Click <strong>Save Layout</strong> to persist.
+          Drag nodes to reposition. Click <strong>Save Layout</strong> to
+          persist.
         </p>
       </section>
 
       {/* Recent runs */}
       <section>
-        <h2 className="font-mono text-[11px] uppercase tracking-wider text-fg-subtle mb-3">
+        <h2 className="mb-3 font-mono text-[11px] uppercase tracking-wider text-fg-subtle">
           Recent Runs
         </h2>
         {runs.length === 0 ? (
-          <p className="text-sm text-fg-muted">No runs yet. Trigger one above.</p>
+          <p className="text-sm text-fg-muted">
+            No runs yet. Trigger one above.
+          </p>
         ) : (
-          <div className="rounded-lg border border-border bg-surface/40 overflow-hidden">
+          <div className="overflow-hidden rounded-lg border border-border bg-surface/40">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-bg/30">
-                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                     Status
                   </th>
-                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                     Trigger
                   </th>
-                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                     Cost
                   </th>
-                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                     Started
                   </th>
-                  <th className="px-4 py-3 w-20" />
+                  <th className="w-20 px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {runs.map((run) => (
                   <tr
                     key={run.id}
-                    className="border-b border-border last:border-0 hover:bg-elevated/30 transition-colors"
+                    className="border-b border-border transition-colors last:border-0 hover:bg-elevated/30"
                   >
                     <td className="px-4 py-3">
                       <RunStatusBadge status={run.status} />
                     </td>
-                    <td className="px-4 py-3 text-fg-muted font-mono text-xs">{run.trigger}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-fg-muted">
+                      {run.trigger}
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs text-fg-muted">
                       ${run.total_cost_usd.toFixed(4)}
                     </td>
-                    <td className="px-4 py-3 text-fg-subtle text-xs">
-                      {run.started_at ? new Date(run.started_at).toLocaleString() : '—'}
+                    <td className="px-4 py-3 text-xs text-fg-subtle">
+                      {run.started_at
+                        ? new Date(run.started_at).toLocaleString()
+                        : '—'}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Button asChild variant="ghost" size="sm">
                         <Link href={`/runs/${run.id}`}>
-                          <Clock className="h-3.5 w-3.5 mr-1" />
+                          <Clock className="mr-1 h-3.5 w-3.5" />
                           View
                         </Link>
                       </Button>

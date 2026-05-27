@@ -12,6 +12,7 @@ Three modes, mirroring the MemoryMode enum:
 These are deliberately simple. Vector-backed long-term memory is the
 obvious upgrade path (see docs/architecture.md "out of scope").
 """
+
 from __future__ import annotations
 
 from app.models.enums import MemoryMode

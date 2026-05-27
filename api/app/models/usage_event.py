@@ -5,6 +5,7 @@ rolls up. Costs are computed at insert time from a static price table
 (see app.runtime.pricing) — cheap, deterministic, no surprise dependency
 on provider billing APIs.
 """
+
 from __future__ import annotations
 
 import uuid

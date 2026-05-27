@@ -1,4 +1,5 @@
 """Tool listing schema for the UI's agent-config dropdown."""
+
 from __future__ import annotations
 
 from typing import Any

@@ -1,4 +1,5 @@
 """Channel binding routes."""
+
 from __future__ import annotations
 
 import uuid
@@ -24,9 +25,7 @@ async def list_channels(s: AsyncSession = Depends(get_session)) -> list[Channel]
 
 
 @router.post("", response_model=ChannelRead, status_code=status.HTTP_201_CREATED)
-async def create_channel(
-    body: ChannelCreate, s: AsyncSession = Depends(get_session)
-) -> Channel:
+async def create_channel(body: ChannelCreate, s: AsyncSession = Depends(get_session)) -> Channel:
     # Validate that the workflow exists before creating the binding.
     if await s.get(Workflow, body.workflow_id) is None:
         raise NotFound(f"Workflow {body.workflow_id} not found.")
@@ -61,9 +60,7 @@ async def update_channel(
 
 
 @router.delete("/{channel_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_channel(
-    channel_id: uuid.UUID, s: AsyncSession = Depends(get_session)
-) -> None:
+async def delete_channel(channel_id: uuid.UUID, s: AsyncSession = Depends(get_session)) -> None:
     channel = await s.get(Channel, channel_id)
     if channel is None:
         raise NotFound(f"Channel {channel_id} not found.")

@@ -11,6 +11,7 @@ The agent node uses the registry two ways:
 The UI uses the registry to populate the "tools" multi-select on the
 agent configuration form.
 """
+
 from __future__ import annotations
 
 import inspect

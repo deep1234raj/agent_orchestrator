@@ -6,6 +6,7 @@ through the codebase. The only intentional exception is the tool layer,
 where keys are read lazily so the app can boot even with some keys
 missing.
 """
+
 from __future__ import annotations
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     """Typed view of every environment variable the API reads."""
 
     model_config = SettingsConfigDict(
-        env_file=None,             # docker-compose injects env; .env handled there
+        env_file=None,  # docker-compose injects env; .env handled there
         case_sensitive=False,
         extra="ignore",
     )
@@ -25,9 +26,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # --- database -------------------------------------------------------
-    database_url: str = (
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/aaop"
-    )
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/aaop"
 
     # --- CORS -----------------------------------------------------------
     cors_origins: str = "http://localhost:3000"

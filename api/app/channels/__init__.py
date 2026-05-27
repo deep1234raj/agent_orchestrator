@@ -5,6 +5,7 @@ configuration and register it. Missing config means the channel isn't
 registered — the system still boots, and routes that would use it
 fail cleanly with a clear error message rather than crashing on import.
 """
+
 from __future__ import annotations
 
 import structlog
@@ -27,5 +28,4 @@ def register_all_channels() -> None:
         )
         log.info("channel_registered", kind="telegram")
     else:
-        log.info("channel_skipped", kind="telegram",
-                 reason="TELEGRAM_BOT_TOKEN not set")
+        log.info("channel_skipped", kind="telegram", reason="TELEGRAM_BOT_TOKEN not set")

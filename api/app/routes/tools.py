@@ -1,4 +1,5 @@
 """Tools route — list every registered tool (drives the UI dropdown)."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter

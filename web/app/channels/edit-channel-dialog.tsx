@@ -8,11 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader,
-  DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { channelsApi, workflowsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
@@ -31,7 +39,8 @@ export function EditChannelDialog({ channel }: { channel: Channel }) {
   });
 
   const update = useMutation({
-    mutationFn: () => channelsApi.update(channel.id, { workflow_id: workflowId, enabled }),
+    mutationFn: () =>
+      channelsApi.update(channel.id, { workflow_id: workflowId, enabled }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['channels'] });
       toast.success('Channel updated');
@@ -39,7 +48,8 @@ export function EditChannelDialog({ channel }: { channel: Channel }) {
     },
     onError: (err) => {
       toast.error('Could not update channel', {
-        description: err instanceof ApiException ? err.detail : 'An error occurred.',
+        description:
+          err instanceof ApiException ? err.detail : 'An error occurred.',
       });
     },
   });
@@ -55,7 +65,9 @@ export function EditChannelDialog({ channel }: { channel: Channel }) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">Edit</Button>
+        <Button variant="ghost" size="sm">
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -74,7 +86,9 @@ export function EditChannelDialog({ channel }: { channel: Channel }) {
               </SelectTrigger>
               <SelectContent>
                 {workflows.map((w) => (
-                  <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                  <SelectItem key={w.id} value={w.id}>
+                    {w.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -89,7 +103,9 @@ export function EditChannelDialog({ channel }: { channel: Channel }) {
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button
             variant="primary"
             disabled={update.isPending}

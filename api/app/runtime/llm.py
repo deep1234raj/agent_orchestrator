@@ -13,6 +13,7 @@ Why not just use LangChain's ChatModel?
   - The interface here is small. Wrapping it ourselves is cheaper than
     untangling LangChain abstractions when something goes wrong.
 """
+
 from __future__ import annotations
 
 import os
@@ -53,7 +54,7 @@ class ToolResult:
     """Result of executing a tool, fed back to the model next turn."""
 
     tool_use_id: str
-    content: str            # serialized result for the model
+    content: str  # serialized result for the model
     is_error: bool = False
 
 
@@ -159,12 +160,14 @@ class AnthropicProvider(LLMProvider):
         if text:
             blocks.append({"type": "text", "text": text})
         for tu in tool_uses:
-            blocks.append({
-                "type": "tool_use",
-                "id": tu.id,
-                "name": tu.name,
-                "input": tu.arguments,
-            })
+            blocks.append(
+                {
+                    "type": "tool_use",
+                    "id": tu.id,
+                    "name": tu.name,
+                    "input": tu.arguments,
+                }
+            )
         return {"role": "assistant", "content": blocks}
 
     def format_tool_results(self, results: list[ToolResult]) -> dict[str, Any]:

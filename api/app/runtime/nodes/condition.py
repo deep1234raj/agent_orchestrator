@@ -15,6 +15,7 @@ We keep two forms of condition:
 
 The compiler decides which form to use based on the node's `data` payload.
 """
+
 from __future__ import annotations
 
 import re
@@ -80,19 +81,21 @@ def _evaluate(expr: str, state: RunState) -> bool:
     raise ValueError(f"Unhandled operator: {op!r}")
 
 
-def make_expression_router(
-    *, expr: str, on_true: str, on_false: str
-) -> Callable[[RunState], str]:
+def make_expression_router(*, expr: str, on_true: str, on_false: str) -> Callable[[RunState], str]:
     """Build a router function for `add_conditional_edges`."""
+
     def router(state: RunState) -> str:
         return on_true if _evaluate(expr, state) else on_false
+
     return router
 
 
 def make_hint_router(*, routes: dict[str, str], default: str) -> Callable[[RunState], str]:
     """Route on `state.next_hint`. Falls back to `default` if no hint set."""
+
     def router(state: RunState) -> str:
         if state.next_hint and state.next_hint in routes:
             return routes[state.next_hint]
         return default
+
     return router
