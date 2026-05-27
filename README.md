@@ -139,42 +139,93 @@ Both are editable in the UI; seeding never overwrites changes you make.
 aaop/
 ├── api/                      # FastAPI backend
 │   ├── app/
-│   │   ├── main.py           # FastAPI entrypoint
-│   │   ├── routes/           # REST endpoints (agents, workflows, runs)
-│   │   ├── ws/               # WebSocket gateway
-│   │   ├── webhooks/         # Telegram webhook
-│   │   ├── runtime/          # LangGraph executor + compiler
-│   │   ├── tools/            # Real tool implementations
-│   │   ├── channels/         # Channel adapters (Telegram, …)
-│   │   ├── models/           # SQLAlchemy models
-│   │   ├── schemas/          # Pydantic schemas
-│   │   └── db/               # Engine, session, migrations
-│   ├── alembic/
-│   ├── tests/
+│   │   ├── main.py                 # App factory + lifespan (worker, scheduler, seeder)
+│   │   ├── config.py               # Pydantic-settings env loader
+│   │   ├── errors.py               # Domain exceptions + HTTP handlers
+│   │   ├── worker.py               # In-process run dispatcher + scheduler tick
+│   │   ├── logging_config.py       # structlog setup
+│   │   ├── routes/                 # REST endpoints (agents, workflows, runs, tools, channels)
+│   │   ├── ws/gateway.py           # WebSocket per-run event stream
+│   │   ├── webhooks/telegram.py    # Inbound Telegram messages → runs
+│   │   ├── runtime/                # LangGraph compiler + executor + nodes
+│   │   │   ├── compiler.py         # Workflow JSON → StateGraph
+│   │   │   ├── executor.py         # Run lifecycle + guardrail enforcement
+│   │   │   ├── events.py           # Persist + broadcast event bus
+│   │   │   ├── llm.py              # Provider abstraction (Anthropic; OpenAI seam)
+│   │   │   ├── memory.py           # Memory strategies (none / windowed / summary)
+│   │   │   ├── pricing.py          # $/token table
+│   │   │   ├── state.py            # RunState passed between nodes
+│   │   │   ├── nodes/              # agent_node, condition, terminal
+│   │   │   └── templates/          # Pre-built workflows (JSON, seeded on boot)
+│   │   ├── tools/                  # Tool registry + implementations
+│   │   │   ├── registry.py         # @tool decorator + lookup
+│   │   │   └── *.py                # web_search, http_get, calculator, get_time, send_message
+│   │   ├── channels/               # Channel adapters
+│   │   │   ├── base.py             # Channel protocol
+│   │   │   └── telegram.py         # Bot API adapter
+│   │   ├── services/conversation.py # Cross-run conversation preamble
+│   │   ├── models/                 # SQLAlchemy 2.0 ORM
+│   │   ├── schemas/                # Pydantic request/response
+│   │   └── db/                     # Engine, session, UUID v7, seeder
+│   ├── alembic/                    # Migrations
 │   └── pyproject.toml
 │
-├── web/                      # Next.js frontend
+├── web/                            # Next.js 16 + TypeScript + Tailwind
 │   ├── app/
-│   │   ├── agents/           # Agent CRUD + playground
-│   │   ├── workflows/        # Builder + list
-│   │   ├── runs/             # Run history + live view
-│   │   └── page.tsx          # Dashboard
+│   │   ├── layout.tsx              # Fonts, providers, sidebar shell
+│   │   ├── page.tsx                # Home (quick links)
+│   │   ├── error.tsx, not-found.tsx
+│   │   └── agents/                 # Agents CRUD (list + edit)
 │   ├── components/
-│   ├── lib/                  # API client, WS hook
+│   │   ├── ui/                     # Hand-styled primitives (Button, Dialog, …)
+│   │   ├── sidebar.tsx, page-header.tsx, empty-state.tsx
+│   │   └── query-provider.tsx, toaster.tsx
+│   ├── lib/
+│   │   ├── api/                    # Typed fetch client + per-entity functions
+│   │   └── utils.ts                # cn() helper
 │   └── package.json
 │
-├── infra/
-│   └── docker-compose.yml
-│
-├── docs/
-│   ├── architecture.png
-│   └── demo.gif
-│
+├── infra/docker-compose.yml
+├── docs/architecture.md            # Deep architecture document
 ├── .env.example
-├── CLAUDE.md                 # Operating manual for AI-assisted dev
+├── CLAUDE.md                       # Operating manual for AI-assisted dev
 └── README.md
 ```
-
+ 
+---
+ 
+## Implementation status
+ 
+This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's planned — useful for reviewers and for AI-assisted continuation.
+ 
+**Done end-to-end**
+- Postgres schema (7 tables) + Alembic migration + UUID v7 PKs
+- LangGraph runtime: compiler, executor, agent node with tool-calling loop, condition node, terminal node
+- Memory strategies (none / windowed / summary)
+- Event system: persists to DB → broadcasts to in-process pub/sub → WebSocket fans out
+- Worker with `SELECT … FOR UPDATE SKIP LOCKED` claim pattern + orphan sweep on startup
+- Scheduler tick (croniter) for cron-triggered workflows
+- Cost tracking (per call → per agent → per run rollup)
+- Guardrails (max_iterations, max_cost_usd) enforced between graph steps
+- Cooperative cancellation via `POST /runs/{id}/cancel`
+- REST API: agents, workflows, runs, tools, channels (full CRUD where applicable)
+- WebSocket gateway at `/ws/runs/{id}`
+- Telegram webhook with secret verification, channel binding, conversation preamble across runs
+- 5 working tools: web_search (Tavily), http_get, calculator, get_time, send_message
+- 2 seed templates (Research & Brief, Daily Standup Summarizer) — idempotent
+- Web: foundation (Tailwind, fonts, providers, layout, sidebar, error/404)
+- Web: Agents page (list, create, edit, delete) with form + tool multi-select
+- Docker Compose with health checks; one-command boot
+**Stubbed (interface in place, body deferred)**
+- OpenAI LLM provider — `get_provider("openai")` raises clearly; Anthropic works
+- Slack / WhatsApp channels — registered in the enum, not implemented
+**Not built yet (planned next)**
+- Web: Workflow builder (React Flow canvas, save/load, run trigger)
+- Web: Runs view (history list + live monitoring with WebSocket subscription)
+- Web: Channels page
+- Web: Dashboard with cost rollups
+- Pytest suite (smoke tests exist but aren't running in CI)
+- `setWebhook` helper endpoint for one-command Telegram setup
 ---
 
 ## Key flows
