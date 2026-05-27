@@ -41,7 +41,7 @@ export default function WorkflowDetailPage() {
 
   const { mutate: saveLayout, isPending: isSaving } = useMutation({
     mutationFn: (graph: GraphDocument) =>
-      workflowsApi.update(id, { graph: graph as Record<string, unknown> }),
+      workflowsApi.update(id, { graph: graph as unknown as Record<string, unknown> }),
     onSuccess: () => {
       toast.success('Layout saved');
       setPendingGraph(null);

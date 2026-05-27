@@ -18,7 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { agentsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
-import type { Agent } from '@/lib/api/schema';
+import type { Agent } from '@/lib/api/resources';
 
 export function DeleteAgentButton({ agent }: { agent: Agent }) {
   const qc = useQueryClient();

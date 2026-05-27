@@ -13,7 +13,7 @@ export function PageHeader({
   actions,
   className,
 }: {
-  title: string;
+  title: React.ReactNode;
   subtitle?: string;
   actions?: React.ReactNode;
   className?: string;

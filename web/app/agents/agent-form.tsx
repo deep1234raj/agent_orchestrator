@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toolsApi } from '@/lib/api/resources';
-import type { Agent } from '@/lib/api/schema';
+import type { Agent } from '@/lib/api/resources';
 import {
   agentFormSchema,
   memoryModes,

@@ -10,7 +10,11 @@
  * sites and one place to change behavior (auth, retries, logging).
  */
 
-import type { ApiError } from './schema';
+interface ApiError {
+  detail: string;
+  code: string;
+  errors?: unknown;
+}
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

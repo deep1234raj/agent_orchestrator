@@ -112,18 +112,18 @@ export default function AgentsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    {agent.tools.length === 0 ? (
+                    {(agent.tools ?? []).length === 0 ? (
                       <span className="text-fg-subtle text-xs">—</span>
                     ) : (
                       <div className="flex flex-wrap gap-1">
-                        {agent.tools.slice(0, 3).map((t) => (
+                        {(agent.tools ?? []).slice(0, 3).map((t) => (
                           <Badge key={t} variant="outline">
                             {t}
                           </Badge>
                         ))}
-                        {agent.tools.length > 3 && (
+                        {(agent.tools ?? []).length > 3 && (
                           <Badge variant="outline">
-                            +{agent.tools.length - 3}
+                            +{(agent.tools ?? []).length - 3}
                           </Badge>
                         )}
                       </div>
