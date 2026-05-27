@@ -19,8 +19,10 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -111,6 +113,58 @@ async def telegram_webhook(
     log.info("telegram_run_enqueued", chat_id=chat_id,
              workflow_id=str(binding.workflow_id), run_id=str(run.id))
     return {"status": "queued", "run_id": str(run.id)}
+
+
+class SetupWebhookRequest(BaseModel):
+    base_url: str
+
+    @field_validator("base_url")
+    @classmethod
+    def must_be_https(cls, v: str) -> str:
+        if not v.startswith("https://"):
+            raise ValueError("base_url must start with https://")
+        return v.rstrip("/")
+
+
+class SetupWebhookResponse(BaseModel):
+    ok: bool
+    description: str | None = None
+
+
+@router.post("/telegram/setup", response_model=SetupWebhookResponse)
+async def setup_telegram_webhook(body: SetupWebhookRequest) -> SetupWebhookResponse:
+    """Call Telegram setWebhook on behalf of the configured bot."""
+    from app.config import settings  # late import avoids circular at module load
+
+    if not settings.telegram_bot_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="TELEGRAM_BOT_TOKEN is not configured",
+        )
+
+    webhook_url = f"{body.base_url}/webhooks/telegram"
+    payload: dict[str, str] = {"url": webhook_url}
+    if settings.telegram_webhook_secret:
+        payload["secret_token"] = settings.telegram_webhook_secret
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"https://api.telegram.org/bot{settings.telegram_bot_token}/setWebhook",
+                json=payload,
+                timeout=10.0,
+            )
+            data = resp.json()
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Telegram API unreachable: {exc}",
+        ) from exc
+
+    return SetupWebhookResponse(
+        ok=data.get("ok", False),
+        description=data.get("description"),
+    )
 
 
 # ─── helpers ─────────────────────────────────────────────────────────────────
