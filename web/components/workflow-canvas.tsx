@@ -214,14 +214,16 @@ export function WorkflowCanvas({
   }, [activeAgentId, setNodes]);
 
   // Notify parent after drag completes (not on every intermediate drag event).
+  // Uses the `nodes` state (all canvas nodes) rather than the callback's third parameter,
+  // which in React Flow v12 contains only the dragged node(s), not the full list.
   // Strip synthesized fields (agent_name, isActive) so they aren't persisted to the DB.
   const handleNodeDragStop = useCallback(
-    (_: React.MouseEvent, _node: Node, allNodes: Node[]) => {
+    (_: React.MouseEvent, _node: Node) => {
       if (onGraphChange && graph) {
         const doc = graph as unknown as GraphDocument;
         onGraphChange({
           ...doc,
-          nodes: allNodes.map((n) => {
+          nodes: nodes.map((n) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { agent_name, isActive, ...originalData } = (n.data ?? {}) as Record<string, unknown>;
             return {
@@ -234,7 +236,7 @@ export function WorkflowCanvas({
         });
       }
     },
-    [onGraphChange, graph],
+    [onGraphChange, graph, nodes],
   );
 
   if (!graph || nodes.length === 0) {
