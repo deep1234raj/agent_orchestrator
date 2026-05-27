@@ -1,0 +1,60 @@
+# --- Version Control ---
+.git
+.gitignore
+.gitattributes
+
+# --- Local Secrets and Environments ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+secrets.txt
+
+# --- Large Dependencies (Let the Dockerfile install these) ---
+node_modules/
+jspm_packages/
+web_modules/
+.npm/
+vendor/
+venv/
+.venv/
+env/
+packages/
+*.gem
+
+# --- Local Build Artifacts and Cache ---
+dist/
+build/
+.next/
+out/
+.nuxt/
+target/
+.cache/
+.pytest_cache/
+.eslintcache
+.turbo/
+
+# --- IDE and Editor Garbage ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# --- Testing and Coverage Reports ---
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+htmlcov/
+
+# --- Documentation ---
+README.md
+CHANGELOG.md
+docs/
