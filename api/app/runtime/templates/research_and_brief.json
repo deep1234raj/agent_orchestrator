@@ -61,7 +61,9 @@
       {"id": "e1", "source": "start",    "target": "research"},
       {"id": "e2", "source": "research", "target": "write"},
       {"id": "e3", "source": "write",    "target": "critique"},
-      {"id": "e4", "source": "critique", "target": "decide"}
+      {"id": "e4", "source": "critique", "target": "decide"},
+      {"id": "e5", "source": "decide",   "target": "end",   "label": "approved"},
+      {"id": "e6", "source": "decide",   "target": "write", "label": "revise"}
     ]
   }
 }

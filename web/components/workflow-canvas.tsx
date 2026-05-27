@@ -142,14 +142,42 @@ export function WorkflowCanvas({
   );
 
   const buildEdges = useCallback(
-    (doc: GraphDocument): Edge[] =>
-      (doc.edges ?? []).map((e) => ({
+    (doc: GraphDocument): Edge[] => {
+      const explicit: Edge[] = (doc.edges ?? []).map((e) => ({
         id: e.id,
         source: e.source,
         target: e.target,
+        label: (e.label as string | undefined) ?? undefined,
         style: { stroke: 'rgb(var(--border))', strokeWidth: 1.5 },
         animated: false,
-      })),
+      }));
+
+      // Derive edges from condition nodes' on_true / on_false when not already stored.
+      // Older seeded workflows may predate these being added to the template's edge list.
+      const existingPairs = new Set(explicit.map((e) => `${e.source}→${e.target}`));
+      const derived: Edge[] = [];
+      for (const node of doc.nodes ?? []) {
+        if (node.type !== 'condition') continue;
+        const data = node.data ?? {};
+        const branches: [string, string, string][] = [
+          ['on_true', 'yes', data.on_true as string],
+          ['on_false', 'no', data.on_false as string],
+        ];
+        for (const [key, label, target] of branches) {
+          if (!target || existingPairs.has(`${node.id}→${target}`)) continue;
+          derived.push({
+            id: `derived-${node.id}-${key}`,
+            source: node.id,
+            target,
+            label,
+            style: { stroke: 'rgb(var(--border))', strokeWidth: 1.5, strokeDasharray: '5 4' },
+            animated: false,
+          });
+        }
+      }
+
+      return [...explicit, ...derived];
+    },
     [],
   );
 
