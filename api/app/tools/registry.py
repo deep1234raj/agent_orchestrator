@@ -120,4 +120,10 @@ def import_all_tools() -> None:
     Called once at app startup. Add a line here for every new tool module
     you create — relying on globbing is too magical for this codebase.
     """
-    from app.tools import calculator, get_time, http_get, web_search  # noqa: F401
+    from app.tools import (  # noqa: F401
+        calculator,
+        get_time,
+        http_get,
+        send_message,
+        web_search,
+    )

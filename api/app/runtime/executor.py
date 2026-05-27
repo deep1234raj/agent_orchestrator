@@ -31,6 +31,7 @@ from app.runtime.compiler import CompileError, compile_workflow
 from app.runtime.events import EventEmitter
 from app.runtime.nodes.terminal import derive_output
 from app.runtime.state import RunState
+from app.tools.send_message import set_run_input_context
 
 log = structlog.get_logger(__name__)
 
@@ -66,6 +67,10 @@ async def _execute(run_id: uuid.UUID, emitter: EventEmitter) -> None:
     async with session_scope() as s:
         run = await _load_run(s, run_id)
         workflow = await _load_workflow(s, run.workflow_id)
+
+    # Make run input available to tools (notably send_message) without
+    # polluting the tool signature. Cleared at the end via the finally.
+    set_run_input_context(run.input)
 
     await emitter.status(RunStatus.RUNNING)
 

@@ -58,10 +58,24 @@ Once up:
 
 **Telegram setup** (one-time):
 
-1. Talk to [@BotFather](https://t.me/BotFather), create a bot, copy the token into `.env`.
-2. Start an [ngrok](https://ngrok.com/) tunnel: `ngrok http 8000`.
-3. Set the webhook: `curl -F "url=https://<ngrok>.ngrok-free.app/webhooks/telegram" https://api.telegram.org/bot<TOKEN>/setWebhook`.
-4. Message your bot. The platform routes the message into the workflow you've designated as the Telegram entry point.
+1. Talk to [@BotFather](https://t.me/BotFather), create a bot, copy the token into `.env` as `TELEGRAM_BOT_TOKEN`.
+2. Choose any random string for `TELEGRAM_WEBHOOK_SECRET` and put it in `.env`.
+3. Start an [ngrok](https://ngrok.com/) tunnel: `ngrok http 8000`.
+4. Register the webhook with Telegram:
+   ```bash
+   curl -F "url=https://<your-ngrok>.ngrok-free.app/webhooks/telegram" \
+        -F "secret_token=<your-secret>" \
+        https://api.telegram.org/bot<TOKEN>/setWebhook
+   ```
+5. In the web UI, bind the bot to a workflow via **Channels** → **New** (use external_id `*` to accept any chat, or a specific chat_id).
+6. Message your bot. The seeded "Research & Brief" workflow runs end-to-end and the Critic agent delivers the final brief back to Telegram.
+
+**Pre-built workflows** (seeded automatically on first boot, idempotent):
+
+- **Research & Brief** — Researcher → Writer → Critic with a feedback loop. Triggered from Telegram. The canonical demo flow.
+- **Daily Standup Summarizer** — single agent on a cron schedule. Demonstrates scheduling.
+
+Both are editable in the UI; seeding never overwrites changes you make.
 
 ---
 

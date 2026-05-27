@@ -1,0 +1,67 @@
+{
+  "name": "Research & Brief",
+  "description": "Research a topic, draft a brief, critique it, and either approve or loop back for revision. The canonical multi-agent demo workflow — designed to be triggered from Telegram.",
+  "agents": [
+    {
+      "name": "Researcher",
+      "role": "research",
+      "system_prompt": "You are a Researcher. Given a topic from the user, use the web_search tool to gather 3 to 5 relevant, recent sources. For each source, capture the title, URL, and a one-sentence summary of the key claim. Then write a short 'Findings' section (no more than 150 words) synthesizing what you learned. Be concise and factual. Do not editorialize. If a 'Critic notes' section appears in the conversation, address every point it raises with new searches as needed.",
+      "tools": ["web_search"],
+      "model": "claude-sonnet-4-5",
+      "temperature": 0.3,
+      "max_tokens": 1500,
+      "memory_mode": "windowed",
+      "memory_window": 8,
+      "guardrails": {"max_iterations": 8, "max_cost_usd": 1.0}
+    },
+    {
+      "name": "Writer",
+      "role": "writer",
+      "system_prompt": "You are a Writer. Take the Researcher's findings and produce a polished one-page brief (under 400 words) with this structure:\n\n1. **Summary** — two sentences capturing the essence.\n2. **Key Points** — 3 to 5 bullets, each one sentence.\n3. **Sources** — list each URL the Researcher cited, one per line.\n\nWrite for an intelligent non-specialist. Plain prose, no jargon. If a 'Critic notes' section appears, revise the brief to address every issue raised.",
+      "tools": [],
+      "model": "claude-sonnet-4-5",
+      "temperature": 0.5,
+      "max_tokens": 1500,
+      "memory_mode": "windowed",
+      "memory_window": 8,
+      "guardrails": {"max_iterations": 8, "max_cost_usd": 1.0}
+    },
+    {
+      "name": "Critic",
+      "role": "critic",
+      "system_prompt": "You are a Critic. Read the Writer's brief carefully. If it is clear, accurate to the Researcher's findings, well-structured, and free of unsupported claims, reply with EXACTLY this single word and nothing else:\n\napproved\n\nOtherwise, reply with a 'Critic notes' section listing 2 to 4 specific, actionable issues for the Writer to address — and do not use the word 'approved' anywhere. Do not write a revised version yourself.\n\nFinally, once you have decided the brief is approved, also use the send_message tool to deliver the final brief verbatim to the user.",
+      "tools": ["send_message"],
+      "model": "claude-sonnet-4-5",
+      "temperature": 0.2,
+      "max_tokens": 800,
+      "memory_mode": "windowed",
+      "memory_window": 8,
+      "guardrails": {"max_iterations": 8, "max_cost_usd": 1.0}
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {"id": "start",    "type": "start",    "position": {"x":  50, "y": 200}},
+      {"id": "research", "type": "agent",    "data": {"agent": "Researcher"},
+       "position": {"x": 220, "y": 200}},
+      {"id": "write",    "type": "agent",    "data": {"agent": "Writer"},
+       "position": {"x": 440, "y": 200}},
+      {"id": "critique", "type": "agent",    "data": {"agent": "Critic"},
+       "position": {"x": 660, "y": 200}},
+      {"id": "decide",   "type": "condition",
+       "data": {
+         "expr": "last_message contains \"approved\"",
+         "on_true":  "end",
+         "on_false": "write"
+       },
+       "position": {"x": 880, "y": 200}},
+      {"id": "end",      "type": "end",      "position": {"x": 1100, "y": 200}}
+    ],
+    "edges": [
+      {"id": "e1", "source": "start",    "target": "research"},
+      {"id": "e2", "source": "research", "target": "write"},
+      {"id": "e3", "source": "write",    "target": "critique"},
+      {"id": "e4", "source": "critique", "target": "decide"}
+    ]
+  }
+}

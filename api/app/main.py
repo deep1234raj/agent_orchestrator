@@ -21,7 +21,9 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.channels import register_all_channels
 from app.config import settings
+from app.db.seed import seed_templates
 from app.errors import register_exception_handlers
 from app.logging_config import configure_logging
 from app.routes import agents as agents_routes
@@ -30,6 +32,7 @@ from app.routes import runs as runs_routes
 from app.routes import tools as tools_routes
 from app.routes import workflows as workflows_routes
 from app.tools.registry import import_all_tools
+from app.webhooks.telegram import router as telegram_webhook_router
 from app.worker import orphan_sweep, run_loop, scheduler_loop
 from app.ws.gateway import router as ws_router
 
@@ -45,6 +48,15 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     # Register every tool so the registry is populated by the time the
     # first request hits the routes.
     import_all_tools()
+
+    # Register every channel for which credentials are configured.
+    # Missing credentials are non-fatal — the system runs, just without
+    # the corresponding channel.
+    register_all_channels()
+
+    # Seed pre-built workflow templates (idempotent — skips anything
+    # that already exists by name).
+    await seed_templates()
 
     # Sweep up orphaned runs from any prior crash before starting fresh
     # workers — otherwise their stale RUNNING rows look real in the UI.
@@ -100,6 +112,9 @@ def create_app() -> FastAPI:
     app.include_router(runs_routes.router)
     app.include_router(tools_routes.router)
     app.include_router(channels_routes.router)
+
+    # Webhooks
+    app.include_router(telegram_webhook_router)
 
     # WebSocket
     app.include_router(ws_router)
