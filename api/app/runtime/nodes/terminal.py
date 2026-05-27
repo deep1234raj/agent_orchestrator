@@ -27,12 +27,14 @@ def derive_output(state: RunState) -> dict[str, Any]:
 
     Precedence:
       1. state.context["output"] if explicitly populated.
-      2. The last agent message's content under "reply".
+      2. The last *substantive* agent message (> 20 chars) under "reply".
+         Short messages like "approved" are coordination signals, not
+         the intended output — scan backwards past them.
       3. Empty dict.
     """
     if "output" in state.context:
         return {"output": state.context["output"]}
-    if state.messages:
-        last = state.messages[-1]
-        return {"reply": last.content, "agent": last.agent_name}
+    for msg in reversed(state.messages):
+        if msg.role == "agent" and len(msg.content.strip()) > 20:
+            return {"reply": msg.content, "agent": msg.agent_name}
     return {}
