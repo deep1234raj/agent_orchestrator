@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import { api, ApiException } from '@/lib/api/client';
 
 type SetupResponse = { ok: boolean; description?: string };
 
-export function TelegramSetupDialog({ trigger }: { trigger: React.ReactNode }) {
+export function TelegramSetupDialog({ trigger }: { trigger: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [baseUrl, setBaseUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,7 +64,7 @@ export function TelegramSetupDialog({ trigger }: { trigger: React.ReactNode }) {
             {loading ? 'Registering…' : 'Register Webhook'}
           </Button>
           {status && (
-            <p className={status.ok ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+            <p className={cn('text-sm', status.ok ? 'text-green-600' : 'text-red-600')}>
               {status.message}
             </p>
           )}
