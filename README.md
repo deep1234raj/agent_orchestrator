@@ -61,7 +61,7 @@ Once up:
 1. Talk to [@BotFather](https://t.me/BotFather), create a bot, copy the token into `.env` as `TELEGRAM_BOT_TOKEN`.
 2. Choose any random string for `TELEGRAM_WEBHOOK_SECRET` and put it in `.env`.
 3. Start an [ngrok](https://ngrok.com/) tunnel: `ngrok http 8000`.
-4. Register the webhook with Telegram:
+4. Register the webhook with Telegram — **either** use the in-UI helper (Dashboard → **Setup Telegram**, enter your ngrok URL) **or** run the curl command manually:
    ```bash
    curl -F "url=https://<your-ngrok>.ngrok-free.app/webhooks/telegram" \
         -F "secret_token=<your-secret>" \
@@ -173,9 +173,10 @@ aaop/
 ├── web/                            # Next.js 16 + TypeScript + Tailwind
 │   ├── app/
 │   │   ├── layout.tsx              # Fonts, providers, sidebar shell
-│   │   ├── page.tsx                # Home (quick links)
+│   │   ├── page.tsx                # Dashboard (live runs, stats, quick actions)
 │   │   ├── error.tsx, not-found.tsx
-│   │   └── agents/                 # Agents CRUD (list + edit)
+│   │   ├── agents/                 # Agents CRUD (list + edit)
+│   │   └── channels/               # Channels CRUD (list + create + edit + delete)
 │   ├── components/
 │   │   ├── ui/                     # Hand-styled primitives (Button, Dialog, …)
 │   │   ├── sidebar.tsx, page-header.tsx, empty-state.tsx
@@ -211,21 +212,21 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 - REST API: agents, workflows, runs, tools, channels (full CRUD where applicable)
 - WebSocket gateway at `/ws/runs/{id}`
 - Telegram webhook with secret verification, channel binding, conversation preamble across runs
+- `POST /webhooks/telegram/setup` — one-click webhook registration from the UI
 - 5 working tools: web_search (Tavily), http_get, calculator, get_time, send_message
 - 2 seed templates (Research & Brief, Daily Standup Summarizer) — idempotent
 - Web: foundation (Tailwind, fonts, providers, layout, sidebar, error/404)
 - Web: Agents page (list, create, edit, delete) with form + tool multi-select
-- Web: Workflow builder — React Flow canvas with drag-to-reposition, Save Layout, Trigger Run dialog, recent-runs table
+- Web: Workflow builder — React Flow canvas with drag-to-reposition, Save Layout, Trigger Run dialog, recent-runs table; condition edges color-coded (green = true, red = false)
 - Web: Runs view — list page (status, duration, cost, tokens) + live monitoring dashboard (WebSocket event feed, active-node highlight in React Flow, cost/token counter)
+- Web: Channels page — list, create, edit (toggle enabled), delete with confirmation
+- Web: Dashboard — live active-runs section (5s polling), system health counts, all-time stats (total runs, cost, success rate), quick-action buttons including Setup Telegram dialog
 - Docker Compose with health checks; one-command boot
 **Stubbed (interface in place, body deferred)**
 - OpenAI LLM provider — `get_provider("openai")` raises clearly; Anthropic works
 - Slack / WhatsApp channels — registered in the enum, not implemented
 **Not built yet (planned next)**
-- Web: Channels page
-- Web: Dashboard with cost rollups
 - Pytest suite (smoke tests exist but aren't running in CI)
-- `setWebhook` helper endpoint for one-command Telegram setup
 ---
 
 ## Key flows

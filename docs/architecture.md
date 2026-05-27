@@ -32,7 +32,7 @@ Four layers, top to bottom: **UI → API → Orchestration → Persistence**.
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │  UI LAYER  (Next.js + React Flow + shadcn/ui)                      │
-│  Agent CRUD · Workflow builder · Run viewer · Live monitoring      │
+│  Dashboard · Agent CRUD · Workflow builder · Run viewer · Channels │
 └──────────────┬───────────────────────────────────┬─────────────────┘
                │ REST (OpenAPI-generated client)   │ WebSocket
 ┌──────────────▼───────────────────────────────────▼─────────────────┐
@@ -65,6 +65,7 @@ directory boundaries and import linting.
 - Maintain no business logic beyond form validation and presentation.
 - Every backend interaction goes through a typed client generated from
   the API's OpenAPI spec.
+- Pages: Dashboard (live runs + stats), Agents, Workflows (React Flow canvas), Runs, Channels.
 
 ### API layer
 - Translate HTTP and WebSocket traffic into orchestration calls.
@@ -101,7 +102,7 @@ api/app/
 ├── ws/
 │   └── gateway.py           subscribe per-run, broadcast events
 ├── webhooks/
-│   └── telegram.py          inbound message → run creation
+│   └── telegram.py          inbound message → run creation; POST /setup helper
 ├── channels/
 │   ├── base.py              Channel protocol
 │   └── telegram.py          send/receive impl using the Bot API
@@ -140,8 +141,9 @@ these directories; if it doesn't fit, ask before inventing a new one.
 web/
 ├── app/
 │   ├── layout.tsx               Fonts, providers (ReactQuery, Toaster), sidebar shell
-│   ├── page.tsx                 Home — quick links to all sections
+│   ├── page.tsx                 Dashboard — active runs (5s poll), health stats, quick actions
 │   ├── agents/                  Agent CRUD (list + create + edit + delete)
+│   ├── channels/                Channel bindings (list + create + edit + delete)
 │   ├── workflows/
 │   │   ├── page.tsx             Workflow list with template badges
 │   │   └── [id]/
@@ -155,14 +157,15 @@ web/
 │           ├── event-feed.tsx   Live message + tool-call stream (scrolls to bottom)
 │           └── cost-counter.tsx  Running token + USD cost display
 ├── components/
-│   ├── workflow-canvas.tsx      React Flow canvas — 4 custom node types, editable/read-only mode
+│   ├── workflow-canvas.tsx      React Flow canvas — 4 custom node types; condition edges color-coded
+│   ├── telegram-setup-dialog.tsx  Dialog to call POST /webhooks/telegram/setup
 │   ├── run-status-badge.tsx     Status → amber/green/red/grey badge
 │   ├── ui/                      shadcn/ui primitives (Button, Dialog, Tabs, Badge, …)
 │   ├── sidebar.tsx, page-header.tsx, empty-state.tsx
 │   └── query-provider.tsx, toaster.tsx
 └── lib/api/
     ├── schema.ts                Auto-generated from OpenAPI (pnpm openapi)
-    ├── resources.ts             Per-entity API functions + type aliases
+    ├── resources.ts             Per-entity API functions + type aliases (includes channelsApi)
     └── client.ts                fetch wrapper (uniform error shape, typed via generics)
 ```
 
