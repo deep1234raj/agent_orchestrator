@@ -38,6 +38,14 @@ export const agentsApi = {
     api<Agent>(`/agents/${id}`, { method: "PATCH", body }),
   remove: (id: string) => api<void>(`/agents/${id}`, { method: "DELETE" }),
   listSchedules: (id: string) => api<ScheduleRead[]>(`/agents/${id}/schedules`),
+  registerWebhook: (id: string, base_url: string, bot_token: string) =>
+    api<{ ok: boolean; description?: string }>(
+      `/agents/${id}/register-webhook`,
+      {
+        method: "POST",
+        body: { base_url, bot_token },
+      },
+    ),
 };
 
 export const workflowsApi = {

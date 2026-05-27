@@ -15,6 +15,7 @@ import { ApiException } from '@/lib/api/client';
 import { AgentForm, valuesToApiPayload } from '../agent-form';
 import type { AgentFormValues } from '../agent-schema';
 import { DeleteAgentButton } from '../delete-agent-button';
+import { RegisterWebhookButton } from '../register-webhook-button';
 
 export default function EditAgentPage({
   params,
@@ -141,6 +142,11 @@ export default function EditAgentPage({
                 workflows containing this agent will be triggered on each
                 incoming message.
               </p>
+              {agent.channel_kind === 'telegram' && (
+                <div className="pt-2">
+                  <RegisterWebhookButton agent={agent} />
+                </div>
+              )}
             </div>
           )}
 

@@ -76,3 +76,21 @@ class TelegramChannel:
         # Headers come in lowercase from Starlette.
         provided = headers.get("x-telegram-bot-api-secret-token", "")
         return provided == self._webhook_secret
+
+    async def register_webhook(self, webhook_url: str) -> dict:
+        """Call Telegram setWebhook for this bot.
+
+        Returns the raw Telegram API response dict.
+        Raises httpx.HTTPError on network failure.
+        """
+        payload: dict[str, str] = {"url": webhook_url}
+        if self._webhook_secret:
+            payload["secret_token"] = self._webhook_secret
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(
+                f"{TELEGRAM_API}/bot{self._bot_token}/setWebhook",
+                json=payload,
+            )
+            resp.raise_for_status()
+            return resp.json()

@@ -5,7 +5,6 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { TelegramSetupDialog } from '@/components/telegram-setup-dialog';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import {
   agentsApi,
@@ -162,9 +161,6 @@ export default function Home() {
           <Button asChild variant="ghost">
             <Link href="/workflows">Open Workflows</Link>
           </Button>
-          <TelegramSetupDialog
-            trigger={<Button variant="ghost">Setup Telegram</Button>}
-          />
         </div>
       </section>
     </>

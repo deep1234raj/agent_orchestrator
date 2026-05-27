@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import uuid
 
+import httpx
 import sqlalchemy as sa
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.channels.telegram import TelegramChannel
 from app.db.session import get_session
-from app.errors import Conflict, NotFound
+from app.errors import BadRequest, Conflict, NotFound
 from app.models.agent import Agent
 from app.models.channel import Channel
 from app.models.schedule import Schedule
@@ -19,6 +22,24 @@ from app.models.workflow import Workflow
 from app.schemas.agent import AgentCreate, AgentRead, AgentUpdate
 from app.schemas.channel import ChannelRead
 from app.schemas.schedule import ScheduleRead
+
+
+class RegisterWebhookRequest(BaseModel):
+    base_url: str
+    bot_token: str
+
+    @field_validator("base_url")
+    @classmethod
+    def must_be_https(cls, v: str) -> str:
+        if not v.startswith("https://"):
+            raise ValueError("base_url must start with https://")
+        return v.rstrip("/")
+
+
+class RegisterWebhookResponse(BaseModel):
+    ok: bool
+    description: str | None = None
+
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -80,6 +101,39 @@ async def delete_agent(agent_id: uuid.UUID, s: AsyncSession = Depends(get_sessio
         raise NotFound(f"Agent {agent_id} not found.")
     await s.delete(agent)
     await s.commit()
+
+
+@router.post("/{agent_id}/register-webhook", response_model=RegisterWebhookResponse)
+async def register_agent_webhook(
+    agent_id: uuid.UUID,
+    body: RegisterWebhookRequest,
+    s: AsyncSession = Depends(get_session),
+) -> RegisterWebhookResponse:
+    agent = await s.get(Agent, agent_id)
+    if agent is None:
+        raise NotFound(f"Agent {agent_id} not found.")
+    if agent.channel_kind != "telegram":
+        raise BadRequest("Only telegram channel agents support webhook registration.")
+
+    webhook_secret = (agent.channel_config or {}).get("webhook_secret")
+    channel = TelegramChannel(bot_token=body.bot_token, webhook_secret=webhook_secret)
+    webhook_url = f"{body.base_url}/webhooks/telegram/{agent_id}"
+
+    try:
+        data = await channel.register_webhook(webhook_url)
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Telegram API unreachable: {exc}",
+        ) from exc
+
+    if not data.get("ok", False):
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=data.get("description", "Telegram rejected the webhook registration"),
+        )
+
+    return RegisterWebhookResponse(ok=True, description=data.get("description"))
 
 
 @router.get("/{agent_id}/channels", response_model=list[ChannelRead])

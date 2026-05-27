@@ -18,15 +18,12 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-import httpx
 import sqlalchemy as sa
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
 from app.db.session import get_session
 from app.models.agent import Agent
 from app.models.enums import RunStatus
@@ -37,71 +34,6 @@ from app.services.conversation import build_conversation_preamble
 log = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
-
-
-# NOTE: /telegram/setup must be registered BEFORE /telegram/{agent_id} so that
-# FastAPI does not try to coerce "setup" to a UUID.
-
-
-class SetupWebhookRequest(BaseModel):
-    base_url: str
-
-    @field_validator("base_url")
-    @classmethod
-    def must_be_https(cls, v: str) -> str:
-        if not v.startswith("https://"):
-            raise ValueError("base_url must start with https://")
-        return v.rstrip("/")
-
-
-class SetupWebhookResponse(BaseModel):
-    ok: bool
-    description: str | None = None
-
-
-@router.post("/telegram/setup", response_model=SetupWebhookResponse)
-async def setup_telegram_webhook(body: SetupWebhookRequest) -> SetupWebhookResponse:
-    """Call Telegram setWebhook on behalf of the globally configured bot.
-
-    For per-agent bot setup, register the webhook manually using the
-    agent's own bot_token and the URL shown on the agent edit page.
-    """
-    if not settings.telegram_bot_token:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="TELEGRAM_BOT_TOKEN is not configured",
-        )
-
-    webhook_url = f"{body.base_url}/webhooks/telegram"
-    payload: dict[str, str] = {"url": webhook_url}
-    if settings.telegram_webhook_secret:
-        payload["secret_token"] = settings.telegram_webhook_secret
-
-    try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"https://api.telegram.org/bot{settings.telegram_bot_token}/setWebhook",
-                json=payload,
-                timeout=10.0,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Telegram API unreachable: {exc}",
-        ) from exc
-
-    if not data.get("ok", False):
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=data.get("description", "Telegram rejected the webhook registration"),
-        )
-
-    return SetupWebhookResponse(
-        ok=data.get("ok", False),
-        description=data.get("description"),
-    )
 
 
 @router.post("/telegram/{agent_id}", status_code=status.HTTP_200_OK)
