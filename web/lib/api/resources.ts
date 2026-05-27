@@ -59,3 +59,18 @@ export const runsApi = {
 export const toolsApi = {
   list: () => api<Tool[]>('/tools'),
 };
+
+export type Channel       = components['schemas']['ChannelRead'];
+export type ChannelCreate = components['schemas']['ChannelCreate'];
+export type ChannelUpdate = components['schemas']['ChannelUpdate'];
+export type ChannelKind   = components['schemas']['ChannelKind'];
+
+export const channelsApi = {
+  list: () => api<Channel[]>('/channels'),
+  create: (body: ChannelCreate) =>
+    api<Channel>('/channels', { method: 'POST', body }),
+  update: (id: string, body: ChannelUpdate) =>
+    api<Channel>(`/channels/${id}`, { method: 'PATCH', body }),
+  remove: (id: string) =>
+    api<void>(`/channels/${id}`, { method: 'DELETE' }),
+};
