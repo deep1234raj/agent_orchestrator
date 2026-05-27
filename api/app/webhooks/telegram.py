@@ -1,38 +1,37 @@
 """Telegram webhook handler.
 
-POST /webhooks/telegram receives Update objects from Telegram. We:
+POST /webhooks/telegram/{agent_id} receives Update objects from Telegram. We:
 
-  1. Verify the secret header (when configured).
+  1. Look up the channel agent and verify its webhook secret.
   2. Parse the Update for a text message.
-  3. Find the Channel row matching this kind/external_id (or the wildcard "*").
+  3. Find ALL active workflows whose graph references this agent_id.
   4. Build a conversation preamble from recent runs on this chat.
-  5. Create a PENDING run; the worker picks it up.
-  6. Return 200 to Telegram immediately. The agent will reply via
-     send_message asynchronously.
+  5. Create one PENDING run per matching workflow.
+  6. Return 200 immediately.
 
-Telegram retries on non-2xx responses, so this handler must complete
-quickly and only return errors when something is genuinely broken
-(verification failure, bad payload). When a chat has no bound workflow,
-we 200-and-ignore — silence is the right behavior for unintended bots.
+Telegram retries on non-2xx, so we return 200 even for no-match cases.
+Fan-out means one incoming message can trigger multiple independent workflows.
 """
 
 from __future__ import annotations
 
+import uuid
 from typing import Any
 
 import httpx
+import sqlalchemy as sa
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.channels.base import get_channel_or_none
 from app.config import settings
 from app.db.session import get_session
-from app.models.channel import Channel
-from app.models.enums import ChannelKind, RunStatus
+from app.models.agent import Agent
+from app.models.enums import RunStatus
 from app.models.run import Run
+from app.models.workflow import Workflow
 from app.services.conversation import build_conversation_preamble
 
 log = structlog.get_logger(__name__)
@@ -40,86 +39,8 @@ log = structlog.get_logger(__name__)
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
 
-@router.post("/telegram", status_code=status.HTTP_200_OK)
-async def telegram_webhook(
-    request: Request,
-    s: AsyncSession = Depends(get_session),
-    x_telegram_bot_api_secret_token: str | None = Header(default=None),
-) -> dict[str, str]:
-    """Receive a Telegram Update and enqueue a run."""
-    # 1. Verify origin.
-    channel = get_channel_or_none(ChannelKind.TELEGRAM)
-    if channel is None:
-        # Bot token wasn't configured — return 200 so Telegram doesn't retry
-        # forever, but log so the operator notices.
-        log.warning("telegram_webhook_unconfigured")
-        return {"status": "ignored"}
-
-    headers = {
-        "x-telegram-bot-api-secret-token": x_telegram_bot_api_secret_token or "",
-    }
-    if not channel.verify_webhook(headers):
-        log.warning("telegram_webhook_verification_failed")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="webhook verification failed"
-        )
-
-    # 2. Parse the payload.
-    update = await request.json()
-    parsed = _extract_text_message(update)
-    if parsed is None:
-        # Not a text message we care about (sticker, edit, etc.). 200-ack.
-        return {"status": "ignored"}
-
-    chat_id = str(parsed["chat_id"])
-    text = parsed["text"]
-    sender_name = parsed.get("sender_name")
-
-    # 3. Find a Channel binding. Try chat-specific first, then wildcard.
-    binding = await _find_binding(s, chat_id)
-    if binding is None:
-        log.info("telegram_webhook_no_binding", chat_id=chat_id)
-        return {"status": "no_binding"}
-
-    # 4. Build conversation preamble for cross-run memory.
-    preamble = await build_conversation_preamble(
-        session=s,
-        workflow_id=binding.workflow_id,
-        channel="telegram",
-        chat_id=chat_id,
-    )
-
-    # The runtime gives `input` to the first agent. We combine the
-    # preamble (if any) with the current message into one structured
-    # input the agent can reason over.
-    if preamble:
-        full_input = f"{preamble}\n\n---\n\nNew user message: {text}"
-    else:
-        full_input = text
-
-    # 5. Create the run. The worker dispatches asynchronously.
-    run = Run(
-        workflow_id=binding.workflow_id,
-        status=RunStatus.PENDING,
-        trigger="telegram",
-        input={
-            "input": full_input,
-            "channel": "telegram",
-            "chat_id": chat_id,
-            "sender_name": sender_name,
-            "raw_message": text,  # kept separately for debugging / audit
-        },
-    )
-    s.add(run)
-    await s.commit()
-
-    log.info(
-        "telegram_run_enqueued",
-        chat_id=chat_id,
-        workflow_id=str(binding.workflow_id),
-        run_id=str(run.id),
-    )
-    return {"status": "queued", "run_id": str(run.id)}
+# NOTE: /telegram/setup must be registered BEFORE /telegram/{agent_id} so that
+# FastAPI does not try to coerce "setup" to a UUID.
 
 
 class SetupWebhookRequest(BaseModel):
@@ -140,7 +61,11 @@ class SetupWebhookResponse(BaseModel):
 
 @router.post("/telegram/setup", response_model=SetupWebhookResponse)
 async def setup_telegram_webhook(body: SetupWebhookRequest) -> SetupWebhookResponse:
-    """Call Telegram setWebhook on behalf of the configured bot."""
+    """Call Telegram setWebhook on behalf of the globally configured bot.
+
+    For per-agent bot setup, register the webhook manually using the
+    agent's own bot_token and the URL shown on the agent edit page.
+    """
     if not settings.telegram_bot_token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -179,6 +104,87 @@ async def setup_telegram_webhook(body: SetupWebhookRequest) -> SetupWebhookRespo
     )
 
 
+@router.post("/telegram/{agent_id}", status_code=status.HTTP_200_OK)
+async def telegram_webhook_agent(
+    agent_id: uuid.UUID,
+    request: Request,
+    s: AsyncSession = Depends(get_session),
+    x_telegram_bot_api_secret_token: str | None = Header(default=None),
+) -> dict[str, Any]:
+    """Receive a Telegram Update for a specific channel-agent.
+
+    Fans out to ALL active workflows whose graph contains this agent.
+    """
+    agent = await s.get(Agent, agent_id)
+    if agent is None or agent.channel_kind != "telegram":
+        return {"status": "ignored"}
+
+    # Verify the agent's own webhook secret (if configured).
+    webhook_secret = (agent.channel_config or {}).get("webhook_secret")
+    if webhook_secret:
+        provided = x_telegram_bot_api_secret_token or ""
+        if provided != webhook_secret:
+            log.warning("telegram_webhook_verification_failed", agent_id=str(agent_id))
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="webhook verification failed",
+            )
+
+    update = await request.json()
+    parsed = _extract_text_message(update)
+    if parsed is None:
+        return {"status": "ignored"}
+
+    chat_id = str(parsed["chat_id"])
+    text = parsed["text"]
+    sender_name = parsed.get("sender_name")
+
+    # Find all active workflows whose graph references this agent.
+    wf_result = await s.execute(
+        select(Workflow).where(Workflow.graph.cast(sa.Text).contains(str(agent_id)))
+    )
+    workflows = list(wf_result.scalars())
+    if not workflows:
+        log.info("telegram_agent_no_workflows", agent_id=str(agent_id))
+        return {"status": "no_workflows"}
+
+    # Fan-out: one Run per matching workflow.
+    runs: list[Run] = []
+    for wf in workflows:
+        preamble = await build_conversation_preamble(
+            session=s,
+            workflow_id=wf.id,
+            channel="telegram",
+            chat_id=chat_id,
+        )
+        full_input = f"{preamble}\n\n---\n\nNew user message: {text}" if preamble else text
+
+        run = Run(
+            workflow_id=wf.id,
+            status=RunStatus.PENDING,
+            trigger="telegram",
+            input={
+                "input": full_input,
+                "channel": "telegram",
+                "chat_id": chat_id,
+                "sender_name": sender_name,
+                "raw_message": text,
+                "triggering_agent_id": str(agent_id),
+            },
+        )
+        s.add(run)
+        runs.append(run)
+
+    await s.commit()
+    run_ids = [str(r.id) for r in runs]
+    log.info(
+        "telegram_agent_runs_enqueued",
+        agent_id=str(agent_id),
+        run_ids=run_ids,
+    )
+    return {"status": "queued", "run_ids": run_ids}
+
+
 # ─── helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -198,26 +204,3 @@ def _extract_text_message(update: dict[str, Any]) -> dict[str, Any] | None:
         "text": msg["text"],
         "sender_name": sender.get("first_name") or sender.get("username"),
     }
-
-
-async def _find_binding(s: AsyncSession, chat_id: str) -> Channel | None:
-    """Return the Channel binding for this chat.
-
-    Lookup order:
-      1. Exact chat_id match.
-      2. Wildcard "*" — a bot bound to *any* chat.
-
-    Either way the binding must be enabled.
-    """
-    for external_id in (chat_id, "*"):
-        result = await s.execute(
-            select(Channel).where(
-                Channel.kind == ChannelKind.TELEGRAM,
-                Channel.external_id == external_id,
-                Channel.enabled.is_(True),
-            )
-        )
-        ch = result.scalar_one_or_none()
-        if ch is not None:
-            return ch
-    return None

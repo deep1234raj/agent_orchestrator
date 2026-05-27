@@ -59,17 +59,18 @@ Once up:
 
 **Telegram setup** (one-time):
 
-1. Talk to [@BotFather](https://t.me/BotFather), create a bot, copy the token into `.env` as `TELEGRAM_BOT_TOKEN`.
-2. Choose any random string for `TELEGRAM_WEBHOOK_SECRET` and put it in `.env`.
+1. Talk to [@BotFather](https://t.me/BotFather), create a bot, copy the token.
+2. In the web UI, open **Agents** → open the agent you want as the Telegram entry point (e.g., the Researcher) → expand the **Channel** section → set kind to `telegram`, paste the bot token, optionally set a webhook secret, and **Save**.
 3. Start an [ngrok](https://ngrok.com/) tunnel: `ngrok http 8000`.
-4. Register the webhook with Telegram — **either** use the in-UI helper (Dashboard → **Setup Telegram**, enter your ngrok URL) **or** run the curl command manually:
+4. Register the webhook URL with Telegram:
    ```bash
-   curl -F "url=https://<your-ngrok>.ngrok-free.app/webhooks/telegram" \
-        -F "secret_token=<your-secret>" \
+   curl -F "url=https://<your-ngrok>.ngrok-free.app/webhooks/telegram/<AGENT_ID>" \
+        -F "secret_token=<your-webhook-secret>" \
         https://api.telegram.org/bot<TOKEN>/setWebhook
    ```
-5. In the web UI, bind the bot to a workflow via **Channels** → **New** (use external_id `*` to accept any chat, or a specific chat_id).
-6. Message your bot. The seeded "Research & Brief" workflow runs end-to-end and the Critic agent delivers the final brief back to Telegram.
+   The agent's edit page shows the exact webhook URL to use — copy it from the **Webhook URL** panel.
+5. In the web UI, create a routing rule via **Channels** → **New Channel** — pick the channel agent and use external_id `*` to accept any chat (or a specific `chat_id` to restrict).
+6. Message your bot. Every active workflow that contains the channel agent fires simultaneously; the Critic delivers the final brief back to Telegram via that agent's own bot token.
 
 **Pre-built workflows** (seeded automatically on first boot, idempotent):
 
@@ -213,16 +214,22 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 - Cooperative cancellation via `POST /runs/{id}/cancel`
 - REST API: agents, workflows, runs, tools, channels (full CRUD where applicable)
 - WebSocket gateway at `/ws/runs/{id}`
-- Telegram webhook with secret verification, channel binding, conversation preamble across runs
-- `POST /webhooks/telegram/setup` — one-click webhook registration from the UI
+- Telegram webhook with per-agent bot credentials, fan-out to all containing workflows, per-agent reply delivery
+- `POST /webhooks/telegram/{agent_id}` — agent-bound webhook route
+- Agent channel credentials (`channel_kind`, `channel_config`) — one agent = one bot
+- Skills system: 5 built-in skills (`research`, `writing`, `analysis`, `math`, `translation`) + custom skill support via `api/skills/*.md`; progressive disclosure via `load_skill` tool
+- Interaction rules (3 categories): operational tool constraints, communication protocols, domain/SOP rules — all compiled into system prompt at runtime
+- `GET /agents/{id}/channels` and `GET /agents/{id}/schedules` sub-resource endpoints
+- `GET /skills` and `GET /skills/{slug}` skill registry API
 - 5 working tools: web_search (Tavily), http_get, calculator, get_time, send_message
 - 2 seed templates (Research & Brief, Daily Standup Summarizer) — idempotent
 - Web: foundation (Tailwind, fonts, providers, layout, sidebar, error/404)
-- Web: Agents page (list, create, edit, delete) with form + tool multi-select
+- Web: Agents page (list, create, edit, delete) with Channel, Skills, and Interaction Rules sections
+- Web: Agent edit page — webhook URL panel, Channel Routing Rules panel, Schedules panel
 - Web: Workflow builder — React Flow canvas with drag-to-reposition, Save Layout, Trigger Run dialog, recent-runs table; condition edges color-coded (green = true, red = false)
 - Web: Runs view — list page (status, duration, cost, tokens) + live monitoring dashboard (WebSocket event feed, active-node highlight in React Flow, cost/token counter)
-- Web: Channels page — list, create, edit (toggle enabled), delete with confirmation
-- Web: Dashboard — live active-runs section (5s polling), system health counts, all-time stats (total runs, cost, success rate), quick-action buttons including Setup Telegram dialog
+- Web: Channels page — list, create (agent-only picker), edit, delete with confirmation
+- Web: Dashboard — live active-runs section (5s polling), system health counts, all-time stats (total runs, cost, success rate), quick-action buttons
 - Docker Compose with health checks; one-command boot
   **Stubbed (interface in place, body deferred)**
 - OpenAI LLM provider — `get_provider("openai")` raises clearly; Anthropic works
@@ -245,11 +252,13 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 
 ### Telegram message → multi-agent response
 
-1. Telegram POSTs to `/webhooks/telegram`.
-2. Webhook handler looks up the workflow bound to that bot, creates a run with the message as initial input.
-3. Workflow executes (e.g., Researcher → Writer → Critic → loop or done).
-4. Final output is sent back to Telegram via the Bot API.
-5. The conversation is also visible in the UI's Runs view.
+1. Telegram POSTs to `POST /webhooks/telegram/{agent_id}`.
+2. Webhook handler verifies the agent's `webhook_secret` (if configured).
+3. Finds all active workflows whose graph contains that agent.
+4. Creates one Run per matching workflow (fan-out), each storing `triggering_agent_id`.
+5. Each workflow executes (e.g., Researcher → Writer → Critic → loop or done).
+6. Each run delivers its final reply via the triggering agent's own bot token — no shared global token.
+7. The conversation is visible in the UI's Runs view; multiple simultaneous runs appear as separate entries.
 
 ---
 
@@ -261,11 +270,61 @@ Every agent supports:
 - **Model** — provider + model id + temperature + max tokens
 - **Tools** — pick from registered tools (web search, http_get, calculator, …)
 - **Memory** — none / summary / windowed (last N turns)
-- **Schedule** — optional cron expression for triggered runs
-- **Guardrails** — max iterations per run, max cost per run, content filter on/off
-- **Channels** — which external channels (Telegram, …) this agent listens on
+- **Guardrails** — max iterations per run, max cost per run
+- **Channel** — make this agent a bot entry point (`channel_kind` + bot credentials)
+- **Skills** — select named skills the agent can load on demand
+- **Interaction Rules** — behavioural constraints compiled into the system prompt at runtime
 
 All of these are editable from the UI. None require a redeploy.
+
+---
+
+## Agent Capabilities
+
+### Channel Agents
+
+An agent can own a specific bot identity by configuring `channel_kind` (e.g., `telegram`) and credentials (`bot_token`, optional `webhook_secret`). One agent = one bot.
+
+When a Telegram message arrives at `POST /webhooks/telegram/{agent_id}`, the system:
+1. Verifies the agent exists and owns a Telegram bot.
+2. Finds **all active workflows** whose graph contains that agent as a node.
+3. Creates one `Run` per matching workflow (fan-out), storing `triggering_agent_id` in each run's input.
+4. On completion, delivers the final reply back to Telegram using **that agent's own bot credentials** (not a global token).
+
+This means a single incoming message can simultaneously trigger multiple workflows, and each delivers its own reply through the same bot.
+
+### Skills (Progressive Disclosure)
+
+Skills are modular capability packages stored as `api/skills/{slug}.md` files:
+
+```
+---
+name: Research
+slug: research
+description: Deep investigation using web search and HTTP sources.
+---
+
+When researching a topic, follow this procedure: ...
+```
+
+When an agent has skills configured:
+- The system prompt gains an `[Available Skills]` block listing slug + description.
+- A `load_skill` tool is auto-injected; the agent calls `load_skill("research")` when it needs the full procedure.
+- Full instructions are only loaded when used — keeping context lean.
+
+To add a custom skill: create `api/skills/{new_slug}.md` and restart the API. The registry auto-discovers all `.md` files in that directory.
+
+### Interaction Rules
+
+Three categories of behavioural constraints compiled into the system prompt at runtime:
+
+| Category | Fields | Enforcement |
+|---|---|---|
+| **Operational** | `allowed_tools`, `denied_tools`, `no_pii` | AgentNode filters tool list before LLM call |
+| **Protocols** | `require_human_approval`, `authorized_delegators`, `proactive_disclosure` | Injected as system-prompt instructions |
+| **Domain / SOPs** | `output_format`, `tone`, `response_language`, `forbidden_topics`, `domain_rules` | Injected as system-prompt bullet points |
+
+All three categories are configurable from the agent edit form.
 
 ---
 
@@ -277,11 +336,17 @@ All of these are editable from the UI. None require a redeploy.
 2. Register it in `api/app/tools/__init__.py`.
 3. It appears in the agent configuration dropdown automatically.
 
+### Add a custom skill
+
+1. Create `api/skills/{slug}.md` with YAML frontmatter (`name`, `slug`, `description`) and a Markdown instructions body.
+2. Restart the API. The skills registry auto-discovers all `.md` files in `api/skills/`.
+3. The skill appears in the Skills section of the agent edit form.
+
 ### Add a new messaging channel
 
 1. Implement the `Channel` protocol in `api/app/channels/` (methods: `receive`, `send`, `verify_webhook`).
-2. Add a webhook route under `api/app/webhooks/`.
-3. Add a channel option to the agent config UI.
+2. Add a webhook route under `api/app/webhooks/` following the `POST /webhooks/{kind}/{agent_id}` pattern.
+3. Add the new `ChannelKind` enum value and the channel option to the agent config UI.
 
 ### Add a new workflow template
 

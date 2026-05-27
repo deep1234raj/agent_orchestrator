@@ -17,7 +17,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
 
 if TYPE_CHECKING:
-    from app.models.channel import Channel
     from app.models.run import Run
     from app.models.schedule import Schedule
 
@@ -38,10 +37,6 @@ class Workflow(Base, UUIDPKMixin, TimestampMixin):
 
     # Relationships
     runs: Mapped[list["Run"]] = relationship(
-        back_populates="workflow",
-        cascade="all, delete-orphan",
-    )
-    channels: Mapped[list["Channel"]] = relationship(
         back_populates="workflow",
         cascade="all, delete-orphan",
     )

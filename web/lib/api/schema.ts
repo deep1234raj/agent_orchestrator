@@ -58,6 +58,40 @@ export interface paths {
     patch: operations["update_agent_agents__agent_id__patch"];
     trace?: never;
   };
+  "/agents/{agent_id}/channels": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Agent Channels */
+    get: operations["list_agent_channels_agents__agent_id__channels_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/agents/{agent_id}/schedules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Agent Schedules */
+    get: operations["list_agent_schedules_agents__agent_id__schedules_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/workflows": {
     parameters: {
       query?: never;
@@ -231,20 +265,40 @@ export interface paths {
     patch: operations["update_channel_channels__channel_id__patch"];
     trace?: never;
   };
-  "/webhooks/telegram": {
+  "/skills": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
     /**
-     * Telegram Webhook
-     * @description Receive a Telegram Update and enqueue a run.
+     * List Skills
+     * @description Return skill metadata only (no full instructions — token-efficient).
      */
-    post: operations["telegram_webhook_webhooks_telegram_post"];
+    get: operations["list_skills_skills_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/skills/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Skill
+     * @description Return full skill including instructions (progressive disclosure).
+     */
+    get: operations["get_skill_skills__slug__get"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -262,9 +316,34 @@ export interface paths {
     put?: never;
     /**
      * Setup Telegram Webhook
-     * @description Call Telegram setWebhook on behalf of the configured bot.
+     * @description Call Telegram setWebhook on behalf of the globally configured bot.
+     *
+     *     For per-agent bot setup, register the webhook manually using the
+     *     agent's own bot_token and the URL shown on the agent edit page.
      */
     post: operations["setup_telegram_webhook_webhooks_telegram_setup_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/webhooks/telegram/{agent_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Telegram Webhook Agent
+     * @description Receive a Telegram Update for a specific channel-agent.
+     *
+     *     Fans out to ALL active workflows whose graph contains this agent.
+     */
+    post: operations["telegram_webhook_agent_webhooks_telegram__agent_id__post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -316,6 +395,18 @@ export interface components {
       guardrails?: {
         [key: string]: unknown;
       };
+      /** Channel Kind */
+      channel_kind?: string | null;
+      /** Channel Config */
+      channel_config?: {
+        [key: string]: unknown;
+      };
+      /** Skills */
+      skills?: string[];
+      /** Interaction Rules */
+      interaction_rules?: {
+        [key: string]: unknown;
+      };
     };
     /** AgentRead */
     AgentRead: {
@@ -356,6 +447,18 @@ export interface components {
       memory_window: number;
       /** Guardrails */
       guardrails?: {
+        [key: string]: unknown;
+      };
+      /** Channel Kind */
+      channel_kind?: string | null;
+      /** Channel Config */
+      channel_config?: {
+        [key: string]: unknown;
+      };
+      /** Skills */
+      skills?: string[];
+      /** Interaction Rules */
+      interaction_rules?: {
         [key: string]: unknown;
       };
       /**
@@ -402,14 +505,26 @@ export interface components {
       guardrails?: {
         [key: string]: unknown;
       } | null;
+      /** Channel Kind */
+      channel_kind?: string | null;
+      /** Channel Config */
+      channel_config?: {
+        [key: string]: unknown;
+      } | null;
+      /** Skills */
+      skills?: string[] | null;
+      /** Interaction Rules */
+      interaction_rules?: {
+        [key: string]: unknown;
+      } | null;
     };
     /** ChannelCreate */
     ChannelCreate: {
       /**
-       * Workflow Id
+       * Agent Id
        * Format: uuid
        */
-      workflow_id: string;
+      agent_id: string;
       kind: components["schemas"]["ChannelKind"];
       /** External Id */
       external_id: string;
@@ -431,10 +546,10 @@ export interface components {
     /** ChannelRead */
     ChannelRead: {
       /**
-       * Workflow Id
+       * Agent Id
        * Format: uuid
        */
-      workflow_id: string;
+      agent_id: string;
       kind: components["schemas"]["ChannelKind"];
       /** External Id */
       external_id: string;
@@ -465,8 +580,8 @@ export interface components {
     };
     /** ChannelUpdate */
     ChannelUpdate: {
-      /** Workflow Id */
-      workflow_id?: string | null;
+      /** Agent Id */
+      agent_id?: string | null;
       /** Config */
       config?: {
         [key: string]: unknown;
@@ -618,6 +733,45 @@ export interface components {
      * @enum {string}
      */
     RunStatus: "pending" | "running" | "succeeded" | "failed" | "cancelled";
+    /** ScheduleRead */
+    ScheduleRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Workflow Id
+       * Format: uuid
+       */
+      workflow_id: string;
+      /** Name */
+      name: string;
+      /** Cron */
+      cron: string;
+      /** Timezone */
+      timezone: string;
+      status: components["schemas"]["ScheduleStatus"];
+      /** Next Fire At */
+      next_fire_at: string | null;
+      /** Last Fired At */
+      last_fired_at: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /**
+     * ScheduleStatus
+     * @enum {string}
+     */
+    ScheduleStatus: "active" | "paused";
     /** SetupWebhookRequest */
     SetupWebhookRequest: {
       /** Base Url */
@@ -629,6 +783,26 @@ export interface components {
       ok: boolean;
       /** Description */
       description?: string | null;
+    };
+    /** SkillDetail */
+    SkillDetail: {
+      /** Slug */
+      slug: string;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+      /** Instructions */
+      instructions: string;
+    };
+    /** SkillSummary */
+    SkillSummary: {
+      /** Slug */
+      slug: string;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
     };
     /** ToolCallRead */
     ToolCallRead: {
@@ -956,6 +1130,68 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AgentRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_agent_channels_agents__agent_id__channels_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChannelRead"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_agent_schedules_agents__agent_id__schedules_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"][];
         };
       };
       /** @description Validation Error */
@@ -1384,12 +1620,10 @@ export interface operations {
       };
     };
   };
-  telegram_webhook_webhooks_telegram_post: {
+  list_skills_skills_get: {
     parameters: {
       query?: never;
-      header?: {
-        "x-telegram-bot-api-secret-token"?: string | null;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -1401,9 +1635,29 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            [key: string]: string;
-          };
+          "application/json": components["schemas"]["SkillSummary"][];
+        };
+      };
+    };
+  };
+  get_skill_skills__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SkillDetail"];
         };
       };
       /** @description Validation Error */
@@ -1437,6 +1691,41 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SetupWebhookResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  telegram_webhook_agent_webhooks_telegram__agent_id__post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-telegram-bot-api-secret-token"?: string | null;
+      };
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
         };
       };
       /** @description Validation Error */

@@ -125,6 +125,7 @@ def import_all_tools() -> None:
         calculator,
         get_time,
         http_get,
+        load_skill,
         send_message,
         web_search,
     )

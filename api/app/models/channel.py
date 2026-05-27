@@ -1,11 +1,7 @@
-"""Channel — binding between an external messaging channel and a workflow.
+"""Channel — routing rule from an external messaging channel to a channel agent.
 
-When a Telegram message arrives, the webhook handler looks up the Channel
-row by `external_id` (the bot's chat or bot identifier), finds the bound
-workflow, and creates a run with the message as input.
-
-One Channel row per (kind, external_id). A workflow can have many channels
-(e.g. Telegram + Slack), but the v1 implementation only fulfills Telegram.
+Every channel row binds a (kind, external_id) tuple to an Agent that owns the
+bot credentials. Incoming messages route to ALL workflows containing that agent.
 """
 
 from __future__ import annotations
@@ -21,20 +17,19 @@ from app.db.base import Base, TimestampMixin, UUIDPKMixin
 from app.models.enums import ChannelKind
 
 if TYPE_CHECKING:
-    from app.models.workflow import Workflow
+    from app.models.agent import Agent
 
 
 class Channel(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "channels"
     __table_args__ = (UniqueConstraint("kind", "external_id", name="uq_channel_kind_external_id"),)
 
-    workflow_id: Mapped[uuid.UUID] = mapped_column(
+    agent_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
-        ForeignKey("workflows.id", ondelete="CASCADE"),
+        ForeignKey("agents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-
     kind: Mapped[ChannelKind] = mapped_column(
         SAEnum(
             ChannelKind,
@@ -44,16 +39,8 @@ class Channel(Base, UUIDPKMixin, TimestampMixin):
         ),
         nullable=False,
     )
-
-    # The channel-side identifier we route on.
-    # Telegram: chat_id (or "*" to bind a bot to all chats).
     external_id: Mapped[str] = mapped_column(String(120), nullable=False)
-
-    # Channel-specific config: bot tokens are in env, but per-channel knobs
-    # (e.g. allowed user list, default language) live here.
     config: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
-
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-    # Relationships
-    workflow: Mapped["Workflow"] = relationship(back_populates="channels")
+    agent: Mapped["Agent"] = relationship(back_populates="channels")

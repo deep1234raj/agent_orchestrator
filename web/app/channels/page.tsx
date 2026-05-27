@@ -6,7 +6,7 @@ import { Cable, Loader2, AlertTriangle } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
-import { channelsApi, workflowsApi } from '@/lib/api/resources';
+import { agentsApi, channelsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
 
 import { CreateChannelDialog } from './create-channel-dialog';
@@ -22,20 +22,20 @@ export default function ChannelsPage() {
     queryKey: ['channels'],
     queryFn: channelsApi.list,
   });
-  const { data: workflows } = useQuery({
-    queryKey: ['workflows'],
-    queryFn: workflowsApi.list,
+  const { data: agents = [] } = useQuery({
+    queryKey: ['agents'],
+    queryFn: agentsApi.list,
     staleTime: 30_000,
   });
 
-  const workflowsById = new Map(workflows?.map((w) => [w.id, w]) ?? []);
+  const agentsById = new Map(agents.map((a) => [a.id, a]));
 
   return (
     <>
       <PageHeader
         title="Channels"
-        subtitle="Bind messaging services to workflows. Telegram messages trigger the linked workflow automatically."
-        actions={<CreateChannelDialog workflows={workflows ?? []} />}
+        subtitle="Routing rules that map external chat IDs to channel agents. Each agent owns its own bot credentials."
+        actions={<CreateChannelDialog />}
       />
 
       {isLoading && (
@@ -49,7 +49,7 @@ export default function ChannelsPage() {
         <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <h3 className="font-medium text-fg">Couldn't load channels</h3>
+            <h3 className="font-medium text-fg">Couldn&apos;t load channels</h3>
             <p className="mt-1 text-sm text-fg-muted">
               {error instanceof ApiException
                 ? error.detail
@@ -63,8 +63,8 @@ export default function ChannelsPage() {
         <EmptyState
           icon={<Cable strokeWidth={1.5} />}
           title="No channels yet"
-          description="Create a channel to connect a Telegram bot to a workflow. Use * as External ID to accept messages from any chat."
-          action={<CreateChannelDialog workflows={workflows ?? []} />}
+          description="Create a routing rule to link a chat ID to a channel agent. Use * as External ID to accept messages from any chat."
+          action={<CreateChannelDialog />}
         />
       )}
 
@@ -80,7 +80,7 @@ export default function ChannelsPage() {
                   External ID
                 </th>
                 <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
-                  Workflow
+                  Agent
                 </th>
                 <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Status
@@ -106,8 +106,11 @@ export default function ChannelsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-fg-muted">
-                    {workflowsById.get(channel.workflow_id)?.name ??
-                      channel.workflow_id}
+                    {agentsById.get(channel.agent_id)?.name ?? (
+                      <span className="font-mono text-xs">
+                        {channel.agent_id}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     {channel.enabled ? (

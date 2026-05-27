@@ -16,14 +16,6 @@ import { AgentForm, valuesToApiPayload } from '../agent-form';
 import type { AgentFormValues } from '../agent-schema';
 import { DeleteAgentButton } from '../delete-agent-button';
 
-/*
- * Edit an existing agent.
- *
- * In Next 15, page params come as a Promise — we unwrap with React.use().
- * The same AgentForm component handles both create and edit; we pass
- * defaultValues from the fetched agent and an onSubmit that PATCHes.
- */
-
 export default function EditAgentPage({
   params,
 }: {
@@ -39,6 +31,18 @@ export default function EditAgentPage({
   } = useQuery({
     queryKey: ['agents', id],
     queryFn: () => agentsApi.get(id),
+  });
+
+  const { data: agentChannels } = useQuery({
+    queryKey: ['agents', id, 'channels'],
+    queryFn: () => agentsApi.listChannels(id),
+    enabled: !!agent,
+  });
+
+  const { data: agentSchedules } = useQuery({
+    queryKey: ['agents', id, 'schedules'],
+    queryFn: () => agentsApi.listSchedules(id),
+    enabled: !!agent,
   });
 
   const update = useMutation({
@@ -77,7 +81,9 @@ export default function EditAgentPage({
         <div className="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger/5 p-5">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <h3 className="font-medium text-fg">Couldn't load this agent</h3>
+            <h3 className="font-medium text-fg">
+              Couldn&apos;t load this agent
+            </h3>
             <p className="mt-1 text-sm text-fg-muted">
               {error instanceof ApiException
                 ? error.detail
@@ -127,6 +133,92 @@ export default function EditAgentPage({
                 </span>
               </span>
             </div>
+          </div>
+
+          {/* WEBHOOK URL */}
+          {agent.channel_kind && (
+            <div className="mt-8 space-y-1 rounded-md border border-accent/30 bg-accent/5 p-4">
+              <p className="text-xs font-medium text-fg">Webhook URL</p>
+              <p className="break-all font-mono text-xs text-fg-muted">
+                {'<YOUR_BASE_URL>'}/webhooks/{agent.channel_kind}/{agent.id}
+              </p>
+              <p className="text-xs text-fg-subtle">
+                Register this URL with your {agent.channel_kind} bot. All
+                workflows containing this agent will be triggered on each
+                incoming message.
+              </p>
+            </div>
+          )}
+
+          {/* CHANNEL ROUTING RULES */}
+          <div className="mt-8 space-y-3">
+            <h3 className="font-display text-base text-fg">
+              Channel Routing Rules
+            </h3>
+            {(!agentChannels || agentChannels.length === 0) && (
+              <p className="text-xs text-fg-subtle">
+                No routing rules. Create one from the Channels page to filter by
+                external_id.
+              </p>
+            )}
+            {agentChannels && agentChannels.length > 0 && (
+              <ul className="space-y-2">
+                {agentChannels.map((ch) => (
+                  <li
+                    key={ch.id}
+                    className="flex items-center gap-3 rounded-md border border-border p-3"
+                  >
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {ch.kind}
+                    </Badge>
+                    <span className="font-mono text-xs text-fg-muted">
+                      {ch.external_id}
+                    </span>
+                    <Badge
+                      variant={ch.enabled ? 'default' : 'secondary'}
+                      className="ml-auto text-xs"
+                    >
+                      {ch.enabled ? 'enabled' : 'disabled'}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* SCHEDULES */}
+          <div className="mt-6 space-y-3">
+            <h3 className="font-display text-base text-fg">Schedules</h3>
+            {(!agentSchedules || agentSchedules.length === 0) && (
+              <p className="text-xs text-fg-subtle">
+                No scheduled workflows contain this agent.
+              </p>
+            )}
+            {agentSchedules && agentSchedules.length > 0 && (
+              <ul className="space-y-2">
+                {agentSchedules.map((sched) => (
+                  <li
+                    key={sched.id}
+                    className="flex items-center gap-3 rounded-md border border-border p-3"
+                  >
+                    <span className="font-mono text-xs text-fg">
+                      {sched.name}
+                    </span>
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {sched.cron}
+                    </Badge>
+                    <Badge
+                      variant={
+                        sched.status === 'active' ? 'default' : 'secondary'
+                      }
+                      className="ml-auto text-xs"
+                    >
+                      {sched.status}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="mt-6 flex justify-start">

@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
 from app.errors import Conflict, NotFound
+from app.models.agent import Agent
 from app.models.channel import Channel
-from app.models.workflow import Workflow
 from app.schemas.channel import ChannelCreate, ChannelRead, ChannelUpdate
 
 router = APIRouter(prefix="/channels", tags=["channels"])
@@ -26,9 +26,8 @@ async def list_channels(s: AsyncSession = Depends(get_session)) -> list[Channel]
 
 @router.post("", response_model=ChannelRead, status_code=status.HTTP_201_CREATED)
 async def create_channel(body: ChannelCreate, s: AsyncSession = Depends(get_session)) -> Channel:
-    # Validate that the workflow exists before creating the binding.
-    if await s.get(Workflow, body.workflow_id) is None:
-        raise NotFound(f"Workflow {body.workflow_id} not found.")
+    if await s.get(Agent, body.agent_id) is None:
+        raise NotFound(f"Agent {body.agent_id} not found.")
 
     channel = Channel(**body.model_dump())
     s.add(channel)

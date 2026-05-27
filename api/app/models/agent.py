@@ -17,6 +17,7 @@ from app.db.base import Base, TimestampMixin, UUIDPKMixin
 from app.models.enums import MemoryMode
 
 if TYPE_CHECKING:
+    from app.models.channel import Channel
     from app.models.message import Message
     from app.models.tool_call import ToolCall
     from app.models.usage_event import UsageEvent
@@ -54,6 +55,18 @@ class Agent(Base, UUIDPKMixin, TimestampMixin):
     #                  "content_filter": bool}
     guardrails: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
+    # Channel-agent credentials. Set when this agent owns a specific bot.
+    # channel_kind: "telegram" | "slack" | "whatsapp" | None
+    # channel_config: {"bot_token": str, "webhook_secret": str | None}
+    channel_kind: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    channel_config: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
+    # Skills — slugs referencing files in api/skills/*.md
+    skills: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+
+    # Interaction rules applied to system prompt at runtime.
+    interaction_rules: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
     # Relationships
     messages: Mapped[list["Message"]] = relationship(
         back_populates="agent",
@@ -65,6 +78,10 @@ class Agent(Base, UUIDPKMixin, TimestampMixin):
         cascade="all, delete-orphan",
     )
     usage_events: Mapped[list["UsageEvent"]] = relationship(
+        back_populates="agent",
+        cascade="all, delete-orphan",
+    )
+    channels: Mapped[list["Channel"]] = relationship(
         back_populates="agent",
         cascade="all, delete-orphan",
     )

@@ -32,6 +32,7 @@ from app.routes import channels as channels_routes
 from app.routes import runs as runs_routes
 from app.routes import tools as tools_routes
 from app.routes import workflows as workflows_routes
+from app.skills import router as skills_router
 from app.tools.registry import import_all_tools
 from app.webhooks.telegram import router as telegram_webhook_router
 from app.worker import orphan_sweep, run_loop, scheduler_loop
@@ -113,6 +114,7 @@ def create_app() -> FastAPI:
     app.include_router(runs_routes.router)
     app.include_router(tools_routes.router)
     app.include_router(channels_routes.router)
+    app.include_router(skills_router)
 
     # Webhooks
     app.include_router(telegram_webhook_router)

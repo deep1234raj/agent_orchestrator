@@ -37,6 +37,8 @@ export const agentsApi = {
   update: (id: string, body: AgentUpdate) =>
     api<Agent>(`/agents/${id}`, { method: "PATCH", body }),
   remove: (id: string) => api<void>(`/agents/${id}`, { method: "DELETE" }),
+  listChannels: (id: string) => api<Channel[]>(`/agents/${id}/channels`),
+  listSchedules: (id: string) => api<ScheduleRead[]>(`/agents/${id}/schedules`),
 };
 
 export const workflowsApi = {
@@ -63,9 +65,18 @@ export const toolsApi = {
 };
 
 export type Channel = components["schemas"]["ChannelRead"];
+export type ScheduleRead = components["schemas"]["ScheduleRead"];
 export type ChannelCreate = components["schemas"]["ChannelCreate"];
 export type ChannelUpdate = components["schemas"]["ChannelUpdate"];
 export type ChannelKind = components["schemas"]["ChannelKind"];
+
+export type SkillSummary = components["schemas"]["SkillSummary"];
+export type SkillDetail = components["schemas"]["SkillDetail"];
+
+export const skillsApi = {
+  list: () => api<SkillSummary[]>("/skills"),
+  get: (slug: string) => api<SkillDetail>(`/skills/${slug}`),
+};
 
 export const channelsApi = {
   list: () => api<Channel[]>("/channels"),

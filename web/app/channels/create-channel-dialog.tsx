@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,25 +23,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { channelsApi } from '@/lib/api/resources';
+import { agentsApi, channelsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
-import type { Workflow } from '@/lib/api/resources';
 
-interface CreateChannelDialogProps {
-  workflows: Workflow[];
-}
-
-export function CreateChannelDialog({ workflows }: CreateChannelDialogProps) {
+export function CreateChannelDialog() {
   const [open, setOpen] = useState(false);
-  const [workflowId, setWorkflowId] = useState('');
+  const [agentId, setAgentId] = useState('');
   const [externalId, setExternalId] = useState('*');
   const qc = useQueryClient();
+
+  const { data: agents = [] } = useQuery({
+    queryKey: ['agents'],
+    queryFn: agentsApi.list,
+    staleTime: 30_000,
+  });
+
+  // Only channel agents (those with channel_kind set) are valid selections.
+  const channelAgents = agents.filter((a) => !!a.channel_kind);
+
+  const selectedAgent = channelAgents.find((a) => a.id === agentId);
 
   const create = useMutation({
     mutationFn: () =>
       channelsApi.create({
-        workflow_id: workflowId,
-        kind: 'telegram',
+        agent_id: agentId,
+        kind:
+          (selectedAgent?.channel_kind as 'telegram' | 'slack' | 'whatsapp') ??
+          'telegram',
         external_id: externalId,
         enabled: true,
         config: {},
@@ -50,7 +58,7 @@ export function CreateChannelDialog({ workflows }: CreateChannelDialogProps) {
       qc.invalidateQueries({ queryKey: ['channels'] });
       toast.success('Channel created');
       setOpen(false);
-      setWorkflowId('');
+      setAgentId('');
       setExternalId('*');
     },
     onError: (err) => {
@@ -71,39 +79,34 @@ export function CreateChannelDialog({ workflows }: CreateChannelDialogProps) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Channel</DialogTitle>
+          <DialogTitle>New Channel Routing Rule</DialogTitle>
           <DialogDescription>
-            Bind a Telegram bot to a workflow. Use{' '}
+            Route incoming messages from a specific chat to a channel agent. Use{' '}
             <span className="font-mono">*</span> as External ID to accept
             messages from any chat.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
           <div className="grid gap-1.5">
-            <Label htmlFor="ch-workflow">Workflow</Label>
-            <Select value={workflowId} onValueChange={setWorkflowId}>
-              <SelectTrigger id="ch-workflow">
-                <SelectValue placeholder="Select a workflow" />
+            <Label htmlFor="ch-agent">Channel Agent</Label>
+            <Select value={agentId} onValueChange={setAgentId}>
+              <SelectTrigger id="ch-agent">
+                <SelectValue placeholder="Select channel agent…" />
               </SelectTrigger>
               <SelectContent>
-                {workflows.map((w) => (
-                  <SelectItem key={w.id} value={w.id}>
-                    {w.name}
+                {channelAgents.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.name} · {a.channel_kind}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="ch-kind">Kind</Label>
-            <Select defaultValue="telegram" disabled>
-              <SelectTrigger id="ch-kind">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="telegram">Telegram</SelectItem>
-              </SelectContent>
-            </Select>
+            {channelAgents.length === 0 && (
+              <p className="text-xs text-fg-subtle">
+                No channel agents found. Configure an agent with a channel kind
+                first.
+              </p>
+            )}
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="ch-external-id">External ID</Label>
@@ -122,7 +125,7 @@ export function CreateChannelDialog({ workflows }: CreateChannelDialogProps) {
           </Button>
           <Button
             variant="primary"
-            disabled={!workflowId || !externalId || create.isPending}
+            disabled={!agentId || !externalId || create.isPending}
             onClick={() => create.mutate()}
           >
             {create.isPending ? 'Creating…' : 'Create Channel'}

@@ -135,21 +135,30 @@ async def _execute(run_id: uuid.UUID, emitter: EventEmitter) -> None:
     await emitter.status(RunStatus.SUCCEEDED)
     log.info("run_succeeded", run_id=str(run_id))
 
-    # Auto-deliver the final reply to the triggering channel (e.g. Telegram).
-    # Agents no longer need send_message in their tool list for delivery;
-    # this fires exactly once when the run succeeds.
+    # Auto-deliver the final reply via the triggering agent's own bot credentials,
+    # with fallback to the globally registered channel.
     _channel = run.input.get("channel")
     _chat_id = run.input.get("chat_id")
     _reply = output.get("reply", "")
+    _triggering_agent_id = run.input.get("triggering_agent_id")
+
     if _channel and _chat_id and _reply:
-        from app.channels.base import ChannelMessage, dispatch_send  # local to avoid cycle
+        from app.channels.base import ChannelMessage  # local to avoid cycle
         from app.models.enums import ChannelKind
 
+        msg = ChannelMessage(chat_id=str(_chat_id), text=_reply)
         try:
-            await dispatch_send(
-                ChannelKind(_channel),
-                ChannelMessage(chat_id=str(_chat_id), text=_reply),
-            )
+            delivered = False
+            if _triggering_agent_id:
+                delivered = await _deliver_via_agent(
+                    agent_id=uuid.UUID(_triggering_agent_id),
+                    channel_kind=_channel,
+                    message=msg,
+                )
+            if not delivered:
+                from app.channels.base import dispatch_send
+
+                await dispatch_send(ChannelKind(_channel), msg)
             log.info("run_auto_delivered", run_id=str(run_id), channel=_channel)
         except Exception:
             log.exception("run_auto_deliver_failed", run_id=str(run_id), channel=_channel)
@@ -214,3 +223,36 @@ async def _is_cancelled(run_id: uuid.UUID) -> bool:
         result = await s.execute(select(Run.status).where(Run.id == run_id))
         status_val = result.scalar_one_or_none()
     return status_val == RunStatus.CANCELLED
+
+
+async def _deliver_via_agent(
+    agent_id: uuid.UUID,
+    channel_kind: str,
+    message: Any,
+) -> bool:
+    """Send a message using the triggering agent's own bot credentials.
+
+    Returns True if delivered, False if the agent or its credentials are missing
+    (caller should fall back to the globally registered channel).
+    """
+    from app.models.agent import Agent
+
+    async with session_scope() as s:
+        agent = await s.get(Agent, agent_id)
+
+    if agent is None or agent.channel_kind != channel_kind:
+        return False
+
+    bot_token = (agent.channel_config or {}).get("bot_token")
+    if not bot_token:
+        return False
+
+    if channel_kind == "telegram":
+        from app.channels.telegram import TelegramChannel
+
+        webhook_secret = (agent.channel_config or {}).get("webhook_secret")
+        ch = TelegramChannel(bot_token=bot_token, webhook_secret=webhook_secret)
+        await ch.send(message)
+        return True
+
+    return False

@@ -12,6 +12,8 @@ deliberately accepted.
 - [System overview](#system-overview)
 - [Layer responsibilities](#layer-responsibilities)
 - [Component map](#component-map)
+- [Agent data model](#agent-data-model)
+- [Skills — progressive disclosure](#skills--progressive-disclosure)
 - [The compile step: workflow JSON → LangGraph](#the-compile-step-workflow-json--langgraph)
 - [Data flow: UI-triggered run](#data-flow-ui-triggered-run)
 - [Data flow: Telegram-triggered run](#data-flow-telegram-triggered-run)
@@ -94,23 +96,24 @@ directory boundaries and import linting.
 api/app/
 ├── main.py                  FastAPI app factory, lifespan, middleware
 ├── routes/
-│   ├── agents.py            CRUD
+│   ├── agents.py            CRUD + /agents/{id}/channels + /agents/{id}/schedules
 │   ├── workflows.py         CRUD + run-trigger
 │   ├── runs.py              list, get, cancel
 │   ├── tools.py             list registered tools (UI dropdown)
-│   └── channels.py          channel bindings CRUD
+│   └── channels.py          channel bindings CRUD (agent-bound)
+├── skills.py                Skills registry (reads api/skills/*.md) + GET /skills routes
 ├── ws/
 │   └── gateway.py           subscribe per-run, broadcast events
 ├── webhooks/
-│   └── telegram.py          inbound message → run creation; POST /setup helper
+│   └── telegram.py          POST /webhooks/telegram/{agent_id} — fan-out to workflows
 ├── channels/
-│   ├── base.py              Channel protocol
+│   ├── base.py              Channel protocol + dispatch_send helper
 │   └── telegram.py          send/receive impl using the Bot API
 ├── runtime/
 │   ├── compiler.py          workflow JSON → LangGraph
-│   ├── executor.py          run lifecycle: claim, execute, finalize
+│   ├── executor.py          run lifecycle; _deliver_via_agent() for per-bot reply
 │   ├── nodes/
-│   │   ├── agent_node.py    LLM invocation with tool calling
+│   │   ├── agent_node.py    LLM invocation; _build_system_prompt(); tool restrictions
 │   │   ├── condition.py     branch evaluation
 │   │   └── terminal.py      end nodes
 │   ├── memory.py            summary/windowed memory strategies
@@ -123,7 +126,8 @@ api/app/
 │   ├── http_get.py
 │   ├── calculator.py
 │   ├── send_message.py      bridge to channels
-│   └── get_time.py
+│   ├── get_time.py
+│   └── load_skill.py        progressive disclosure — load skill instructions on demand
 ├── models/                  SQLAlchemy ORM (see README structure)
 ├── schemas/                 Pydantic request/response/internal DTOs
 ├── db/
@@ -132,6 +136,13 @@ api/app/
 │   ├── uuid7.py
 │   └── seed.py              idempotent template seeding
 └── worker.py                in-process async run-claimer + scheduler tick
+
+api/skills/                  Skill definition files (YAML frontmatter + instructions body)
+├── research.md
+├── writing.md
+├── analysis.md
+├── math.md
+└── translation.md
 ```
 
 This layout is the single source of truth. New code lands in one of
@@ -168,6 +179,96 @@ web/
     ├── resources.ts             Per-entity API functions + type aliases (includes channelsApi)
     └── client.ts                fetch wrapper (uniform error shape, typed via generics)
 ```
+
+---
+
+## Agent data model
+
+In addition to the core identity and runtime fields, every `Agent` row carries four capability columns:
+
+| Column | Type | Purpose |
+|---|---|---|
+| `channel_kind` | `str \| None` | Channel provider (`"telegram"`) or `null` for internal-only agents |
+| `channel_config` | `JSON` | Bot credentials: `{"bot_token": "...", "webhook_secret": "..."}` |
+| `skills` | `JSON list[str]` | Slugs of skill files in `api/skills/` assigned to this agent |
+| `interaction_rules` | `JSON dict` | Operational, protocol, and domain rule constraints |
+
+**`interaction_rules` shape** (all fields optional):
+
+```json
+{
+  "allowed_tools": ["web_search"],
+  "denied_tools": ["http_get"],
+  "no_pii": true,
+  "require_human_approval": false,
+  "human_approval_actions": ["send_message"],
+  "authorized_delegators": ["OrchestratorAgent"],
+  "proactive_disclosure": true,
+  "output_format": "markdown",
+  "tone": "formal",
+  "response_language": "en",
+  "forbidden_topics": ["politics"],
+  "domain_rules": ["Never book on Sundays."]
+}
+```
+
+`AgentNode._build_system_prompt(agent)` compiles these at run time into:
+
+```
+[base system prompt]
+
+[Available Skills]
+- Research (research): Deep investigation using web search and HTTP sources.
+...
+
+[Interaction Rules]
+- Output format: markdown
+- Tone: formal
+- Never book on Sundays.
+```
+
+The `allowed_tools`/`denied_tools` fields are enforced *before* the LLM call by filtering the tool schema list — the model never even sees denied tools.
+
+---
+
+## Skills — progressive disclosure
+
+Skills are named capability packages stored as Markdown files with YAML frontmatter:
+
+```
+api/skills/{slug}.md
+─────────────────────────────────────────────────────
+---
+name: Research
+slug: research
+description: Deep investigation using web search and HTTP sources.
+---
+
+When researching a topic, follow this procedure:
+1. Gather sources...
+```
+
+**Registry loading** — `app/skills.py` reads all `api/skills/*.md` files at import time into `SKILLS_REGISTRY: dict[str, SkillSpec]`.
+
+**Three-tier disclosure flow:**
+
+```
+1. AgentNode._build_system_prompt()
+      └─ get_skills_overview(agent.skills)
+           └─ Adds [Available Skills] block: slug + description only
+                (keeps system prompt small — no full instructions yet)
+
+2. Model decides it needs a skill and calls:
+      load_skill(slug="research")
+
+3. load_skill tool (auto-injected when agent.skills is non-empty)
+      └─ Returns full instructions from SKILLS_REGISTRY[slug].instructions
+           └─ Model now has the complete procedure in context
+```
+
+This pattern avoids prepopulating context with skill instructions that may never be used. A complex agent with 5 skills only pays the token cost for the skills it actually exercises.
+
+**Custom skills:** create `api/skills/{new_slug}.md` and restart the API. No code change needed.
 
 ---
 
@@ -262,43 +363,49 @@ soon as it's written.
 User messages the bot on Telegram
         │
         ▼
-Telegram POSTs to /webhooks/telegram (with secret header)
+Telegram POSTs to POST /webhooks/telegram/{agent_id}
         │
         ▼
-Webhook handler verifies secret, parses Update
+Webhook handler:
+  1. Loads agent from DB — must exist with channel_kind == "telegram"
+  2. Verifies X-Telegram-Bot-Api-Secret-Token against agent.channel_config.webhook_secret
+  3. Parses Update → extracts text, chat_id, sender_name
         │
         ▼
-ChannelRepo.find(kind=TELEGRAM, external_id=chat_id or "*")
+SELECT workflows WHERE graph::text CONTAINS agent_id
+        │ (returns all workflows that reference this agent as a node)
+        ▼
+Fan-out: for each matching workflow
+  ├─ Build conversation preamble from prior runs in this chat
+  ├─ RunRepo.create(input={
+  │     "input": preamble + text,
+  │     "channel": "telegram",
+  │     "chat_id": chat_id,
+  │     "triggering_agent_id": str(agent_id)
+  │   }, trigger="telegram")
+  └─ worker.enqueue(run_id)
+        │
+   returns 200 {"status": "queued", "run_ids": [...]} to Telegram
+        │
+        ▼  (each run executes exactly as the UI-triggered case)
         │
         ▼
-WorkflowRepo.get(channel.workflow_id)
+executor._execute() — at completion:
+  _channel = run.input["channel"]           # "telegram"
+  _triggering_agent_id = run.input[...]     # the agent_id from the webhook
+
+  _deliver_via_agent(agent_id, channel_kind="telegram", message)
+      ├─ Loads agent from DB
+      ├─ Reads agent.channel_config["bot_token"]
+      ├─ TelegramChannel(bot_token=...).send(ChannelMessage(chat_id, text=reply))
+      └─ Posts back to Telegram's Bot API using that agent's own credentials
         │
         ▼
-RunRepo.create(input={"input": message.text, "channel": "telegram",
-                       "chat_id": chat_id}, trigger="telegram")
-        │
-        ▼
-worker.enqueue(run_id)
-        │
-   returns 200 to Telegram
-        │
-        ▼  (workflow executes exactly as the UI-triggered case)
-        │
-        ▼
-Final agent node calls the `send_message` tool
-        │
-        ▼
-send_message dispatches to the Telegram channel adapter,
-which posts back to Telegram's Bot API
-        │
-        ▼
-User sees the response in Telegram.
-The whole conversation is also visible in /runs/{id} in the UI.
+User sees the reply in Telegram (one reply per workflow that completed).
+The full conversation is also visible in /runs/{id} in the UI.
 ```
 
-The same workflow can be triggered from the UI for testing, or via
-Telegram for real interaction. The only difference is the `trigger`
-field on the run and the presence of a `chat_id` in the input.
+**Key design invariant:** There is no globally shared bot token. Each channel agent owns its own `bot_token` in `channel_config`. This means different agents can operate different bots, and multiple bots can coexist in the same platform without credential conflicts.
 
 ---
 
@@ -345,28 +452,37 @@ inspector, the cost meter, the status badge.
 ## Persistence & schema relationships
 
 ```
-                  ┌────────────┐
-                  │  agents    │
-                  └─────┬──────┘
-                        │ (many runs reference many agents via messages)
-                        │
-┌────────────┐   ┌──────▼──────┐   ┌──────────────┐
+┌─────────────────────────────────────────────────────────────┐
+│  agents                                                      │
+│  id · name · role · system_prompt · model · tools · memory  │
+│  channel_kind · channel_config · skills · interaction_rules  │
+└──────┬──────────────────────────────────────────────────────┘
+       │ one-to-many                        │ one-to-many
+       ▼                                    ▼
+┌─────────────┐                    ┌──────────────────────────┐
+│  channels   │                    │  (agent referenced by    │
+│  agent_id   │                    │   workflow.graph JSON)   │
+│  kind       │                    └──────────────────────────┘
+│  external_id│
+└─────────────┘
+
+┌────────────┐   ┌─────────────┐   ┌──────────────┐
 │ workflows  │──▶│    runs     │──▶│   messages   │
 └─────┬──────┘   └──────┬──────┘   └──────────────┘
       │                 │
       │                 ├────────▶ tool_calls
       │                 └────────▶ usage_events
       │
-      ├────────▶ channels
       └────────▶ schedules
 ```
 
-- All FKs cascade on delete from `runs` downward — deleting a run
-  removes its messages, tool calls, and usage events.
-- Deleting an agent **does not** cascade-delete messages it authored;
-  `messages.agent_id` is `ON DELETE SET NULL` so history survives.
-- UUID v7 primary keys give us time-ordered IDs, which makes
-  `ORDER BY id` equivalent to `ORDER BY created_at` for fast paging.
+Key FK relationships:
+
+- `channels.agent_id` → `agents.id` CASCADE DELETE — a channel is deleted when its agent is deleted.
+- `workflows` and `agents` are decoupled at the FK level. The relationship is encoded in `workflow.graph` as JSON (agent IDs appear as node `data.agent_id`). The webhook fan-out query (`graph::text CONTAINS agent_id`) exploits this text encoding.
+- All FKs cascade on delete from `runs` downward — deleting a run removes its messages, tool calls, and usage events.
+- Deleting an agent does **not** cascade-delete messages it authored; `messages.agent_id` is `ON DELETE SET NULL` so history survives.
+- UUID v7 primary keys give time-ordered IDs: `ORDER BY id` ≡ `ORDER BY created_at` for fast paging.
 
 See `api/app/models/` for the authoritative schema.
 
