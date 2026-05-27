@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, ForeignKey, String, Text
+from sqlalchemy import JSON, Enum as SAEnum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -44,7 +44,10 @@ class Message(Base, UUIDPKMixin, TimestampMixin):
         index=True,
     )
 
-    role: Mapped[MessageRole] = mapped_column(String(20), nullable=False, index=True)
+    role: Mapped[MessageRole] = mapped_column(
+        SAEnum(MessageRole, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        nullable=False, index=True,
+    )
 
     content: Mapped[str] = mapped_column(Text, nullable=False)
 

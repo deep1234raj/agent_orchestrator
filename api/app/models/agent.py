@@ -9,7 +9,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Float, Integer, String, Text
+from sqlalchemy import JSON, Enum as SAEnum, Float, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
@@ -40,7 +40,9 @@ class Agent(Base, UUIDPKMixin, TimestampMixin):
 
     # Memory
     memory_mode: Mapped[MemoryMode] = mapped_column(
-        String(20), nullable=False, default=MemoryMode.SUMMARY
+        SAEnum(MemoryMode, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        nullable=False,
+        default=MemoryMode.SUMMARY,
     )
     memory_window: Mapped[int] = mapped_column(Integer, nullable=False, default=10)
 

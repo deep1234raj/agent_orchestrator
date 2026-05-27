@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String
+from sqlalchemy import JSON, DateTime, Enum as SAEnum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -46,7 +46,8 @@ class Schedule(Base, UUIDPKMixin, TimestampMixin):
     input: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     status: Mapped[ScheduleStatus] = mapped_column(
-        String(20), nullable=False, default=ScheduleStatus.ACTIVE, index=True
+        SAEnum(ScheduleStatus, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        nullable=False, default=ScheduleStatus.ACTIVE, index=True,
     )
 
     # Computed at creation and after every fire. The scheduler tick polls on this.

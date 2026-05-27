@@ -70,7 +70,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Construct the FastAPI app. Called by uvicorn at import time."""
     app = FastAPI(
-        title="Yuno API",
+        title="AAOP API",
         description="AI Agent Orchestration Platform.",
         version="0.1.0",
         lifespan=lifespan,

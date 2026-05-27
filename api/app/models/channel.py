@@ -12,7 +12,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Boolean, ForeignKey, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Enum as SAEnum, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -36,7 +36,10 @@ class Channel(Base, UUIDPKMixin, TimestampMixin):
         index=True,
     )
 
-    kind: Mapped[ChannelKind] = mapped_column(String(20), nullable=False)
+    kind: Mapped[ChannelKind] = mapped_column(
+        SAEnum(ChannelKind, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        nullable=False,
+    )
 
     # The channel-side identifier we route on.
     # Telegram: chat_id (or "*" to bind a bot to all chats).

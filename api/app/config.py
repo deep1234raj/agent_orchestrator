@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     # --- database -------------------------------------------------------
     database_url: str = (
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/yuno"
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/aaop"
     )
 
     # --- CORS -----------------------------------------------------------

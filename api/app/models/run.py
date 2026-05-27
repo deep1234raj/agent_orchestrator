@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, Enum as SAEnum, Float, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -38,7 +38,8 @@ class Run(Base, UUIDPKMixin, TimestampMixin):
     )
 
     status: Mapped[RunStatus] = mapped_column(
-        String(20), nullable=False, default=RunStatus.PENDING, index=True
+        SAEnum(RunStatus, native_enum=False, length=20, values_callable=lambda e: [m.value for m in e]),
+        nullable=False, default=RunStatus.PENDING, index=True,
     )
 
     # What kicked this off. Examples: "ui", "telegram", "schedule".

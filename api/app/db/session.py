@@ -33,13 +33,13 @@ DATABASE_URL = _normalize_url(
     )
 )
 
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-)
+# Pool params apply to server-based databases (Postgres). SQLite (used
+# in some unit tests) doesn't accept them.
+_engine_kwargs: dict = {"echo": False, "pool_pre_ping": True}
+if "sqlite" not in DATABASE_URL:
+    _engine_kwargs.update({"pool_size": 10, "max_overflow": 20})
+
+engine = create_async_engine(DATABASE_URL, **_engine_kwargs)
 
 SessionFactory = async_sessionmaker(
     engine,
