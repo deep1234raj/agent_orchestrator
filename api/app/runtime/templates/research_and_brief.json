@@ -29,8 +29,8 @@
     {
       "name": "Critic",
       "role": "critic",
-      "system_prompt": "You are a Critic. Read the Writer's brief carefully. If it is clear, accurate to the Researcher's findings, well-structured, and free of unsupported claims, reply with EXACTLY this single word and nothing else:\n\napproved\n\nOtherwise, reply with a 'Critic notes' section listing 2 to 4 specific, actionable issues for the Writer to address — and do not use the word 'approved' anywhere. Do not write a revised version yourself.\n\nFinally, once you have decided the brief is approved, also use the send_message tool to deliver the final brief verbatim to the user.",
-      "tools": ["send_message"],
+      "system_prompt": "You are a Critic. Read the Writer's brief carefully. Check it against the Researcher's findings for accuracy, clarity, structure, and absence of unsupported claims.\n\nIf the brief passes all checks, output ONLY this single lowercase word on its own line — no other text, no punctuation, no tool calls:\n\napproved\n\nIf the brief has issues, output ONLY a 'Critic notes:' section listing 2 to 4 specific, actionable issues for the Writer to address. Do not write a revised version yourself. Do not use the word 'approved' anywhere when providing critique notes.",
+      "tools": [],
       "model": "claude-sonnet-4-5",
       "temperature": 0.2,
       "max_tokens": 800,

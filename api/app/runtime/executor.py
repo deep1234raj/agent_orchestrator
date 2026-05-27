@@ -136,6 +136,24 @@ async def _execute(run_id: uuid.UUID, emitter: EventEmitter) -> None:
     await emitter.status(RunStatus.SUCCEEDED)
     log.info("run_succeeded", run_id=str(run_id))
 
+    # Auto-deliver the final reply to the triggering channel (e.g. Telegram).
+    # Agents no longer need send_message in their tool list for delivery;
+    # this fires exactly once when the run succeeds.
+    _channel = run.input.get("channel")
+    _chat_id = run.input.get("chat_id")
+    _reply = output.get("reply", "")
+    if _channel and _chat_id and _reply:
+        from app.channels.base import ChannelMessage, dispatch_send  # local to avoid cycle
+        from app.models.enums import ChannelKind
+        try:
+            await dispatch_send(
+                ChannelKind(_channel),
+                ChannelMessage(chat_id=str(_chat_id), text=_reply),
+            )
+            log.info("run_auto_delivered", run_id=str(run_id), channel=_channel)
+        except Exception:
+            log.exception("run_auto_deliver_failed", run_id=str(run_id), channel=_channel)
+
 
 # ─── helpers ─────────────────────────────────────────────────────────────────
 
