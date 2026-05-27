@@ -251,6 +251,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/webhooks/telegram/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Setup Telegram Webhook
+         * @description Call Telegram setWebhook on behalf of the configured bot.
+         */
+        post: operations["setup_telegram_webhook_webhooks_telegram_setup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -445,6 +465,8 @@ export interface components {
         };
         /** ChannelUpdate */
         ChannelUpdate: {
+            /** Workflow Id */
+            workflow_id?: string | null;
             /** Config */
             config?: {
                 [key: string]: unknown;
@@ -596,6 +618,18 @@ export interface components {
          * @enum {string}
          */
         RunStatus: "pending" | "running" | "succeeded" | "failed" | "cancelled";
+        /** SetupWebhookRequest */
+        SetupWebhookRequest: {
+            /** Base Url */
+            base_url: string;
+        };
+        /** SetupWebhookResponse */
+        SetupWebhookResponse: {
+            /** Ok */
+            ok: boolean;
+            /** Description */
+            description?: string | null;
+        };
         /** ToolCallRead */
         ToolCallRead: {
             /**
@@ -1370,6 +1404,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setup_telegram_webhook_webhooks_telegram_setup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetupWebhookRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupWebhookResponse"];
                 };
             };
             /** @description Validation Error */

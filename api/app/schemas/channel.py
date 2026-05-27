@@ -24,6 +24,7 @@ class ChannelCreate(ChannelBase):
 
 
 class ChannelUpdate(ApiModel):
+    workflow_id: uuid.UUID | None = None
     config: dict[str, Any] | None = None
     enabled: bool | None = None
 
