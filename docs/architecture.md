@@ -67,7 +67,7 @@ directory boundaries and import linting.
 - Maintain no business logic beyond form validation and presentation.
 - Every backend interaction goes through a typed client generated from
   the API's OpenAPI spec.
-- Pages: Dashboard (live runs + stats), Agents, Workflows (React Flow canvas), Runs, Channels.
+- Pages: Dashboard (live runs + stats), Agents, Workflows (React Flow canvas), Runs.
 
 ### API layer
 - Translate HTTP and WebSocket traffic into orchestration calls.
@@ -154,7 +154,6 @@ web/
 │   ├── layout.tsx               Fonts, providers (ReactQuery, Toaster), sidebar shell
 │   ├── page.tsx                 Dashboard — active runs (5s poll), health stats, quick actions
 │   ├── agents/                  Agent CRUD (list + create + edit + delete)
-│   ├── channels/                Channel bindings (list + create + edit + delete)
 │   ├── workflows/
 │   │   ├── page.tsx             Workflow list with template badges
 │   │   └── [id]/
@@ -176,7 +175,7 @@ web/
 │   └── query-provider.tsx, toaster.tsx
 └── lib/api/
     ├── schema.ts                Auto-generated from OpenAPI (pnpm openapi)
-    ├── resources.ts             Per-entity API functions + type aliases (includes channelsApi)
+    ├── resources.ts             Per-entity API functions + type aliases
     └── client.ts                fetch wrapper (uniform error shape, typed via generics)
 ```
 

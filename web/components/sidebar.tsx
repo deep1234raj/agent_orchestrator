@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bot, GitBranch, Activity, Radio, LayoutDashboard } from "lucide-react";
+import { Bot, GitBranch, Activity, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /*
@@ -22,7 +22,6 @@ const NAV = [
   { href: "/agents", label: "Agents", icon: Bot },
   { href: "/workflows", label: "Workflows", icon: GitBranch },
   { href: "/runs", label: "Runs", icon: Activity },
-  { href: "/channels", label: "Channels", icon: Radio },
 ] as const;
 
 export function Sidebar() {

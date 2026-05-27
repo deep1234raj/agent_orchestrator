@@ -36,8 +36,6 @@ export const agentFormSchema = z.object({
   tone: z.enum(toneOptions).optional(),
   response_language: z.string().max(10).optional(),
   forbidden_topics_raw: z.string().optional(),
-  allowed_tools_raw: z.string().optional(),
-  denied_tools_raw: z.string().optional(),
   no_pii: z.boolean().default(false),
   require_human_approval: z.boolean().default(false),
   human_approval_actions_raw: z.string().optional(),

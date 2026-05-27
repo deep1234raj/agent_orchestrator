@@ -33,12 +33,6 @@ export default function EditAgentPage({
     queryFn: () => agentsApi.get(id),
   });
 
-  const { data: agentChannels } = useQuery({
-    queryKey: ['agents', id, 'channels'],
-    queryFn: () => agentsApi.listChannels(id),
-    enabled: !!agent,
-  });
-
   const { data: agentSchedules } = useQuery({
     queryKey: ['agents', id, 'schedules'],
     queryFn: () => agentsApi.listSchedules(id),
@@ -150,42 +144,6 @@ export default function EditAgentPage({
             </div>
           )}
 
-          {/* CHANNEL ROUTING RULES */}
-          <div className="mt-8 space-y-3">
-            <h3 className="font-display text-base text-fg">
-              Channel Routing Rules
-            </h3>
-            {(!agentChannels || agentChannels.length === 0) && (
-              <p className="text-xs text-fg-subtle">
-                No routing rules. Create one from the Channels page to filter by
-                external_id.
-              </p>
-            )}
-            {agentChannels && agentChannels.length > 0 && (
-              <ul className="space-y-2">
-                {agentChannels.map((ch) => (
-                  <li
-                    key={ch.id}
-                    className="flex items-center gap-3 rounded-md border border-border p-3"
-                  >
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {ch.kind}
-                    </Badge>
-                    <span className="font-mono text-xs text-fg-muted">
-                      {ch.external_id}
-                    </span>
-                    <Badge
-                      variant={ch.enabled ? 'default' : 'secondary'}
-                      className="ml-auto text-xs"
-                    >
-                      {ch.enabled ? 'enabled' : 'disabled'}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
           {/* SCHEDULES */}
           <div className="mt-6 space-y-3">
             <h3 className="font-display text-base text-fg">Schedules</h3>
@@ -209,7 +167,7 @@ export default function EditAgentPage({
                     </Badge>
                     <Badge
                       variant={
-                        sched.status === 'active' ? 'default' : 'secondary'
+                        sched.status === 'active' ? 'default' : 'outline'
                       }
                       className="ml-auto text-xs"
                     >

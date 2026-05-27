@@ -11,7 +11,6 @@ import {
   agentsApi,
   workflowsApi,
   runsApi,
-  channelsApi,
   type Run,
 } from '@/lib/api/resources';
 
@@ -51,12 +50,6 @@ export default function Home() {
   const { data: agents } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
-    staleTime: 30_000,
-  });
-
-  const { data: channels } = useQuery({
-    queryKey: ['channels'],
-    queryFn: channelsApi.list,
     staleTime: 30_000,
   });
 
@@ -139,7 +132,10 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-3">
             <StatChip value={agents?.length ?? '—'} label="Agents" />
             <StatChip value={workflows?.length ?? '—'} label="Workflows" />
-            <StatChip value={channels?.length ?? '—'} label="Channels" />
+            <StatChip
+              value={agents?.filter((a) => a.channel_kind).length ?? '—'}
+              label="Bots"
+            />
           </div>
         </section>
 

@@ -69,8 +69,7 @@ Once up:
         https://api.telegram.org/bot<TOKEN>/setWebhook
    ```
    The agent's edit page shows the exact webhook URL to use — copy it from the **Webhook URL** panel.
-5. In the web UI, create a routing rule via **Channels** → **New Channel** — pick the channel agent and use external_id `*` to accept any chat (or a specific `chat_id` to restrict).
-6. Message your bot. Every active workflow that contains the channel agent fires simultaneously; the Critic delivers the final brief back to Telegram via that agent's own bot token.
+5. Message your bot. Every active workflow that contains the channel agent fires simultaneously; the Critic delivers the final brief back to Telegram via that agent's own bot token.
 
 **Pre-built workflows** (seeded automatically on first boot, idempotent):
 
@@ -225,10 +224,9 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 - 2 seed templates (Research & Brief, Daily Standup Summarizer) — idempotent
 - Web: foundation (Tailwind, fonts, providers, layout, sidebar, error/404)
 - Web: Agents page (list, create, edit, delete) with Channel, Skills, and Interaction Rules sections
-- Web: Agent edit page — webhook URL panel, Channel Routing Rules panel, Schedules panel
+- Web: Agent edit page — webhook URL panel, Schedules panel
 - Web: Workflow builder — React Flow canvas with drag-to-reposition, Save Layout, Trigger Run dialog, recent-runs table; condition edges color-coded (green = true, red = false)
 - Web: Runs view — list page (status, duration, cost, tokens) + live monitoring dashboard (WebSocket event feed, active-node highlight in React Flow, cost/token counter)
-- Web: Channels page — list, create (agent-only picker), edit, delete with confirmation
 - Web: Dashboard — live active-runs section (5s polling), system health counts, all-time stats (total runs, cost, success rate), quick-action buttons
 - Docker Compose with health checks; one-command boot
   **Stubbed (interface in place, body deferred)**

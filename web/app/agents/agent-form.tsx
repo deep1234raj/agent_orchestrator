@@ -106,12 +106,6 @@ export function AgentForm({
       forbidden_topics_raw: (
         (ir.forbidden_topics as string[] | undefined) ?? []
       ).join(', '),
-      allowed_tools_raw: (
-        (ir.allowed_tools as string[] | undefined) ?? []
-      ).join(', '),
-      denied_tools_raw: ((ir.denied_tools as string[] | undefined) ?? []).join(
-        ', ',
-      ),
       no_pii: (ir.no_pii as boolean | undefined) ?? false,
       require_human_approval:
         (ir.require_human_approval as boolean | undefined) ?? false,
@@ -323,9 +317,9 @@ export function AgentForm({
             {tools.map((tool) => {
               const checked = selectedTools.includes(tool.name);
               return (
-                <li key={tool.name}>
+                <li key={tool.name} className="flex flex-col">
                   <label
-                    className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${
+                    className={`flex h-full cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${
                       checked
                         ? 'border-accent/40 bg-accent/5'
                         : 'border-border bg-bg/40 hover:bg-elevated/40'
@@ -376,9 +370,9 @@ export function AgentForm({
             {skills.map((skill) => {
               const checked = selectedSkills.includes(skill.slug);
               return (
-                <li key={skill.slug}>
+                <li key={skill.slug} className="flex flex-col">
                   <label
-                    className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${
+                    className={`flex h-full cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${
                       checked
                         ? 'border-accent/40 bg-accent/5'
                         : 'border-border bg-bg/40 hover:bg-elevated/40'
@@ -508,28 +502,6 @@ export function AgentForm({
             1 · Operational
           </p>
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="allowed_tools_raw">Allowed Tools</Label>
-              <Input
-                id="allowed_tools_raw"
-                placeholder="e.g. web_search, calculator"
-                {...form.register('allowed_tools_raw')}
-              />
-              <p className="text-xs text-fg-subtle">
-                Comma-separated whitelist. Empty = all tools allowed.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="denied_tools_raw">Denied Tools</Label>
-              <Input
-                id="denied_tools_raw"
-                placeholder="e.g. http_get"
-                {...form.register('denied_tools_raw')}
-              />
-              <p className="text-xs text-fg-subtle">
-                Comma-separated blacklist.
-              </p>
-            </div>
             <label className="flex cursor-pointer items-center gap-2">
               <Checkbox
                 checked={form.watch('no_pii') ?? false}
@@ -712,8 +684,6 @@ export function valuesToApiPayload(values: AgentFormValues) {
     tone,
     response_language,
     forbidden_topics_raw,
-    allowed_tools_raw,
-    denied_tools_raw,
     no_pii,
     require_human_approval,
     human_approval_actions_raw,
@@ -744,18 +714,6 @@ export function valuesToApiPayload(values: AgentFormValues) {
     : [];
   if (forbidden.length) interaction_rules.forbidden_topics = forbidden;
 
-  const allowed_tools = allowed_tools_raw
-    ? allowed_tools_raw
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : [];
-  const denied_tools = denied_tools_raw
-    ? denied_tools_raw
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : [];
   const human_approval_actions = human_approval_actions_raw
     ? human_approval_actions_raw
         .split(',')
@@ -775,8 +733,6 @@ export function valuesToApiPayload(values: AgentFormValues) {
         .filter(Boolean)
     : [];
 
-  if (allowed_tools.length) interaction_rules.allowed_tools = allowed_tools;
-  if (denied_tools.length) interaction_rules.denied_tools = denied_tools;
   if (no_pii) interaction_rules.no_pii = no_pii;
   if (require_human_approval)
     interaction_rules.require_human_approval = require_human_approval;
