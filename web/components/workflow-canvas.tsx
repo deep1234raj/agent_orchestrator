@@ -143,35 +143,56 @@ export function WorkflowCanvas({
 
   const buildEdges = useCallback(
     (doc: GraphDocument): Edge[] => {
-      const explicit: Edge[] = (doc.edges ?? []).map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        label: (e.label as string | undefined) ?? undefined,
-        style: { stroke: 'rgb(var(--border))', strokeWidth: 1.5 },
-        animated: false,
-      }));
+      // Map "sourceId→targetId" to on_true/on_false for all condition nodes.
+      // Used to style both explicitly stored edges and derived edges uniformly.
+      const condEdgeType = new Map<string, 'on_true' | 'on_false'>();
+      for (const node of doc.nodes ?? []) {
+        if (node.type !== 'condition') continue;
+        const d = node.data ?? {};
+        if (d.on_true) condEdgeType.set(`${node.id}→${d.on_true}`, 'on_true');
+        if (d.on_false) condEdgeType.set(`${node.id}→${d.on_false}`, 'on_false');
+      }
 
-      // Derive edges from condition nodes' on_true / on_false when not already stored.
-      // Older seeded workflows may predate these being added to the template's edge list.
+      const condStyle = (key: 'on_true' | 'on_false') => ({
+        type: 'smoothstep' as const,
+        label: key === 'on_true' ? 'true' : 'false',
+        labelStyle: { fill: key === 'on_true' ? '#34d399' : '#f87171', fontSize: 10, fontFamily: 'monospace' },
+        labelBgStyle: { fill: 'rgb(var(--bg))', fillOpacity: 0.85 },
+        style: { stroke: key === 'on_true' ? '#34d399' : '#f87171', strokeWidth: 1.5 },
+        animated: false,
+      });
+
+      const explicit: Edge[] = (doc.edges ?? []).map((e) => {
+        const condKey = condEdgeType.get(`${e.source}→${e.target}`);
+        if (condKey) {
+          return { id: e.id, source: e.source, target: e.target, ...condStyle(condKey) };
+        }
+        return {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          label: (e.label as string | undefined) ?? undefined,
+          style: { stroke: 'rgb(var(--border))', strokeWidth: 1.5 },
+          animated: false,
+        };
+      });
+
       const existingPairs = new Set(explicit.map((e) => `${e.source}→${e.target}`));
       const derived: Edge[] = [];
       for (const node of doc.nodes ?? []) {
         if (node.type !== 'condition') continue;
         const data = node.data ?? {};
-        const branches: [string, string, string][] = [
-          ['on_true', 'yes', data.on_true as string],
-          ['on_false', 'no', data.on_false as string],
+        const branches: [string, 'on_true' | 'on_false'][] = [
+          [data.on_true as string, 'on_true'],
+          [data.on_false as string, 'on_false'],
         ];
-        for (const [key, label, target] of branches) {
+        for (const [target, key] of branches) {
           if (!target || existingPairs.has(`${node.id}→${target}`)) continue;
           derived.push({
             id: `derived-${node.id}-${key}`,
             source: node.id,
             target,
-            label,
-            style: { stroke: 'rgb(var(--border))', strokeWidth: 1.5, strokeDasharray: '5 4' },
-            animated: false,
+            ...condStyle(key),
           });
         }
       }
