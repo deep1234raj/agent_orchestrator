@@ -108,22 +108,25 @@ export function WorkflowCanvas({
 
   const buildNodes = useCallback(
     (doc: GraphDocument): Node[] =>
-      (doc.nodes ?? []).map((n) => ({
-        id: n.id,
-        type: n.type,
-        position: n.position ?? { x: 0, y: 0 },
-        data: {
-          ...n.data,
-          agent_name: n.data.agent_id
-            ? (agentsById.get(n.data.agent_id as string)?.name ?? n.data.agent_id)
-            : undefined,
-          isActive:
-            n.type === 'agent' && activeAgentId != null && n.data.agent_id === activeAgentId,
-        },
-        draggable: editable,
-        selectable: editable,
-        connectable: false,
-      })),
+      (doc.nodes ?? []).map((n) => {
+        const data = n.data ?? {};
+        return {
+          id: n.id,
+          type: n.type,
+          position: n.position ?? { x: 0, y: 0 },
+          data: {
+            ...data,
+            agent_name: data.agent_id
+              ? (agentsById.get(data.agent_id as string)?.name ?? data.agent_id)
+              : undefined,
+            isActive:
+              n.type === 'agent' && activeAgentId != null && data.agent_id === activeAgentId,
+          },
+          draggable: editable,
+          selectable: editable,
+          connectable: false,
+        };
+      }),
     [agentsById, activeAgentId, editable],
   );
 
@@ -159,27 +162,34 @@ export function WorkflowCanvas({
       prev.map((n) => ({
         ...n,
         data: {
-          ...n.data,
+          ...(n.data ?? {}),
           isActive:
-            n.type === 'agent' && activeAgentId != null && n.data['agent_id'] === activeAgentId,
+            n.type === 'agent' &&
+            activeAgentId != null &&
+            (n.data?.['agent_id'] as string | undefined) === activeAgentId,
         },
       })),
     );
   }, [activeAgentId, setNodes]);
 
-  // Notify parent after drag completes (not on every intermediate drag event)
+  // Notify parent after drag completes (not on every intermediate drag event).
+  // Strip synthesized fields (agent_name, isActive) so they aren't persisted to the DB.
   const handleNodeDragStop = useCallback(
     (_: React.MouseEvent, _node: Node, allNodes: Node[]) => {
       if (onGraphChange && graph) {
         const doc = graph as unknown as GraphDocument;
         onGraphChange({
           ...doc,
-          nodes: allNodes.map((n) => ({
-            id: n.id,
-            type: (n.type ?? 'agent') as GraphNode['type'],
-            position: n.position,
-            data: n.data as Record<string, unknown>,
-          })),
+          nodes: allNodes.map((n) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { agent_name, isActive, ...originalData } = (n.data ?? {}) as Record<string, unknown>;
+            return {
+              id: n.id,
+              type: (n.type ?? 'agent') as GraphNode['type'],
+              position: n.position,
+              data: originalData,
+            };
+          }),
         });
       }
     },
