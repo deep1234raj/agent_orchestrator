@@ -12,7 +12,6 @@ from typing import Any
 
 from app.tools.registry import tool
 
-
 _OPS = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -51,5 +50,5 @@ async def calculator(expression: str) -> dict[str, Any]:
         tree = ast.parse(expression, mode="eval")
         value = _eval(tree.body)
         return {"result": value, "error": None}
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         return {"result": None, "error": f"calculator failed: {e}"}

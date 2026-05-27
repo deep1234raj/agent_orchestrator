@@ -20,13 +20,14 @@ coordination — Postgres handles it. We run one in v1.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import structlog
 from croniter import croniter
 from sqlalchemy import and_, select, update
-from zoneinfo import ZoneInfo
 
 from app.config import settings
 from app.db.session import session_scope
@@ -51,7 +52,7 @@ async def orphan_sweep() -> None:
     crash. We can't recover it, but we shouldn't leave it visibly stuck
     in the UI either.
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(minutes=settings.orphan_run_after_minutes)
+    cutoff = datetime.now(UTC) - timedelta(minutes=settings.orphan_run_after_minutes)
     async with session_scope() as s:
         result = await s.execute(
             update(Run)
@@ -64,7 +65,7 @@ async def orphan_sweep() -> None:
             .values(
                 status=RunStatus.FAILED,
                 error="orphaned: process restarted while run was in progress",
-                finished_at=datetime.now(timezone.utc),
+                finished_at=datetime.now(UTC),
             )
             .returning(Run.id)
         )
@@ -104,7 +105,7 @@ async def _claim_one() -> uuid.UUID | None:
         await s.execute(
             update(Run)
             .where(Run.id == run_id)
-            .values(status=RunStatus.RUNNING, started_at=datetime.now(timezone.utc))
+            .values(status=RunStatus.RUNNING, started_at=datetime.now(UTC))
         )
         return run_id
 
@@ -114,7 +115,7 @@ async def _dispatch(run_id: uuid.UUID) -> None:
     log.info("run_dispatch", run_id=str(run_id))
     try:
         await execute_run(run_id)
-    except Exception:  # noqa: BLE001
+    except Exception:
         # execute_run already finalizes status on failure; this catch is
         # belt-and-braces so a buggy executor never kills the worker.
         log.exception("run_dispatch_failed", run_id=str(run_id))
@@ -126,7 +127,7 @@ async def run_loop(stop_event: asyncio.Event) -> None:
     while not stop_event.is_set():
         try:
             run_id = await _claim_one()
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("worker_claim_failed")
             await asyncio.sleep(settings.worker_poll_interval_seconds)
             continue
@@ -134,20 +135,21 @@ async def run_loop(stop_event: asyncio.Event) -> None:
         if run_id is None:
             # Nothing pending — wait a beat before polling again. We use
             # wait_for on the stop_event so shutdown is responsive.
-            try:
+            with contextlib.suppress(TimeoutError):
                 await asyncio.wait_for(
                     stop_event.wait(),
                     timeout=settings.worker_poll_interval_seconds,
                 )
-            except asyncio.TimeoutError:
-                pass
             continue
 
         # Dispatch concurrently so the worker can keep polling while a
         # long-running run executes. In v1 we don't cap concurrency —
         # the LLM and tool layers are I/O-bound, and Postgres handles
         # the rest. Add a Semaphore here when needed.
-        asyncio.create_task(_dispatch(run_id))
+        _tasks: set[asyncio.Task[None]] = set()
+        task = asyncio.create_task(_dispatch(run_id))
+        _tasks.add(task)
+        task.add_done_callback(_tasks.discard)
 
     log.info("worker_stopped")
 
@@ -162,7 +164,7 @@ async def _fire_due_schedules() -> int:
 
     Returns how many fired (for logging).
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     fired = 0
 
     async with session_scope() as s:
@@ -200,7 +202,7 @@ def _advance_next_fire(sched: Schedule, *, base: datetime) -> datetime:
     tz = ZoneInfo(sched.timezone or "UTC")
     base_local = base.astimezone(tz)
     itr = croniter(sched.cron, base_local)
-    return itr.get_next(datetime).astimezone(timezone.utc)
+    return itr.get_next(datetime).astimezone(UTC)
 
 
 async def scheduler_loop(stop_event: asyncio.Event) -> None:
@@ -211,15 +213,13 @@ async def scheduler_loop(stop_event: asyncio.Event) -> None:
             fired = await _fire_due_schedules()
             if fired:
                 log.info("schedules_fired", count=fired)
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("scheduler_tick_failed")
 
-        try:
+        with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(
                 stop_event.wait(),
                 timeout=settings.scheduler_tick_interval_seconds,
             )
-        except asyncio.TimeoutError:
-            pass
 
     log.info("scheduler_stopped")

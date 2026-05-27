@@ -15,13 +15,13 @@ agent configuration form.
 from __future__ import annotations
 
 import inspect
-from typing import Any, Awaitable, Callable, get_type_hints
+from collections.abc import Awaitable, Callable
+from typing import Any, get_type_hints
 
 from pydantic import BaseModel, Field, create_model
 
-
 # Module-private registry. Populated at import time by @tool decorators.
-_REGISTRY: dict[str, "ToolSpec"] = {}
+_REGISTRY: dict[str, ToolSpec] = {}
 
 
 class ToolSpec:

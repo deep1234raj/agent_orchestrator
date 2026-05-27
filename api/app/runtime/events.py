@@ -19,7 +19,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 import structlog
@@ -52,7 +52,7 @@ class Event(BaseModel):
     """Normalized envelope sent over the WebSocket."""
 
     run_id: uuid.UUID
-    ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    ts: datetime = Field(default_factory=lambda: datetime.now(UTC))
     type: EventType
     payload: dict[str, Any] = Field(default_factory=dict)
 
@@ -113,7 +113,7 @@ class EventEmitter:
     async def status(self, status: RunStatus, *, error: str | None = None) -> None:
         async with session_scope() as s:
             values: dict[str, Any] = {"status": status}
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             if status == RunStatus.RUNNING:
                 values["started_at"] = now
             elif status in (RunStatus.SUCCEEDED, RunStatus.FAILED, RunStatus.CANCELLED):

@@ -8,7 +8,6 @@ can round-trip without lossy transforms.
 
 from __future__ import annotations
 
-import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, Boolean, String, Text
@@ -36,11 +35,11 @@ class Workflow(Base, UUIDPKMixin, TimestampMixin):
     is_template: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Relationships
-    runs: Mapped[list["Run"]] = relationship(
+    runs: Mapped[list[Run]] = relationship(
         back_populates="workflow",
         cascade="all, delete-orphan",
     )
-    schedules: Mapped[list["Schedule"]] = relationship(
+    schedules: Mapped[list[Schedule]] = relationship(
         back_populates="workflow",
         cascade="all, delete-orphan",
     )

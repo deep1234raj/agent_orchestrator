@@ -9,7 +9,8 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Boolean, Enum as SAEnum, ForeignKey, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -43,4 +44,4 @@ class Channel(Base, UUIDPKMixin, TimestampMixin):
     config: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-    agent: Mapped["Agent"] = relationship(back_populates="channels")
+    agent: Mapped[Agent] = relationship(back_populates="channels")

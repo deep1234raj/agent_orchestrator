@@ -20,7 +20,6 @@ import httpx
 
 from app.tools.registry import tool
 
-
 TAVILY_ENDPOINT = "https://api.tavily.com/search"
 
 

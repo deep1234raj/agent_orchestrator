@@ -11,11 +11,12 @@ Creates the seven core tables in dependency order:
 
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects.postgresql import JSON, UUID
+
+from alembic import op
 
 revision: str = "0001_initial"
 down_revision: str | None = None

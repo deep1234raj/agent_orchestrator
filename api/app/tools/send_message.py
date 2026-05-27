@@ -31,7 +31,7 @@ log = structlog.get_logger(__name__)
 
 # Set by the executor at the start of each run, read by send_message.
 # A contextvar (not a global) so concurrent runs don't trample each other.
-_run_input: ContextVar[dict[str, Any]] = ContextVar("_run_input", default={})
+_run_input: ContextVar[dict[str, Any] | None] = ContextVar("_run_input", default=None)
 
 
 def set_run_input_context(input_: dict[str, Any]) -> None:
@@ -49,7 +49,7 @@ def set_run_input_context(input_: dict[str, Any]) -> None:
 )
 async def send_message(text: str) -> dict[str, Any]:
     """Send `text` to the user via the triggering channel."""
-    inp = _run_input.get()
+    inp = _run_input.get() or {}
     channel_name = inp.get("channel")
     chat_id = inp.get("chat_id")
 
@@ -75,7 +75,7 @@ async def send_message(text: str) -> dict[str, Any]:
 
     try:
         await dispatch_send(kind, ChannelMessage(chat_id=str(chat_id), text=text))
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         log.exception("send_message_failed", channel=channel_name, chat_id=chat_id)
         return {"ok": False, "error": f"send failed: {e}"}
 

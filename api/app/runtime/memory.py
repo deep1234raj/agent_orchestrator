@@ -42,8 +42,9 @@ def select_memory(
         head = history[:-window]
         summary = _summarize(head)
         return [
-            StateMessage(role="system", content=f"[Summary of earlier messages]\n{summary}")
-        ] + tail
+            StateMessage(role="system", content=f"[Summary of earlier messages]\n{summary}"),
+            *tail,
+        ]
     raise ValueError(f"Unsupported memory mode: {mode}")
 
 

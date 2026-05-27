@@ -58,7 +58,7 @@ async def create_agent(body: AgentCreate, s: AsyncSession = Depends(get_session)
         await s.commit()
     except IntegrityError as e:
         await s.rollback()
-        raise Conflict(f"Agent with this name already exists.") from e
+        raise Conflict("Agent with this name already exists.") from e
     await s.refresh(agent)
     return agent
 

@@ -14,7 +14,8 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, Enum as SAEnum, ForeignKey, String
+from sqlalchemy import JSON, DateTime, ForeignKey, String
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -65,4 +66,4 @@ class Schedule(Base, UUIDPKMixin, TimestampMixin):
     last_fired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    workflow: Mapped["Workflow"] = relationship(back_populates="schedules")
+    workflow: Mapped[Workflow] = relationship(back_populates="schedules")

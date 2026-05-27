@@ -65,7 +65,7 @@ async def seed_templates() -> None:
         for path in files:
             try:
                 await _seed_one(s, path)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 log.exception("template_seed_failed", file=path.name)
 
 

@@ -7,10 +7,10 @@ from this configuration. Nothing about the agent lives in code.
 
 from __future__ import annotations
 
-import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Enum as SAEnum, Float, Integer, String, Text
+from sqlalchemy import JSON, Float, Integer, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
@@ -68,20 +68,20 @@ class Agent(Base, UUIDPKMixin, TimestampMixin):
     interaction_rules: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     # Relationships
-    messages: Mapped[list["Message"]] = relationship(
+    messages: Mapped[list[Message]] = relationship(
         back_populates="agent",
         cascade="all, delete-orphan",
         foreign_keys="Message.agent_id",
     )
-    tool_calls: Mapped[list["ToolCall"]] = relationship(
+    tool_calls: Mapped[list[ToolCall]] = relationship(
         back_populates="agent",
         cascade="all, delete-orphan",
     )
-    usage_events: Mapped[list["UsageEvent"]] = relationship(
+    usage_events: Mapped[list[UsageEvent]] = relationship(
         back_populates="agent",
         cascade="all, delete-orphan",
     )
-    channels: Mapped[list["Channel"]] = relationship(
+    channels: Mapped[list[Channel]] = relationship(
         back_populates="agent",
         cascade="all, delete-orphan",
     )

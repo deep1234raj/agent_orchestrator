@@ -50,7 +50,7 @@ async def run_events(ws: WebSocket, run_id: uuid.UUID) -> None:
             )
     except WebSocketDisconnect:
         log.info("ws_disconnect", run_id=str(run_id))
-    except Exception:  # noqa: BLE001
+    except Exception:
         log.exception("ws_error", run_id=str(run_id))
     finally:
         await unsubscribe(run_id, queue)

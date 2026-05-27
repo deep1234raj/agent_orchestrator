@@ -13,7 +13,6 @@ import httpx
 
 from app.tools.registry import tool
 
-
 MAX_BYTES = 64 * 1024
 
 

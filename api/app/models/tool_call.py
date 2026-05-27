@@ -53,5 +53,5 @@ class ToolCall(Base, UUIDPKMixin, TimestampMixin):
     duration_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # Relationships
-    run: Mapped["Run"] = relationship(back_populates="tool_calls")
-    agent: Mapped["Agent"] = relationship(back_populates="tool_calls")
+    run: Mapped[Run] = relationship(back_populates="tool_calls")
+    agent: Mapped[Agent] = relationship(back_populates="tool_calls")

@@ -48,5 +48,5 @@ class UsageEvent(Base, UUIDPKMixin, TimestampMixin):
     cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
     # Relationships
-    run: Mapped["Run"] = relationship(back_populates="usage_events")
-    agent: Mapped["Agent"] = relationship(back_populates="usage_events")
+    run: Mapped[Run] = relationship(back_populates="usage_events")
+    agent: Mapped[Agent] = relationship(back_populates="usage_events")

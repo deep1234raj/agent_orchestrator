@@ -15,7 +15,8 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Enum as SAEnum, ForeignKey, String, Text
+from sqlalchemy import JSON, ForeignKey, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -64,8 +65,8 @@ class Message(Base, UUIDPKMixin, TimestampMixin):
     meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     # Relationships
-    run: Mapped["Run"] = relationship(back_populates="messages")
-    agent: Mapped["Agent | None"] = relationship(
+    run: Mapped[Run] = relationship(back_populates="messages")
+    agent: Mapped[Agent | None] = relationship(
         back_populates="messages",
         foreign_keys=[agent_id],
     )

@@ -16,7 +16,11 @@ class Settings(BaseSettings):
     """Typed view of every environment variable the API reads."""
 
     model_config = SettingsConfigDict(
-        env_file=None,  # docker-compose injects env; .env handled there
+        # Load root .env for local `uv run` (CWD is api/, so ../.env = repo root).
+        # In Docker the file won't exist; pydantic-settings silently skips it and
+        # reads from the env vars that docker-compose injects instead.
+        env_file="../.env",
+        env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
     )

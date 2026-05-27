@@ -129,12 +129,6 @@ async def compile_workflow(
 
     for src, dst in plain_edges:
         src_lg = START if src == start_node["id"] else src
-        dst_lg = (
-            END
-            if nodes_by_id.get(dst, {}).get("type") == "end"
-            and dst not in [n["id"] for n in nodes if n["type"] == "end"]
-            else dst
-        )
         # If dst is an end node, route to LangGraph's END.
         if nodes_by_id.get(dst, {}).get("type") == "end":
             # We still added the named end node above for graph clarity,

@@ -16,7 +16,6 @@ Why not just use LangChain's ChatModel?
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -95,7 +94,9 @@ class AnthropicProvider(LLMProvider):
     def __init__(self) -> None:
         from anthropic import AsyncAnthropic  # local import to keep startup light
 
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        from app.config import settings
+
+        api_key = settings.anthropic_api_key
         if not api_key:
             raise RuntimeError("ANTHROPIC_API_KEY is not configured.")
         self._client = AsyncAnthropic(api_key=api_key)

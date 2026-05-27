@@ -12,6 +12,8 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+from pydantic import Field
+
 from app.models.enums import RunStatus
 from app.schemas._common import ApiModel
 
@@ -66,6 +68,6 @@ class RunRead(ApiModel):
 class RunDetail(RunRead):
     """Run plus its full message log and tool calls."""
 
-    messages: list[MessageRead] = []
-    tool_calls: list[ToolCallRead] = []
-    usage_events: list[UsageEventRead] = []
+    messages: list[MessageRead] = Field(default_factory=list)
+    tool_calls: list[ToolCallRead] = Field(default_factory=list)
+    usage_events: list[UsageEventRead] = Field(default_factory=list)

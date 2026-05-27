@@ -9,7 +9,7 @@ from __future__ import annotations
 import enum
 
 
-class RunStatus(str, enum.Enum):
+class RunStatus(enum.StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     SUCCEEDED = "succeeded"
@@ -17,7 +17,7 @@ class RunStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 
-class MessageRole(str, enum.Enum):
+class MessageRole(enum.StrEnum):
     """Author of a message on the bus."""
 
     USER = "user"  # external human (e.g. via Telegram)
@@ -26,18 +26,18 @@ class MessageRole(str, enum.Enum):
     TOOL = "tool"  # tool result
 
 
-class ChannelKind(str, enum.Enum):
+class ChannelKind(enum.StrEnum):
     TELEGRAM = "telegram"
     SLACK = "slack"  # stubbed; not implemented in v1
     WHATSAPP = "whatsapp"  # stubbed; not implemented in v1
 
 
-class MemoryMode(str, enum.Enum):
+class MemoryMode(enum.StrEnum):
     NONE = "none"
     WINDOWED = "windowed"  # last N turns
     SUMMARY = "summary"  # rolling summary
 
 
-class ScheduleStatus(str, enum.Enum):
+class ScheduleStatus(enum.StrEnum):
     ACTIVE = "active"
     PAUSED = "paused"

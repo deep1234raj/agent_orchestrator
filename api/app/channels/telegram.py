@@ -11,7 +11,7 @@ from __future__ import annotations
 import httpx
 import structlog
 
-from app.channels.base import Channel, ChannelMessage
+from app.channels.base import ChannelMessage
 from app.models.enums import ChannelKind
 
 log = structlog.get_logger(__name__)

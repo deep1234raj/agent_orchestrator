@@ -55,7 +55,7 @@ async def execute_run(run_id: uuid.UUID) -> None:
     emitter = EventEmitter(run_id)
     try:
         await _execute(run_id, emitter)
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         # The executor should be the *only* place a run failure surfaces
         # to the DB — keep this catch-all here even though specific
         # exceptions are also handled below.

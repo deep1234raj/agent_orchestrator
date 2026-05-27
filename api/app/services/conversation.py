@@ -20,9 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.enums import MessageRole, RunStatus
-from app.models.message import Message
 from app.models.run import Run
-
 
 MAX_TURNS = 6  # Last 6 turns is plenty for short-term context.
 

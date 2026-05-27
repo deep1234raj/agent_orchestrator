@@ -14,7 +14,8 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, Enum as SAEnum, Float, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -69,18 +70,18 @@ class Run(Base, UUIDPKMixin, TimestampMixin):
     total_cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
     # Relationships
-    workflow: Mapped["Workflow"] = relationship(back_populates="runs")
-    messages: Mapped[list["Message"]] = relationship(
+    workflow: Mapped[Workflow] = relationship(back_populates="runs")
+    messages: Mapped[list[Message]] = relationship(
         back_populates="run",
         cascade="all, delete-orphan",
         order_by="Message.created_at",
     )
-    tool_calls: Mapped[list["ToolCall"]] = relationship(
+    tool_calls: Mapped[list[ToolCall]] = relationship(
         back_populates="run",
         cascade="all, delete-orphan",
         order_by="ToolCall.created_at",
     )
-    usage_events: Mapped[list["UsageEvent"]] = relationship(
+    usage_events: Mapped[list[UsageEvent]] = relationship(
         back_populates="run",
         cascade="all, delete-orphan",
     )

@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import json
 import time
-import uuid
 from typing import Any
 
 import structlog
@@ -161,7 +160,7 @@ class AgentNode:
         produced_messages: list[StateMessage] = []
         final_text = ""
 
-        for loop_idx in range(MAX_TOOL_LOOPS_PER_TURN):
+        for _loop_idx in range(MAX_TOOL_LOOPS_PER_TURN):
             response = await self.provider.invoke(
                 model=self.agent.model,
                 system=_build_system_prompt(self.agent),
@@ -258,7 +257,7 @@ class AgentNode:
                         is_error=False,
                     )
                 )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 duration_ms = (time.perf_counter() - t0) * 1000
                 err_msg = f"{type(e).__name__}: {e}"
                 await self.emitter.tool_call_finish(tc_id, error=err_msg, duration_ms=duration_ms)
