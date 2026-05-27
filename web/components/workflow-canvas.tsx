@@ -5,6 +5,8 @@ import {
   ReactFlow,
   Background,
   Controls,
+  Handle,
+  Position,
   useNodesState,
   useEdgesState,
   type NodeTypes,
@@ -29,11 +31,15 @@ export interface GraphDocument {
   viewport?: { x: number; y: number; zoom: number };
 }
 
+/* ── Shared handle style — small, subtle, non-interactive ── */
+const handleStyle = { width: 8, height: 8, background: 'rgb(var(--border))', border: '1px solid rgb(var(--border))' };
+
 /* ── Custom node components ── */
 function StartNode() {
   return (
     <div className="flex items-center justify-center w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-500/60 text-green-400 text-xs font-mono font-semibold">
       Start
+      <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
   );
 }
@@ -41,6 +47,7 @@ function StartNode() {
 function EndNode() {
   return (
     <div className="flex items-center justify-center w-14 h-14 rounded-full bg-danger/20 border-2 border-danger/60 text-danger text-xs font-mono font-semibold">
+      <Handle type="target" position={Position.Left} style={handleStyle} />
       End
     </div>
   );
@@ -57,10 +64,12 @@ function AgentNode({ data }: { data: Record<string, unknown> }) {
           : 'border-border',
       )}
     >
+      <Handle type="target" position={Position.Left} style={handleStyle} />
       <p className="text-[10px] font-mono uppercase tracking-wider text-fg-subtle mb-0.5">Agent</p>
       <p className="text-sm font-medium text-fg leading-tight">
         {(data.agent_name as string) ?? 'Unknown'}
       </p>
+      <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
   );
 }
@@ -68,12 +77,14 @@ function AgentNode({ data }: { data: Record<string, unknown> }) {
 function ConditionNode({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="min-w-[120px] rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+      <Handle type="target" position={Position.Left} style={handleStyle} />
       <p className="text-[10px] font-mono uppercase tracking-wider text-amber-400/70 mb-0.5">
         Condition
       </p>
       <p className="text-xs text-amber-300 font-mono leading-tight truncate max-w-[160px]">
         {(data.expr as string) ?? '—'}
       </p>
+      <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
   );
 }
@@ -144,7 +155,7 @@ export function WorkflowCanvas({
 
   const initDoc = graph as unknown as GraphDocument | undefined;
   const [nodes, setNodes, onNodesChange] = useNodesState(initDoc ? buildNodes(initDoc) : []);
-  const [edges] = useEdgesState(initDoc ? buildEdges(initDoc) : []);
+  const [edges, setEdges] = useEdgesState(initDoc ? buildEdges(initDoc) : []);
 
   // Reset when server graph changes (tracked by JSON key to avoid object identity churn)
   const prevGraphKey = useRef(JSON.stringify(graph));
@@ -152,9 +163,11 @@ export function WorkflowCanvas({
     const key = JSON.stringify(graph);
     if (key !== prevGraphKey.current && graph) {
       prevGraphKey.current = key;
-      setNodes(buildNodes(graph as unknown as GraphDocument));
+      const doc = graph as unknown as GraphDocument;
+      setNodes(buildNodes(doc));
+      setEdges(buildEdges(doc));
     }
-  }, [graph, buildNodes, setNodes]);
+  }, [graph, buildNodes, buildEdges, setNodes, setEdges]);
 
   // Update isActive on each node without resetting positions
   useEffect(() => {
