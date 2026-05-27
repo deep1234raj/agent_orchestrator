@@ -136,6 +136,36 @@ api/app/
 This layout is the single source of truth. New code lands in one of
 these directories; if it doesn't fit, ask before inventing a new one.
 
+```
+web/
+├── app/
+│   ├── layout.tsx               Fonts, providers (ReactQuery, Toaster), sidebar shell
+│   ├── page.tsx                 Home — quick links to all sections
+│   ├── agents/                  Agent CRUD (list + create + edit + delete)
+│   ├── workflows/
+│   │   ├── page.tsx             Workflow list with template badges
+│   │   └── [id]/
+│   │       ├── page.tsx         Workflow detail — React Flow canvas (editable), trigger-run, recent runs
+│   │       └── trigger-run-dialog.tsx  POST /workflows/{id}/run → redirect to run detail
+│   └── runs/
+│       ├── page.tsx             Runs list (status, duration, cost, tokens, auto-refresh)
+│       └── [id]/
+│           ├── page.tsx         Run detail — live monitoring dashboard
+│           ├── use-run-events.ts  WebSocket hook (accumulates events, tracks activeAgentId)
+│           ├── event-feed.tsx   Live message + tool-call stream (scrolls to bottom)
+│           └── cost-counter.tsx  Running token + USD cost display
+├── components/
+│   ├── workflow-canvas.tsx      React Flow canvas — 4 custom node types, editable/read-only mode
+│   ├── run-status-badge.tsx     Status → amber/green/red/grey badge
+│   ├── ui/                      shadcn/ui primitives (Button, Dialog, Tabs, Badge, …)
+│   ├── sidebar.tsx, page-header.tsx, empty-state.tsx
+│   └── query-provider.tsx, toaster.tsx
+└── lib/api/
+    ├── schema.ts                Auto-generated from OpenAPI (pnpm openapi)
+    ├── resources.ts             Per-entity API functions + type aliases
+    └── client.ts                fetch wrapper (uniform error shape, typed via generics)
+```
+
 ---
 
 ## The compile step: workflow JSON → LangGraph

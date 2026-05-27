@@ -215,13 +215,13 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 - 2 seed templates (Research & Brief, Daily Standup Summarizer) — idempotent
 - Web: foundation (Tailwind, fonts, providers, layout, sidebar, error/404)
 - Web: Agents page (list, create, edit, delete) with form + tool multi-select
+- Web: Workflow builder — React Flow canvas with drag-to-reposition, Save Layout, Trigger Run dialog, recent-runs table
+- Web: Runs view — list page (status, duration, cost, tokens) + live monitoring dashboard (WebSocket event feed, active-node highlight in React Flow, cost/token counter)
 - Docker Compose with health checks; one-command boot
 **Stubbed (interface in place, body deferred)**
 - OpenAI LLM provider — `get_provider("openai")` raises clearly; Anthropic works
 - Slack / WhatsApp channels — registered in the enum, not implemented
 **Not built yet (planned next)**
-- Web: Workflow builder (React Flow canvas, save/load, run trigger)
-- Web: Runs view (history list + live monitoring with WebSocket subscription)
 - Web: Channels page
 - Web: Dashboard with cost rollups
 - Pytest suite (smoke tests exist but aren't running in CI)
