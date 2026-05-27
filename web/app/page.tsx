@@ -1,89 +1,150 @@
+'use client';
+
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { Bot, GitBranch, Activity, ArrowRight } from 'lucide-react';
+import { TelegramSetupDialog } from '@/components/telegram-setup-dialog';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import {
+  agentsApi,
+  workflowsApi,
+  runsApi,
+  channelsApi,
+  type Run,
+  type Workflow,
+} from '@/lib/api/resources';
 
-/*
- * Home / dashboard placeholder.
- *
- * The real dashboard (cost rollups, recent runs, etc.) lands later in
- * the polish pass. This page exists so the root URL isn't a 404 and
- * gives reviewers a sense of where to go next.
- */
+function StatChip({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-surface/40 p-4 text-center">
+      <div className="text-3xl font-display text-fg">{value}</div>
+      <div className="mt-1 text-sm text-fg-muted">{label}</div>
+    </div>
+  );
+}
 
-const QUICK_LINKS = [
-  {
-    href: '/agents',
-    icon: Bot,
-    label: 'Agents',
-    description:
-      'Configure the personas that do the work — system prompt, model, tools, memory, guardrails.',
-  },
-  {
-    href: '/workflows',
-    icon: GitBranch,
-    label: 'Workflows',
-    description:
-      'Wire agents into collaborative graphs with conditions and feedback loops.',
-  },
-  {
-    href: '/runs',
-    icon: Activity,
-    label: 'Runs',
-    description:
-      'Watch executions live — agent messages, tool calls, and cost as it happens.',
-  },
-];
+function elapsed(createdAt: string): string {
+  const ms = Date.now() - new Date(createdAt).getTime();
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  return `${m}m ${s % 60}s`;
+}
 
 export default function Home() {
+  const { data: activeRuns, isLoading: runsLoading, isError: runsError } = useQuery({
+    queryKey: ['runs', 'running'],
+    queryFn: () => runsApi.list({ status: 'running', limit: 20 }),
+    refetchInterval: 5000,
+  });
+
+  const { data: workflows } = useQuery({
+    queryKey: ['workflows'],
+    queryFn: workflowsApi.list,
+    staleTime: 30_000,
+  });
+
+  const { data: agents } = useQuery({
+    queryKey: ['agents'],
+    queryFn: agentsApi.list,
+    staleTime: 30_000,
+  });
+
+  const { data: channels } = useQuery({
+    queryKey: ['channels'],
+    queryFn: channelsApi.list,
+    staleTime: 30_000,
+  });
+
+  const { data: allRuns } = useQuery({
+    queryKey: ['runs', 'all'],
+    queryFn: () => runsApi.list({ limit: 200 }),
+    staleTime: 60_000,
+  });
+
+  const workflowsById: Record<string, Workflow> = {};
+  (workflows ?? []).forEach((w) => { workflowsById[w.id] = w; });
+
+  const totalRuns = allRuns?.length ?? 0;
+  const succeeded = allRuns?.filter((r: Run) => r.status === 'succeeded').length ?? 0;
+  const totalCost = allRuns?.reduce((sum: number, r: Run) => sum + (r.total_cost_usd ?? 0), 0) ?? 0;
+  const successRate = totalRuns > 0 ? Math.round((succeeded / totalRuns) * 100) : 0;
+
   return (
     <>
-      <PageHeader
-        title="Welcome"
-        subtitle="A local-first platform for designing, running, and observing collaborative AI agents."
-      />
+      <PageHeader title="Dashboard" subtitle="Live status and quick actions." />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {QUICK_LINKS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group rounded-lg border border-border bg-surface/40 p-5 transition-colors hover:bg-surface hover:border-muted"
-            >
-              <Icon
-                className="h-5 w-5 text-fg-muted group-hover:text-accent transition-colors"
-                strokeWidth={1.75}
-              />
-              <h3 className="mt-4 font-display text-xl text-fg">
-                {item.label}
-              </h3>
-              <p className="mt-2 text-sm text-fg-muted leading-relaxed">
-                {item.description}
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1 text-xs font-mono uppercase tracking-wider text-fg-subtle group-hover:text-accent transition-colors">
-                Open
-                <ArrowRight className="h-3 w-3" />
-              </span>
-            </Link>
-          );
-        })}
+      <section className="mb-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">Active Runs</h2>
+        {runsLoading && (
+          <div className="flex items-center gap-2 text-fg-muted">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Loading…</span>
+          </div>
+        )}
+        {runsError && (
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-sm">Failed to load runs.</span>
+          </div>
+        )}
+        {!runsLoading && !runsError && (activeRuns?.length ?? 0) === 0 && (
+          <div className="flex items-center justify-center rounded-lg border border-dashed border-border py-10 text-sm text-fg-muted">
+            No active runs
+          </div>
+        )}
+        {!runsLoading && !runsError && (activeRuns?.length ?? 0) > 0 && (
+          <div className="space-y-2">
+            {activeRuns!.map((run: Run) => (
+              <Link
+                key={run.id}
+                href={`/runs/${run.id}`}
+                className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 px-4 py-3 text-sm hover:bg-surface transition-colors"
+              >
+                <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400 animate-pulse" />
+                <span className="flex-1 font-medium text-fg">
+                  {workflowsById[run.workflow_id]?.name ?? run.workflow_id}
+                </span>
+                <span className="text-fg-muted">{run.trigger}</span>
+                <span className="font-mono text-xs text-fg-subtle">{elapsed(run.created_at)}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <div className="mb-6 grid gap-4 md:grid-cols-2">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">System Health</h2>
+          <div className="grid grid-cols-3 gap-3">
+            <StatChip value={agents?.length ?? '—'} label="Agents" />
+            <StatChip value={workflows?.length ?? '—'} label="Workflows" />
+            <StatChip value={channels?.length ?? '—'} label="Channels" />
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">All-Time Stats</h2>
+          <div className="grid grid-cols-3 gap-3">
+            <StatChip value={totalRuns} label="Total Runs" />
+            <StatChip value={`$${totalCost.toFixed(2)}`} label="Total Cost" />
+            <StatChip value={`${successRate}%`} label="Success Rate" />
+          </div>
+        </section>
       </div>
 
-      <div className="mt-10 rounded-lg border border-border bg-surface/40 p-5">
-        <h3 className="font-display text-xl text-fg">First time here?</h3>
-        <p className="mt-2 text-sm text-fg-muted leading-relaxed max-w-2xl">
-          Two pre-built workflows are seeded on first boot: <span className="text-fg">Research &amp; Brief</span> (a
-          three-agent flow you can trigger from Telegram) and <span className="text-fg">Daily Standup Summarizer</span>{' '}
-          (a single agent on a cron schedule). Head to Workflows to see them.
-        </p>
-        <div className="mt-4">
-          <Button asChild variant="primary" size="sm">
-            <Link href="/workflows">Browse workflows</Link>
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild variant="primary">
+            <Link href="/agents">+ New Agent</Link>
           </Button>
+          <Button asChild variant="ghost">
+            <Link href="/workflows">Open Workflows</Link>
+          </Button>
+          <TelegramSetupDialog trigger={<Button variant="ghost">Setup Telegram</Button>} />
         </div>
-      </div>
+      </section>
     </>
   );
 }
