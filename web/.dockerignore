@@ -28,6 +28,7 @@ packages/
 dist/
 build/
 .next/
+.pnpm-store/
 out/
 .nuxt/
 target/

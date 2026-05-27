@@ -5,6 +5,7 @@ node_modules/
 
 # Production
 .next/
+.pnpm-store/
 out/
 dist/
 
