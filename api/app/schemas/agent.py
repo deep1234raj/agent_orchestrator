@@ -113,5 +113,6 @@ class AgentUpdate(ApiModel):
 
 class AgentRead(AgentBase):
     id: uuid.UUID
+    default_workflow_id: uuid.UUID | None = None
     created_at: datetime
     updated_at: datetime

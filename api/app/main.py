@@ -27,6 +27,7 @@ from app.config import settings
 from app.db.seed import seed_templates
 from app.errors import register_exception_handlers
 from app.logging_config import configure_logging
+from app.routes import agent_schedules as agent_schedules_routes
 from app.routes import agents as agents_routes
 from app.routes import channels as channels_routes
 from app.routes import runs as runs_routes
@@ -111,6 +112,7 @@ def create_app() -> FastAPI:
 
     # REST
     app.include_router(agents_routes.router)
+    app.include_router(agent_schedules_routes.router)
     app.include_router(workflows_routes.router)
     app.include_router(runs_routes.router)
     app.include_router(schedules_routes.router)

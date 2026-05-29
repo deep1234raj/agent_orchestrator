@@ -60,3 +60,25 @@ class ScheduleRead(ApiModel):
     last_fired_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class AgentScheduleCreate(ApiModel):
+    """Body for POST /agents/{id}/schedules.
+
+    workflow_id is excluded — it is resolved server-side from the agent's
+    default_workflow_id (which is created lazily on first call).
+    """
+
+    name: str = Field(min_length=1, max_length=120)
+    cron: str = Field(min_length=1, max_length=80)
+    timezone: str = Field(default="UTC", max_length=60)
+    input: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("cron")
+    @classmethod
+    def validate_cron(cls, v: str) -> str:
+        from croniter import croniter
+
+        if not croniter.is_valid(v):
+            raise ValueError(f"Invalid cron expression: {v!r}")
+        return v

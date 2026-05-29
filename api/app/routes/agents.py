@@ -5,7 +5,6 @@ from __future__ import annotations
 import uuid
 
 import httpx
-import sqlalchemy as sa
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, field_validator
 from sqlalchemy import select
@@ -17,11 +16,8 @@ from app.db.session import get_session
 from app.errors import BadRequest, Conflict, NotFound
 from app.models.agent import Agent
 from app.models.channel import Channel
-from app.models.schedule import Schedule
-from app.models.workflow import Workflow
 from app.schemas.agent import AgentCreate, AgentRead, AgentUpdate
 from app.schemas.channel import ChannelRead
-from app.schemas.schedule import ScheduleRead
 
 
 class RegisterWebhookRequest(BaseModel):
@@ -149,26 +145,3 @@ async def list_agent_channels(
         .order_by(Channel.created_at.desc())
     )
     return list(result.scalars())
-
-
-@router.get("/{agent_id}/schedules", response_model=list[ScheduleRead])
-async def list_agent_schedules(
-    agent_id: uuid.UUID,
-    s: AsyncSession = Depends(get_session),
-) -> list[Schedule]:
-    if await s.get(Agent, agent_id) is None:
-        raise NotFound(f"Agent {agent_id} not found.")
-
-    wf_result = await s.execute(
-        select(Workflow).where(Workflow.graph.cast(sa.Text).contains(str(agent_id)))
-    )
-    workflow_ids = [w.id for w in wf_result.scalars()]
-    if not workflow_ids:
-        return []
-
-    sched_result = await s.execute(
-        select(Schedule)
-        .where(Schedule.workflow_id.in_(workflow_ids))
-        .order_by(Schedule.created_at.desc())
-    )
-    return list(sched_result.scalars())

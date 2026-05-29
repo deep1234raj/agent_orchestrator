@@ -7,10 +7,12 @@ from this configuration. Nothing about the agent lives in code.
 
 from __future__ import annotations
 
+import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Float, Integer, String, Text
+from sqlalchemy import JSON, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
@@ -21,6 +23,7 @@ if TYPE_CHECKING:
     from app.models.message import Message
     from app.models.tool_call import ToolCall
     from app.models.usage_event import UsageEvent
+    from app.models.workflow import Workflow
 
 
 class Agent(Base, UUIDPKMixin, TimestampMixin):
@@ -84,4 +87,18 @@ class Agent(Base, UUIDPKMixin, TimestampMixin):
     channels: Mapped[list[Channel]] = relationship(
         back_populates="agent",
         cascade="all, delete-orphan",
+    )
+
+    # The lazily-created single-agent workflow used by agent-scoped schedules.
+    # Set on first POST /agents/{id}/schedules; NULL until then.
+    default_workflow_id: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("workflows.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    default_workflow: Mapped[Workflow | None] = relationship(
+        "Workflow",
+        foreign_keys=[default_workflow_id],
+        lazy="noload",
     )
