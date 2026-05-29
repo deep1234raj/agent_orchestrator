@@ -129,6 +129,9 @@ function ConditionPanel({
       const built = buildExpr(exprSource, exprOp, exprValue);
       onUpdate(node.id, { expr: built });
     }
+    // onUpdate is stable (defined with useCallback in WorkflowEditor).
+    // node.id is intentionally excluded — we only want this effect to fire
+    // when the user edits the expression fields, not on node selection change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exprSource, exprOp, exprValue, showRaw]);
 
@@ -326,6 +329,7 @@ export function NodePropertiesPanel({
         )}
         {node.type === "condition" && (
           <ConditionPanel
+            key={node.id}
             node={node}
             nodes={nodes}
             onUpdate={onUpdate}
