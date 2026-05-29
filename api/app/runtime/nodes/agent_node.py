@@ -133,9 +133,12 @@ class AgentNode:
         # 2. Translate to provider format.
         provider_messages = [_state_msg_to_provider(self.provider, m) for m in memory]
 
-        # If memory is empty but there's input, seed it as the user turn.
-        if not provider_messages and state.input.get("input"):
-            provider_messages.append(self.provider.format_user(str(state.input["input"])))
+        # Seed a user turn if memory is empty.  Fall back to a generic
+        # "begin" prompt so the Anthropic API always receives ≥1 message
+        # (schedule-triggered runs often have no explicit input text).
+        if not provider_messages:
+            user_text = str(state.input["input"]) if state.input.get("input") else "Begin."
+            provider_messages.append(self.provider.format_user(user_text))
 
         # 3. Resolve tool schemas, applying operational constraints.
         rules: dict = self.agent.interaction_rules or {}

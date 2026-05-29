@@ -92,7 +92,7 @@ async def _execute(run_id: uuid.UUID, emitter: EventEmitter) -> None:
     # guardrails as the workflow's — refinements could expose them at the
     # workflow level instead, but agents-as-source-of-truth is one less
     # concept for the UI to teach.
-    max_iterations, max_cost = await _resolve_guardrails(compiled.agent_node_ids)
+    max_iterations, max_cost = await _resolve_guardrails(compiled.agent_ids)
 
     # Build initial state.
     initial_state = RunState(run_id=run_id, input=run.input)
@@ -183,32 +183,32 @@ async def _load_workflow(s: AsyncSession, workflow_id: uuid.UUID) -> Workflow:
     return workflow
 
 
-async def _resolve_guardrails(agent_node_ids: list[str]) -> tuple[int, float]:
-    """Sample guardrails from the first agent in the workflow.
+async def _resolve_guardrails(agent_ids: list[uuid.UUID]) -> tuple[int, float]:
+    """Read guardrails from the workflow's first agent.
 
-    Falls back to defaults if no agents are present or fields are missing.
+    Takes the most restrictive max_iterations and max_cost_usd across
+    all agents so a single tight agent caps the whole run.
+    Falls back to defaults when the workflow has no agents or none define guardrails.
     """
     from app.models.agent import Agent  # local to avoid an import cycle
 
-    if not agent_node_ids:
+    if not agent_ids:
         return DEFAULT_MAX_ITERATIONS, DEFAULT_MAX_COST_USD
 
     async with session_scope() as s:
-        # Note: agent_node_ids are workflow-node ids, not agent ids. We don't
-        # have an easy lookup back to agent rows here, so sample the first
-        # agent in the agents table that appears in the workflow.
-        # (Refinement: pass agents-by-node-id through from compile.)
-        result = await s.execute(select(Agent).limit(1))
-        agent = result.scalars().first()
+        result = await s.execute(select(Agent).where(Agent.id.in_(agent_ids)))
+        agents = list(result.scalars())
 
-    if agent is None:
+    if not agents:
         return DEFAULT_MAX_ITERATIONS, DEFAULT_MAX_COST_USD
 
-    g = agent.guardrails or {}
-    return (
-        int(g.get("max_iterations", DEFAULT_MAX_ITERATIONS)),
-        float(g.get("max_cost_usd", DEFAULT_MAX_COST_USD)),
+    max_iters = min(
+        int((a.guardrails or {}).get("max_iterations", DEFAULT_MAX_ITERATIONS)) for a in agents
     )
+    max_cost = min(
+        float((a.guardrails or {}).get("max_cost_usd", DEFAULT_MAX_COST_USD)) for a in agents
+    )
+    return max_iters, max_cost
 
 
 async def _read_total_cost(run_id: uuid.UUID) -> float:

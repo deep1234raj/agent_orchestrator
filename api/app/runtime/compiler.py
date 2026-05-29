@@ -56,7 +56,8 @@ class CompiledWorkflow:
     """The compiled graph plus the metadata the executor needs."""
 
     graph: Any  # langgraph compiled graph
-    agent_node_ids: list[str]  # for max_iterations bookkeeping
+    agent_node_ids: list[str]  # graph-node ids, for max_iterations bookkeeping
+    agent_ids: list[uuid.UUID]  # DB agent UUIDs, for guardrail resolution
 
 
 async def compile_workflow(
@@ -174,7 +175,11 @@ async def compile_workflow(
             sg.add_node(nid, _passthrough)
 
     compiled = sg.compile()
-    return CompiledWorkflow(graph=compiled, agent_node_ids=agent_node_ids)
+    return CompiledWorkflow(
+        graph=compiled,
+        agent_node_ids=agent_node_ids,
+        agent_ids=list(agents_by_id.keys()),
+    )
 
 
 # ─── helpers ─────────────────────────────────────────────────────────────────

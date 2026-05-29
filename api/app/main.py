@@ -30,6 +30,7 @@ from app.logging_config import configure_logging
 from app.routes import agents as agents_routes
 from app.routes import channels as channels_routes
 from app.routes import runs as runs_routes
+from app.routes import schedules as schedules_routes
 from app.routes import tools as tools_routes
 from app.routes import workflows as workflows_routes
 from app.skills import router as skills_router
@@ -112,6 +113,7 @@ def create_app() -> FastAPI:
     app.include_router(agents_routes.router)
     app.include_router(workflows_routes.router)
     app.include_router(runs_routes.router)
+    app.include_router(schedules_routes.router)
     app.include_router(tools_routes.router)
     app.include_router(channels_routes.router)
     app.include_router(skills_router)
