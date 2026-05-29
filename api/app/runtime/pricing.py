@@ -26,10 +26,13 @@ class Price:
 
 # (provider, model) -> Price
 PRICES: dict[tuple[str, str], Price] = {
-    # Anthropic — Claude family
+    # Anthropic — Claude 4 family
+    ("anthropic", "claude-opus-4-8"): Price(15.00, 75.00),
+    ("anthropic", "claude-opus-4-5"): Price(15.00, 75.00),
+    ("anthropic", "claude-sonnet-4-6"): Price(3.00, 15.00),
     ("anthropic", "claude-sonnet-4-5"): Price(3.00, 15.00),
-    ("anthropic", "claude-opus-4-1"): Price(15.00, 75.00),
-    ("anthropic", "claude-haiku-4-5"): Price(1.00, 5.00),
+    ("anthropic", "claude-haiku-4-5"): Price(0.80, 4.00),
+    ("anthropic", "claude-haiku-4-5-20251001"): Price(0.80, 4.00),
     # OpenAI — common SKUs
     ("openai", "gpt-4o"): Price(2.50, 10.00),
     ("openai", "gpt-4o-mini"): Price(0.15, 0.60),

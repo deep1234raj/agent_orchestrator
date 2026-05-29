@@ -7,7 +7,7 @@ import uuid
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, field_validator
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,7 @@ from app.db.session import get_session
 from app.errors import BadRequest, Conflict, NotFound
 from app.models.agent import Agent
 from app.models.channel import Channel
+from app.models.workflow import Workflow
 from app.schemas.agent import AgentCreate, AgentRead, AgentUpdate
 from app.schemas.channel import ChannelRead
 
@@ -95,6 +96,8 @@ async def delete_agent(agent_id: uuid.UUID, s: AsyncSession = Depends(get_sessio
     agent = await s.get(Agent, agent_id)
     if agent is None:
         raise NotFound(f"Agent {agent_id} not found.")
+    if agent.default_workflow_id is not None:
+        await s.execute(delete(Workflow).where(Workflow.id == agent.default_workflow_id))
     await s.delete(agent)
     await s.commit()
 

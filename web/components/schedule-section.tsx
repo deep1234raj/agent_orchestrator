@@ -78,7 +78,7 @@ export function ScheduleSection({ agentId }: Props) {
   });
 
   return (
-    <div className="mt-8 rounded-lg border border-border p-5">
+    <div id="schedules" className="mt-8 rounded-lg border border-border p-5">
       <div className="mb-4 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">

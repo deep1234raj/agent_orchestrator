@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { use } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ export default function EditAgentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
   const qc = useQueryClient();
 
   const {
@@ -93,7 +95,10 @@ export default function EditAgentPage({
                 <Badge variant="outline" className="hidden sm:inline-flex">
                   <span className="font-mono">{agent.id.slice(0, 8)}</span>
                 </Badge>
-                <DeleteAgentButton agent={agent} />
+                <DeleteAgentButton
+                  agent={agent}
+                  onDeleted={() => router.push('/agents')}
+                />
               </>
             }
           />

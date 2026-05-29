@@ -20,13 +20,20 @@ import { agentsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
 import type { Agent } from '@/lib/api/resources';
 
-export function DeleteAgentButton({ agent }: { agent: Agent }) {
+export function DeleteAgentButton({
+  agent,
+  onDeleted,
+}: {
+  agent: Agent;
+  onDeleted?: () => void;
+}) {
   const qc = useQueryClient();
   const del = useMutation({
     mutationFn: () => agentsApi.remove(agent.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['agents'] });
       toast.success('Agent deleted', { description: agent.name });
+      onDeleted?.();
     },
     onError: (err) => {
       const msg =
@@ -60,10 +67,7 @@ export function DeleteAgentButton({ agent }: { agent: Agent }) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              del.mutate();
-            }}
+            onClick={() => del.mutate()}
             disabled={del.isPending}
           >
             Delete

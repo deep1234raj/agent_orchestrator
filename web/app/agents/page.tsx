@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Loader2, AlertTriangle, ArrowUpRight } from 'lucide-react';
+import { Bot, Loader2, AlertTriangle, ArrowUpRight, Clock } from 'lucide-react';
 
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
@@ -91,6 +91,9 @@ export default function AgentsPage() {
                 <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Memory
                 </th>
+                <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
+                  Schedules
+                </th>
                 <th className="w-24 px-4 py-3"></th>
               </tr>
             </thead>
@@ -135,6 +138,20 @@ export default function AgentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <Badge variant="default">{agent.memory_mode}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {agent.default_workflow_id ? (
+                      <Link
+                        href={`/agents/${agent.id}#schedules`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-xs text-accent transition-colors hover:bg-accent/20"
+                        title="This agent has schedules configured"
+                      >
+                        <Clock className="h-3 w-3" />
+                        Scheduled
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-fg-subtle">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">

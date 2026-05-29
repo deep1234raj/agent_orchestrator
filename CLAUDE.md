@@ -187,7 +187,7 @@ A second template ("Daily Standup Summarizer", schedule-triggered) demonstrates 
 cp .env.example .env
 
 # Bring up the whole stack
-docker compose up --build
+docker compose -f infra/docker-compose.yml up --build
 
 # Backend dev (with hot reload, outside Docker)
 cd api && uv run uvicorn app.main:app --reload
@@ -222,7 +222,7 @@ Key packages under `api/app/` and what each owns:
 
 | Package                                             | Responsibility                                                                                                                                                                                               |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `routes/`                                         | Thin HTTP handlers — validate, delegate to services, return responses. Includes `agent_schedules.py` for `/agents/{id}/schedules` CRUD and the lazy default-workflow creation helper.                     |
+| `routes/`                                         | Thin HTTP handlers — validate, delegate to services, return responses. Includes `agent_schedules.py` for `/agents/{id}/schedules` CRUD and the lazy default-workflow creation helper.                   |
 | `services/`                                       | Cross-cutting logic that doesn't belong in routes or runtime (e.g.`conversation.py` builds chat history preamble for Telegram runs)                                                                        |
 | `runtime/`                                        | LangGraph execution:`compiler.py` (workflow JSON → graph), `executor.py` (run lifecycle), `events.py` (event bus), `nodes/` (AgentNode, condition, terminal), `memory.py`, `pricing.py`         |
 | `channels/`                                       | External messaging adapters.`base.py` defines `Channel` protocol + `register_channel()`. `telegram.py` is the only concrete implementation. Missing config = channel skipped at startup, not a crash |
