@@ -322,6 +322,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Models
+     * @description Return all supported models in display order.
+     */
+    get: operations["list_models_models_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/tools": {
     parameters: {
       query?: never;
@@ -732,6 +752,15 @@ export interface components {
        * Format: date-time
        */
       created_at: string;
+    };
+    /** ModelInfo */
+    ModelInfo: {
+      /** Provider */
+      provider: string;
+      /** Model */
+      model: string;
+      /** Label */
+      label: string;
     };
     /** RegisterWebhookRequest */
     RegisterWebhookRequest: {
@@ -1969,6 +1998,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_models_models_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ModelInfo"][];
         };
       };
     };

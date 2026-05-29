@@ -101,3 +101,9 @@ export const skillsApi = {
   list: () => api<SkillSummary[]>("/skills"),
   get: (slug: string) => api<SkillDetail>(`/skills/${slug}`),
 };
+
+export type ModelInfo = components["schemas"]["ModelInfo"];
+
+export const modelsApi = {
+  list: () => api<ModelInfo[]>("/models"),
+};

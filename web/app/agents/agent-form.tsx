@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toolsApi, skillsApi } from '@/lib/api/resources';
+import { toolsApi, skillsApi, modelsApi } from '@/lib/api/resources';
 import type { Agent } from '@/lib/api/resources';
 import {
   agentFormSchema,
@@ -26,29 +26,6 @@ import {
   channelKinds,
   type AgentFormValues,
 } from './agent-schema';
-
-const MODEL_OPTIONS = [
-  // Claude 4.x (latest)
-  { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (recommended)' },
-  { value: 'claude-opus-4-8', label: 'Claude Opus 4.8' },
-  { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
-  // Claude 4.x (previous)
-  { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' },
-  { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 (older)' },
-  // OpenAI
-  { value: 'gpt-4o', label: 'GPT-4o (OpenAI)' },
-  { value: 'gpt-4o-mini', label: 'GPT-4o mini (OpenAI)' },
-];
-
-const PROVIDER_BY_MODEL: Record<string, string> = {
-  'claude-sonnet-4-6': 'anthropic',
-  'claude-opus-4-8': 'anthropic',
-  'claude-haiku-4-5-20251001': 'anthropic',
-  'claude-sonnet-4-5': 'anthropic',
-  'claude-haiku-4-5': 'anthropic',
-  'gpt-4o': 'openai',
-  'gpt-4o-mini': 'openai',
-};
 
 export function AgentForm({
   defaultValues,
@@ -68,6 +45,11 @@ export function AgentForm({
   const { data: skills } = useQuery({
     queryKey: ['skills'],
     queryFn: skillsApi.list,
+  });
+  const { data: modelOptions = [] } = useQuery({
+    queryKey: ['models'],
+    queryFn: modelsApi.list,
+    staleTime: Infinity, // model list rarely changes; cache for session lifetime
   });
 
   const guardrails = (defaultValues?.guardrails ?? {}) as {
@@ -263,15 +245,17 @@ export function AgentForm({
               value={form.watch('model')}
               onValueChange={(v) => {
                 form.setValue('model', v);
-                form.setValue('provider', PROVIDER_BY_MODEL[v] ?? 'anthropic');
+                // Derive provider from the fetched model list; fall back to anthropic
+                const info = modelOptions.find((m) => m.model === v);
+                form.setValue('provider', info?.provider ?? 'anthropic');
               }}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MODEL_OPTIONS.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
+                {modelOptions.map((m) => (
+                  <SelectItem key={m.model} value={m.model}>
                     {m.label}
                   </SelectItem>
                 ))}

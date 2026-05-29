@@ -39,6 +39,25 @@ PRICES: dict[tuple[str, str], Price] = {
 }
 
 
+# Ordered list of supported models for the UI dropdown.
+# Derived from PRICES so there is only ONE place to add a new model.
+# Label is the human-readable name shown in the frontend.
+SUPPORTED_MODELS: list[dict[str, str]] = [
+    {"provider": p, "model": m, "label": lbl}
+    for (p, m), lbl in [
+        (("anthropic", "claude-sonnet-4-6"), "Claude Sonnet 4.6 (recommended)"),
+        (("anthropic", "claude-opus-4-8"), "Claude Opus 4.8"),
+        (("anthropic", "claude-haiku-4-5-20251001"), "Claude Haiku 4.5"),
+        (("anthropic", "claude-sonnet-4-5"), "Claude Sonnet 4.5"),
+        (("anthropic", "claude-opus-4-5"), "Claude Opus 4.5"),
+        (("anthropic", "claude-haiku-4-5"), "Claude Haiku 4.5 (older)"),
+        (("openai", "gpt-4o"), "GPT-4o (OpenAI)"),
+        (("openai", "gpt-4o-mini"), "GPT-4o mini (OpenAI)"),
+    ]
+    if (p, m) in PRICES  # guard: only list models that have a price entry
+]
+
+
 def compute_cost_usd(provider: str, model: str, input_tokens: int, output_tokens: int) -> float:
     """Return the cost of a single LLM call. Unknown models return 0."""
     price = PRICES.get((provider, model))
