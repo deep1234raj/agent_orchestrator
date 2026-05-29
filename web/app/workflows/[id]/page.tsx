@@ -11,6 +11,7 @@ import {
   Clock,
   Save,
   Pencil,
+  XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,6 +49,17 @@ export default function WorkflowDetailPage() {
     queryKey: ['runs', id],
     queryFn: () => runsApi.list({ workflow_id: id, limit: 10 }),
     refetchInterval: 5000,
+  });
+
+  const { mutate: cancelRun } = useMutation({
+    mutationFn: (runId: string) => runsApi.cancel(runId),
+    onSuccess: () => {
+      toast.success('Run cancelled');
+      queryClient.invalidateQueries({ queryKey: ['runs', id] });
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiException ? err.detail : 'Cancel failed');
+    },
   });
 
   const { mutate: saveLayout, isPending: isSaving } = useMutation({
@@ -215,12 +227,25 @@ export default function WorkflowDetailPage() {
                         : '—'}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button asChild variant="ghost" size="sm">
-                        <Link href={`/runs/${run.id}`}>
-                          <Clock className="mr-1 h-3.5 w-3.5" />
-                          View
-                        </Link>
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        {(run.status === 'running' ||
+                          run.status === 'pending') && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-danger hover:bg-danger/10 hover:text-danger"
+                            onClick={() => cancelRun(run.id)}
+                          >
+                            <XCircle className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        <Button asChild variant="ghost" size="sm">
+                          <Link href={`/runs/${run.id}`}>
+                            <Clock className="mr-1 h-3.5 w-3.5" />
+                            View
+                          </Link>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

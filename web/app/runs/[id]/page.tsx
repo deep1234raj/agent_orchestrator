@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Loader2, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Loader2, AlertTriangle, ArrowLeft, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
@@ -65,8 +66,23 @@ export default function RunDetailPage() {
     isConnected,
   } = useRunEvents(id, run?.status ?? 'pending');
 
+  const queryClient = useQueryClient();
+
+  const { mutate: cancelRun, isPending: isCancelling } = useMutation({
+    mutationFn: () => runsApi.cancel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['run', id] });
+      toast.success('Run cancelled');
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiException ? err.detail : 'Cancel failed');
+    },
+  });
+
   const agentsById = new Map(agents.map((a) => [a.id, a.name]));
   const currentStatus = (liveStatus ?? run?.status ?? 'pending') as RunStatus;
+
+  const canCancel = currentStatus === 'running' || currentStatus === 'pending';
 
   if (isLoading) {
     return (
@@ -109,6 +125,24 @@ export default function RunDetailPage() {
           </span>
         }
         subtitle={`Triggered by ${run.trigger} · ${formatDuration(run.started_at, run.finished_at) ?? 'not started'}`}
+        actions={
+          canCancel ? (
+            <Button
+              variant="danger"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => cancelRun()}
+              disabled={isCancelling}
+            >
+              {isCancelling ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <XCircle className="h-3.5 w-3.5" />
+              )}
+              Cancel Run
+            </Button>
+          ) : undefined
+        }
       />
 
       <div className="-mt-2 mb-4 flex items-center gap-2">
@@ -134,8 +168,8 @@ export default function RunDetailPage() {
           </h2>
           <div className="flex-1 overflow-hidden">
             <EventFeed
-              messages={run.messages}
-              toolCalls={run.tool_calls}
+              messages={run.messages ?? []}
+              toolCalls={run.tool_calls ?? []}
               liveEvents={liveEvents}
               agentsById={agentsById}
             />
