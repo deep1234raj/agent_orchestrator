@@ -75,7 +75,7 @@ const falseHandleStyle = {
 /* ── Edit-mode node components ── */
 // Each receives `id` from React Flow and reads error state via context.
 
-function EditStartNode() {
+function EditStartNode(_: { id: string; data: Record<string, unknown> }) {
   return (
     <div className="flex items-center justify-center w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-500/60 text-green-400 text-xs font-mono font-semibold">
       Start
@@ -188,12 +188,11 @@ function buildGraphDocument(nodes: Node[], edges: Edge[]): GraphDocument {
   }
   return {
     nodes: nodes.map((n) => {
-      const { agent_name, isActive, ...data } = (n.data ?? {}) as Record<
-        string,
-        unknown
-      >;
-      void agent_name;
-      void isActive;
+      const {
+        agent_name: _agent_name,
+        isActive: _isActive,
+        ...data
+      } = (n.data ?? {}) as Record<string, unknown>;
       const condData = conditionIds.has(n.id)
         ? (conditionRoutes.get(n.id) ?? {})
         : {};
@@ -446,6 +445,7 @@ function WorkflowEditorInner({
   });
 
   const handleSave = useCallback(() => {
+    if (!isDirty) return;
     if (errors.length > 0) {
       toast.error(
         <div>
@@ -464,7 +464,7 @@ function WorkflowEditorInner({
       return;
     }
     saveWorkflow(buildGraphDocument(nodes, edges));
-  }, [errors, nodes, edges, saveWorkflow]);
+  }, [errors, nodes, edges, saveWorkflow, isDirty]);
 
   const selectedGraphNode = useMemo(
     () => graphDoc.nodes.find((n) => n.id === selectedNodeId) ?? null,
