@@ -102,7 +102,43 @@ export interface paths {
     /** List Agent Schedules */
     get: operations["list_agent_schedules_agents__agent_id__schedules_get"];
     put?: never;
+    /** Create Agent Schedule */
+    post: operations["create_agent_schedule_agents__agent_id__schedules_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/agents/{agent_id}/schedules/{schedule_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
     post?: never;
+    /** Delete Agent Schedule */
+    delete: operations["delete_agent_schedule_agents__agent_id__schedules__schedule_id__delete"];
+    options?: never;
+    head?: never;
+    /** Update Agent Schedule */
+    patch: operations["update_agent_schedule_agents__agent_id__schedules__schedule_id__patch"];
+    trace?: never;
+  };
+  "/agents/{agent_id}/schedules/{schedule_id}/trigger": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Trigger Agent Schedule */
+    post: operations["trigger_agent_schedule_agents__agent_id__schedules__schedule_id__trigger_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -517,6 +553,8 @@ export interface components {
        * Format: uuid
        */
       id: string;
+      /** Default Workflow Id */
+      default_workflow_id?: string | null;
       /**
        * Created At
        * Format: date-time
@@ -527,6 +565,28 @@ export interface components {
        * Format: date-time
        */
       updated_at: string;
+    };
+    /**
+     * AgentScheduleCreate
+     * @description Body for POST /agents/{id}/schedules.
+     *
+     *     workflow_id is excluded — it is resolved server-side from the agent's
+     *     default_workflow_id (which is created lazily on first call).
+     */
+    AgentScheduleCreate: {
+      /** Name */
+      name: string;
+      /** Cron */
+      cron: string;
+      /**
+       * Timezone
+       * @default UTC
+       */
+      timezone: string;
+      /** Input */
+      input?: {
+        [key: string]: unknown;
+      };
     };
     /**
      * AgentUpdate
@@ -1310,6 +1370,139 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ScheduleRead"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_agent_schedule_agents__agent_id__schedules_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AgentScheduleCreate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_agent_schedule_agents__agent_id__schedules__schedule_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_agent_schedule_agents__agent_id__schedules__schedule_id__patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trigger_agent_schedule_agents__agent_id__schedules__schedule_id__trigger_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunRead"];
         };
       };
       /** @description Validation Error */
