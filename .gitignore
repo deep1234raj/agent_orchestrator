@@ -52,4 +52,5 @@ next-env.d.ts
 
 # Local Claude settings
 .claude/
-
+.superpowers/
+superpowers/
