@@ -96,7 +96,8 @@ directory boundaries and import linting.
 api/app/
 ├── main.py                  FastAPI app factory, lifespan, middleware
 ├── routes/
-│   ├── agents.py            CRUD + /agents/{id}/channels + /agents/{id}/schedules
+│   ├── agents.py            CRUD + /agents/{id}/channels
+│   ├── agent_schedules.py   /agents/{id}/schedules CRUD + trigger; lazy default-workflow creation
 │   ├── workflows.py         CRUD + run-trigger
 │   ├── runs.py              list, get, cancel
 │   ├── tools.py             list registered tools (UI dropdown)
@@ -191,6 +192,7 @@ In addition to the core identity and runtime fields, every `Agent` row carries f
 | `channel_config` | `JSON` | Bot credentials: `{"bot_token": "...", "webhook_secret": "..."}` |
 | `skills` | `JSON list[str]` | Slugs of skill files in `api/skills/` assigned to this agent |
 | `interaction_rules` | `JSON dict` | Operational, protocol, and domain rule constraints |
+| `default_workflow_id` | `UUID \| None` | FK to the lazily-created single-agent workflow used by agent-scoped schedules. `NULL` until the first schedule is created for this agent. |
 
 **`interaction_rules` shape** (all fields optional):
 
@@ -451,12 +453,13 @@ inspector, the cost meter, the status badge.
 ## Persistence & schema relationships
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  agents                                                      │
-│  id · name · role · system_prompt · model · tools · memory  │
-│  channel_kind · channel_config · skills · interaction_rules  │
-└──────┬──────────────────────────────────────────────────────┘
-       │ one-to-many                        │ one-to-many
+┌──────────────────────────────────────────────────────────────────┐
+│  agents                                                           │
+│  id · name · role · system_prompt · model · tools · memory       │
+│  channel_kind · channel_config · skills · interaction_rules       │
+│  default_workflow_id (FK → workflows, SET NULL, nullable)         │
+└──────┬────────────────────────────────────┬──────────────────────┘
+       │ one-to-many (channels)                 │ nullable FK (default workflow for scheduling)
        ▼                                    ▼
 ┌─────────────┐                    ┌──────────────────────────┐
 │  channels   │                    │  (agent referenced by    │
@@ -478,7 +481,7 @@ inspector, the cost meter, the status badge.
 Key FK relationships:
 
 - `channels.agent_id` → `agents.id` CASCADE DELETE — a channel is deleted when its agent is deleted.
-- `workflows` and `agents` are decoupled at the FK level. The relationship is encoded in `workflow.graph` as JSON (agent IDs appear as node `data.agent_id`). The webhook fan-out query (`graph::text CONTAINS agent_id`) exploits this text encoding.
+- `workflows` and `agents` are loosely coupled. The primary relationship is encoded in `workflow.graph` as JSON (agent IDs appear as node `data.agent_id`); the webhook fan-out query exploits this. A second, explicit FK (`agents.default_workflow_id`) points to the lazily-created single-agent workflow used for agent-scoped schedules.
 - All FKs cascade on delete from `runs` downward — deleting a run removes its messages, tool calls, and usage events.
 - Deleting an agent does **not** cascade-delete messages it authored; `messages.agent_id` is `ON DELETE SET NULL` so history survives.
 - UUID v7 primary keys give time-ordered IDs: `ORDER BY id` ≡ `ORDER BY created_at` for fast paging.

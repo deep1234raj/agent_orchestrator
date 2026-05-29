@@ -32,6 +32,7 @@ A local-first platform where a user can:
 3. **Run those workflows** on a real agent runtime (LangGraph) that executes real tools (web search, HTTP, calculator, etc.).
 4. **Talk to an agent from Telegram** and watch the multi-agent collaboration unfold live in the dashboard.
 5. **Inspect every run** — inter-agent messages, tool calls, token usage, and cost — in real time and after the fact.
+6. **Schedule any agent** to run automatically on a cron trigger — set up recurring tasks (daily reports, hourly checks) directly from the agent's detail page.
 
 The whole system runs locally with one command. No cloud account required.
 
@@ -218,7 +219,8 @@ This is a checkpoint snapshot. Tracks what's built, what's stubbed, and what's p
 - Agent channel credentials (`channel_kind`, `channel_config`) — one agent = one bot
 - Skills system: 5 built-in skills (`research`, `writing`, `analysis`, `math`, `translation`) + custom skill support via `api/skills/*.md`; progressive disclosure via `load_skill` tool
 - Interaction rules (3 categories): operational tool constraints, communication protocols, domain/SOP rules — all compiled into system prompt at runtime
-- `GET /agents/{id}/channels` and `GET /agents/{id}/schedules` sub-resource endpoints
+- `GET /agents/{id}/channels` sub-resource endpoint
+- Agent-scoped schedule management: `GET/POST/PATCH/DELETE /agents/{id}/schedules`, manual trigger, lazy auto-creation of single-agent default workflow; UI with preset + visual cron builder on the agent detail page
 - `GET /skills` and `GET /skills/{slug}` skill registry API
 - 5 working tools: web_search (Tavily), http_get, calculator, get_time, send_message
 - 2 seed templates (Research & Brief, Daily Standup Summarizer) — idempotent
