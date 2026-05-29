@@ -59,6 +59,23 @@ Once up:
 - API → http://localhost:8000 (docs at `/docs`)
 - Postgres → localhost:5432
 
+### Production
+
+```bash
+# Set public-facing URLs before building (baked into the web image)
+# Edit .env and set: NEXT_PUBLIC_API_URL, NEXT_PUBLIC_WS_URL, CORS_ORIGINS
+
+docker compose -f infra/docker-compose.prod.yml up --build
+```
+
+Key differences from dev:
+- API runs under gunicorn (2 × uvicorn workers), no hot-reload
+- Web is a compiled Next.js standalone build (`node server.js`)
+- Migrations run as a one-shot `migrate` container before the API starts
+- Background worker (`run_loop` + `scheduler_loop`) runs as a separate container
+- No source mounts — everything is baked into the images
+- `restart: unless-stopped` on all long-running services
+
 **Telegram setup** (one-time):
 
 1. Talk to [@BotFather](https://t.me/BotFather), create a bot, copy the token.
@@ -198,7 +215,8 @@ aaop/
 │   │   └── utils.ts                # cn() helper
 │   └── package.json
 │
-├── infra/docker-compose.yml
+├── infra/docker-compose.yml          # dev (hot-reload, source mounts)
+├── infra/docker-compose.prod.yml     # prod (gunicorn, built images, separate worker)
 ├── docs/architecture.md            # Deep architecture document
 ├── .env.example
 ├── CLAUDE.md                       # Operating manual for AI-assisted dev

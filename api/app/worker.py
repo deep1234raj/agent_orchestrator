@@ -223,3 +223,17 @@ async def scheduler_loop(stop_event: asyncio.Event) -> None:
             )
 
     log.info("scheduler_stopped")
+
+
+if __name__ == "__main__":
+    import signal
+
+    async def _main() -> None:
+        stop = asyncio.Event()
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(sig, stop.set)
+        await orphan_sweep()
+        await asyncio.gather(run_loop(stop), scheduler_loop(stop))
+
+    asyncio.run(_main())

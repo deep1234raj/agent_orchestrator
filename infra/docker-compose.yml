@@ -34,30 +34,20 @@ services:
     build:
       context: ../api
       dockerfile: Dockerfile
+      target: builder
     container_name: aaop-api
     depends_on:
       db:
         condition: service_healthy
-    # Load all secrets from .env at the repo root.
-    # env_file paths are resolved relative to this compose file's directory (infra/),
-    # so ../.env always points to the repo root regardless of where docker compose is run.
     env_file: ../.env
     environment:
-      # Docker-specific overrides — these take precedence over env_file.
-      # DATABASE_URL uses the 'db' service hostname, which only exists inside Docker.
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-aaop}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
-      # API keys are loaded via env_file above — do NOT repeat them here.
-      # Repeating with ${VAR:-} would blank them out when Docker Compose resolves
-      # variables from infra/.env (which doesn't exist) instead of the root .env.
     ports:
       - "8000:8000"
     volumes:
-      # Source mount for hot reload. The .venv is kept inside the image to
-      # avoid host/container mismatch issues.
       - ../api:/app
       - aaop_api_venv:/app/.venv
-    # Run migrations, then start the API with hot reload.
     command: >
       sh -c "uv run alembic upgrade head &&
              uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -72,15 +62,13 @@ services:
     build:
       context: ../web
       dockerfile: Dockerfile
+      target: dev
     container_name: aaop-web
     depends_on:
       api:
         condition: service_healthy
-    # Load NEXT_PUBLIC_* overrides from .env at the repo root.
     env_file: ../.env
     environment:
-      # Docker-specific overrides — these take precedence over env_file.
-      # Server-side calls hit the api container; browser-side calls hit localhost.
       CI: true
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
       NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}

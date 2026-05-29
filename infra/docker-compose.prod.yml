@@ -1,0 +1,109 @@
+# AAOP — production stack
+#
+# Usage:
+#   docker compose -f infra/docker-compose.prod.yml up --build
+#
+# Services:
+#   db       — Postgres 16, named volume for persistence
+#   migrate  — one-shot Alembic upgrade, exits before api starts
+#   api      — FastAPI (gunicorn + uvicorn workers), no source mounts
+#   worker   — background run_loop + scheduler_loop (same image, different CMD)
+#   web      — Next.js standalone build (node server.js)
+#
+# NEXT_PUBLIC_* vars are baked into the web image at build time.
+# Set them in .env before running: NEXT_PUBLIC_API_URL, NEXT_PUBLIC_WS_URL.
+
+name: aaop
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aaop-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-aaop}
+    volumes:
+      - aaop_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-aaop}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+      target: runner
+    container_name: aaop-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-aaop}
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+      target: runner
+    container_name: aaop-api
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-aaop}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  worker:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+      target: runner
+    container_name: aaop-worker
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-aaop}
+    command: ["python", "-m", "app.worker"]
+
+  web:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
+    container_name: aaop-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_URL_INTERNAL: http://api:8000
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "3000:3000"
+
+volumes:
+  aaop_pgdata:
