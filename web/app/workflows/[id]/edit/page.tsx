@@ -120,10 +120,7 @@ export default function WorkflowEditPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDiscard}
-              className="bg-danger hover:bg-danger/90"
-            >
+            <AlertDialogAction onClick={confirmDiscard}>
               Discard
             </AlertDialogAction>
           </AlertDialogFooter>
