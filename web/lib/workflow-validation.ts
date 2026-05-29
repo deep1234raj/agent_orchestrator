@@ -61,7 +61,7 @@ export function validateWorkflow(graph: GraphDocument): ValidationError[] {
 
   // Rule: every agent node has agent_id
   for (const n of nodes) {
-    if (n.type === "agent" && !n.data.agent_id) {
+    if (n.type === "agent" && !n.data?.agent_id) {
       errors.push({
         rule: "agent_selected",
         nodeId: n.id,
@@ -84,7 +84,7 @@ export function validateWorkflow(graph: GraphDocument): ValidationError[] {
       });
     }
     // Rule: condition expression must not be empty (expr mode)
-    if (n.data.mode !== "hint" && !n.data.expr) {
+    if (n.data?.mode !== "hint" && !n.data?.expr) {
       errors.push({
         rule: "condition_expr",
         nodeId: n.id,

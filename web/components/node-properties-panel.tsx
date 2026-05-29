@@ -53,7 +53,7 @@ function AgentPanel({
   onUpdate,
   onDelete,
 }: NodePropertiesPanelProps) {
-  const agentId = node.data.agent_id as string | undefined;
+  const agentId = node.data?.agent_id as string | undefined;
   const agent = agents.find((a) => a.id === agentId);
 
   return (
@@ -112,8 +112,8 @@ function ConditionPanel({
   onUpdate: (nodeId: string, patch: Record<string, unknown>) => void;
   onDelete: (nodeId: string) => void;
 }) {
-  const mode = (node.data.mode as string | undefined) ?? "expr";
-  const rawExpr = (node.data.expr as string | undefined) ?? "";
+  const mode = (node.data?.mode as string | undefined) ?? "expr";
+  const rawExpr = (node.data?.expr as string | undefined) ?? "";
 
   const parsed = parseExpr(rawExpr);
   const [exprSource, setExprSource] = useState<string>(
@@ -260,7 +260,7 @@ function ConditionPanel({
               Default route
             </Label>
             <Select
-              value={(node.data.default as string | undefined) ?? ""}
+              value={(node.data?.default as string | undefined) ?? ""}
               onValueChange={(v) => onUpdate(node.id, { default: v })}
             >
               <SelectTrigger className="text-xs h-8">

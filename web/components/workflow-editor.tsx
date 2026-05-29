@@ -216,19 +216,22 @@ function toFlowNodes(
   graphNodes: GraphNode[],
   agentsById: Map<string, Agent>,
 ): Node[] {
-  return graphNodes.map((n) => ({
-    id: n.id,
-    type: n.type,
-    position: n.position,
-    draggable: true,
-    selectable: true,
-    data: {
-      ...n.data,
-      agent_name: n.data.agent_id
-        ? (agentsById.get(n.data.agent_id as string)?.name ?? n.data.agent_id)
-        : undefined,
-    },
-  }));
+  return graphNodes.map((n) => {
+    const data = (n.data ?? {}) as Record<string, unknown>;
+    return {
+      id: n.id,
+      type: n.type,
+      position: n.position,
+      draggable: true,
+      selectable: true,
+      data: {
+        ...data,
+        agent_name: data.agent_id
+          ? (agentsById.get(data.agent_id as string)?.name ?? data.agent_id)
+          : undefined,
+      },
+    };
+  });
 }
 
 function toFlowEdges(graphEdges: GraphEdge[]): Edge[] {

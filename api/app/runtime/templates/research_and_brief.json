@@ -41,7 +41,7 @@
   ],
   "graph": {
     "nodes": [
-      {"id": "start",    "type": "start",    "position": {"x":  50, "y": 200}},
+      {"id": "start",    "type": "start",    "data": {}, "position": {"x":  50, "y": 200}},
       {"id": "research", "type": "agent",    "data": {"agent": "Researcher"},
        "position": {"x": 220, "y": 200}},
       {"id": "write",    "type": "agent",    "data": {"agent": "Writer"},
@@ -55,7 +55,7 @@
          "on_false": "write"
        },
        "position": {"x": 880, "y": 200}},
-      {"id": "end",      "type": "end",      "position": {"x": 1100, "y": 200}}
+      {"id": "end",      "type": "end",      "data": {}, "position": {"x": 1100, "y": 200}}
     ],
     "edges": [
       {"id": "e1", "source": "start",    "target": "research"},

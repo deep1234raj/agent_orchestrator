@@ -17,10 +17,10 @@
   ],
   "graph": {
     "nodes": [
-      {"id": "start",    "type": "start",  "position": {"x":  50, "y": 100}},
+      {"id": "start",    "type": "start",  "data": {}, "position": {"x":  50, "y": 100}},
       {"id": "summary",  "type": "agent",  "data": {"agent": "Standup Summarizer"},
        "position": {"x": 250, "y": 100}},
-      {"id": "end",      "type": "end",    "position": {"x": 480, "y": 100}}
+      {"id": "end",      "type": "end",    "data": {}, "position": {"x": 480, "y": 100}}
     ],
     "edges": [
       {"id": "e1", "source": "start",   "target": "summary"},
