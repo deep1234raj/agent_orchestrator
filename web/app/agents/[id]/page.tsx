@@ -16,6 +16,7 @@ import { AgentForm, valuesToApiPayload } from '../agent-form';
 import type { AgentFormValues } from '../agent-schema';
 import { DeleteAgentButton } from '../delete-agent-button';
 import { RegisterWebhookButton } from '../register-webhook-button';
+import { ScheduleSection } from '@/components/schedule-section';
 
 export default function EditAgentPage({
   params,
@@ -32,12 +33,6 @@ export default function EditAgentPage({
   } = useQuery({
     queryKey: ['agents', id],
     queryFn: () => agentsApi.get(id),
-  });
-
-  const { data: agentSchedules } = useQuery({
-    queryKey: ['agents', id, 'schedules'],
-    queryFn: () => agentsApi.listSchedules(id),
-    enabled: !!agent,
   });
 
   const update = useMutation({
@@ -130,6 +125,8 @@ export default function EditAgentPage({
             </div>
           </div>
 
+          <ScheduleSection agentId={id} />
+
           {/* WEBHOOK URL */}
           {agent.channel_kind && (
             <div className="mt-8 space-y-1 rounded-md border border-accent/30 bg-accent/5 p-4">
@@ -149,41 +146,6 @@ export default function EditAgentPage({
               )}
             </div>
           )}
-
-          {/* SCHEDULES */}
-          <div className="mt-6 space-y-3">
-            <h3 className="font-display text-base text-fg">Schedules</h3>
-            {(!agentSchedules || agentSchedules.length === 0) && (
-              <p className="text-xs text-fg-subtle">
-                No scheduled workflows contain this agent.
-              </p>
-            )}
-            {agentSchedules && agentSchedules.length > 0 && (
-              <ul className="space-y-2">
-                {agentSchedules.map((sched) => (
-                  <li
-                    key={sched.id}
-                    className="flex items-center gap-3 rounded-md border border-border p-3"
-                  >
-                    <span className="font-mono text-xs text-fg">
-                      {sched.name}
-                    </span>
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {sched.cron}
-                    </Badge>
-                    <Badge
-                      variant={
-                        sched.status === 'active' ? 'default' : 'outline'
-                      }
-                      className="ml-auto text-xs"
-                    >
-                      {sched.status}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
 
           <div className="mt-6 flex justify-start">
             <Button asChild variant="ghost" size="sm">

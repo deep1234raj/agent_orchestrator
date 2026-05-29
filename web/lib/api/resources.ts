@@ -38,6 +38,21 @@ export const agentsApi = {
     api<Agent>(`/agents/${id}`, { method: "PATCH", body }),
   remove: (id: string) => api<void>(`/agents/${id}`, { method: "DELETE" }),
   listSchedules: (id: string) => api<ScheduleRead[]>(`/agents/${id}/schedules`),
+  createSchedule: (agentId: string, body: AgentScheduleCreate) =>
+    api<ScheduleRead>(`/agents/${agentId}/schedules`, { method: "POST", body }),
+  updateSchedule: (agentId: string, scheduleId: string, body: ScheduleUpdate) =>
+    api<ScheduleRead>(`/agents/${agentId}/schedules/${scheduleId}`, {
+      method: "PATCH",
+      body,
+    }),
+  deleteSchedule: (agentId: string, scheduleId: string) =>
+    api<void>(`/agents/${agentId}/schedules/${scheduleId}`, {
+      method: "DELETE",
+    }),
+  triggerSchedule: (agentId: string, scheduleId: string) =>
+    api<Run>(`/agents/${agentId}/schedules/${scheduleId}/trigger`, {
+      method: "POST",
+    }),
   registerWebhook: (id: string, base_url: string, bot_token: string) =>
     api<{ ok: boolean; description?: string }>(
       `/agents/${id}/register-webhook`,
@@ -72,6 +87,8 @@ export const toolsApi = {
 };
 
 export type ScheduleRead = components["schemas"]["ScheduleRead"];
+export type ScheduleUpdate = components["schemas"]["ScheduleUpdate"];
+export type AgentScheduleCreate = components["schemas"]["AgentScheduleCreate"];
 
 export type SkillSummary = components["schemas"]["SkillSummary"];
 export type SkillDetail = components["schemas"]["SkillDetail"];
