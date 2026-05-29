@@ -4,7 +4,14 @@ import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, AlertTriangle, ArrowLeft, Clock, Save } from 'lucide-react';
+import {
+  Loader2,
+  AlertTriangle,
+  ArrowLeft,
+  Clock,
+  Save,
+  Pencil,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/page-header';
@@ -113,6 +120,13 @@ export default function WorkflowDetailPage() {
             Template
           </Badge>
         )}
+        <span className="flex-1" />
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
+          <Link href={`/workflows/${id}/edit`}>
+            <Pencil className="h-3.5 w-3.5" />
+            Edit Workflow
+          </Link>
+        </Button>
       </div>
 
       {/* Canvas */}

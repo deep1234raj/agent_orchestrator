@@ -1,17 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Workflow, Loader2, AlertTriangle, ArrowUpRight } from 'lucide-react';
+import {
+  Workflow,
+  Loader2,
+  AlertTriangle,
+  ArrowUpRight,
+  Plus,
+  Pencil,
+} from 'lucide-react';
 
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { CreateWorkflowDialog } from '@/components/create-workflow-dialog';
 import { workflowsApi } from '@/lib/api/resources';
 import { ApiException } from '@/lib/api/client';
 
 export default function WorkflowsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const {
     data: workflows,
     isLoading,
@@ -25,8 +36,20 @@ export default function WorkflowsPage() {
     <>
       <PageHeader
         title="Workflows"
-        subtitle="Workflows wire agents into graphs. The seeded templates run the demo — select one to inspect its graph or trigger a run."
+        subtitle="Wire agents into graphs. Templates run the demo — create your own or clone a template."
+        actions={
+          <Button
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setDialogOpen(true)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New Workflow
+          </Button>
+        }
       />
+
+      <CreateWorkflowDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
       {isLoading && (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-fg-muted">
@@ -53,7 +76,7 @@ export default function WorkflowsPage() {
         <EmptyState
           icon={<Workflow strokeWidth={1.5} />}
           title="No workflows yet"
-          description="Workflows are seeded on first boot. Start the backend and they'll appear here."
+          description="Create a workflow or start the backend to load the seeded templates."
         />
       )}
 
@@ -71,7 +94,7 @@ export default function WorkflowsPage() {
                 <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   Type
                 </th>
-                <th className="w-24 px-4 py-3" />
+                <th className="w-36 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -107,9 +130,17 @@ export default function WorkflowsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link href={`/workflows/${wf.id}`}>Open</Link>
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/workflows/${wf.id}/edit`}>
+                          <Pencil className="mr-1 h-3.5 w-3.5" />
+                          Edit
+                        </Link>
+                      </Button>
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/workflows/${wf.id}`}>Open</Link>
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
