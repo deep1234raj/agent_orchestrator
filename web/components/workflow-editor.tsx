@@ -199,7 +199,7 @@ function buildGraphDocument(nodes: Node[], edges: Edge[]): GraphDocument {
       return {
         id: n.id,
         type: (n.type ?? "agent") as GraphNode["type"],
-        position: n.position,
+        position: n.position ?? { x: 0, y: 0 },
         data: { ...data, ...condData },
       };
     }),
@@ -221,7 +221,7 @@ function toFlowNodes(
     return {
       id: n.id,
       type: n.type,
-      position: n.position,
+      position: n.position ?? { x: 0, y: 0 },
       draggable: true,
       selectable: true,
       data: {

@@ -60,9 +60,14 @@ async def _ensure_default_workflow(agent: Agent, s: AsyncSession) -> uuid.UUID:
         description=f"Auto-created single-agent workflow for agent '{agent.name}'.",
         graph={
             "nodes": [
-                {"id": "start", "type": "start"},
-                {"id": "agent_node", "type": "agent", "data": {"agent_id": str(agent.id)}},
-                {"id": "end_node", "type": "end"},
+                {"id": "start", "type": "start", "position": {"x": 100, "y": 200}},
+                {
+                    "id": "agent_node",
+                    "type": "agent",
+                    "position": {"x": 350, "y": 200},
+                    "data": {"agent_id": str(agent.id)},
+                },
+                {"id": "end_node", "type": "end", "position": {"x": 600, "y": 200}},
             ],
             "edges": [
                 {"id": "e1", "source": "start", "target": "agent_node"},

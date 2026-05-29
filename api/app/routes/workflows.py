@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.db.session import get_session
 from app.errors import Conflict, NotFound
@@ -64,6 +65,8 @@ async def update_workflow(
 
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(workflow, field, value)
+        if field == "graph":
+            flag_modified(workflow, "graph")
 
     try:
         await s.commit()
