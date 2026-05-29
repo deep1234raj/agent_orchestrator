@@ -65,7 +65,8 @@ async def create_schedule(
         next_fire_at=next_fire,
     )
     s.add(sched)
-    await s.flush()
+    await s.commit()
+    await s.refresh(sched)
     log.info("schedule_created", id=str(sched.id), workflow_id=str(body.workflow_id))
     return sched
 
@@ -109,7 +110,8 @@ async def update_schedule(
         except Exception as exc:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-    await s.flush()
+    await s.commit()
+    await s.refresh(sched)
     return sched
 
 
@@ -122,6 +124,7 @@ async def delete_schedule(
     if sched is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Schedule not found.")
     await s.delete(sched)
+    await s.commit()
 
 
 @router.post("/{schedule_id}/trigger", response_model=RunRead, status_code=status.HTTP_201_CREATED)
@@ -141,6 +144,7 @@ async def trigger_schedule(
         input=sched.input,
     )
     s.add(run)
-    await s.flush()
+    await s.commit()
+    await s.refresh(run)
     log.info("schedule_manually_triggered", schedule_id=str(schedule_id), run_id=str(run.id))
     return run

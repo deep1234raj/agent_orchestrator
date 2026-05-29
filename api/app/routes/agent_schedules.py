@@ -15,6 +15,7 @@ import structlog
 from croniter import croniter
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
@@ -45,7 +46,12 @@ async def _get_agent_or_404(agent_id: uuid.UUID, s: AsyncSession) -> Agent:
 
 
 async def _ensure_default_workflow(agent: Agent, s: AsyncSession) -> uuid.UUID:
-    """Return agent.default_workflow_id, creating the workflow if needed."""
+    """Return agent.default_workflow_id, creating the workflow if needed.
+
+    Uses try/except IntegrityError to handle the rare concurrent-POST race
+    where two requests simultaneously find default_workflow_id is None and
+    both attempt to create the workflow.
+    """
     if agent.default_workflow_id is not None:
         return agent.default_workflow_id
 
@@ -65,7 +71,19 @@ async def _ensure_default_workflow(agent: Agent, s: AsyncSession) -> uuid.UUID:
         },
     )
     s.add(wf)
-    await s.flush()
+    try:
+        await s.flush()
+    except IntegrityError:
+        await s.rollback()
+        # Another request won the race — re-fetch the agent to get the workflow ID it set.
+        refreshed = await s.get(Agent, agent.id)
+        if refreshed is None or refreshed.default_workflow_id is None:
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create default workflow.",
+            ) from None
+        return refreshed.default_workflow_id
+
     agent.default_workflow_id = wf.id
     await s.flush()
     log.info("default_workflow_created", agent_id=str(agent.id), workflow_id=str(wf.id))
