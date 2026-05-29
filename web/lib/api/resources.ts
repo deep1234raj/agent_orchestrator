@@ -23,6 +23,7 @@ export type RunRead = components["schemas"]["RunRead"];
 export type RunStatus = components["schemas"]["RunStatus"];
 export type Tool = components["schemas"]["ToolRead"];
 export type Workflow = components["schemas"]["WorkflowRead"];
+export type WorkflowCreate = components["schemas"]["WorkflowCreate"];
 export type WorkflowUpdate = components["schemas"]["WorkflowUpdate"];
 export type MessageRead = components["schemas"]["MessageRead"];
 export type ToolCallRead = components["schemas"]["ToolCallRead"];
@@ -66,8 +67,11 @@ export const agentsApi = {
 export const workflowsApi = {
   list: () => api<Workflow[]>("/workflows"),
   get: (id: string) => api<Workflow>(`/workflows/${id}`),
+  create: (body: WorkflowCreate) =>
+    api<Workflow>("/workflows", { method: "POST", body }),
   update: (id: string, body: WorkflowUpdate) =>
     api<Workflow>(`/workflows/${id}`, { method: "PATCH", body }),
+  remove: (id: string) => api<void>(`/workflows/${id}`, { method: "DELETE" }),
   triggerRun: (id: string, body: { input?: Record<string, unknown> }) =>
     api<RunRead>(`/workflows/${id}/run`, { method: "POST", body }),
 };
