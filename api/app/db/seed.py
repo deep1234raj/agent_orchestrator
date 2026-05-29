@@ -82,17 +82,49 @@ async def _seed_one(s: AsyncSession, path: Path) -> None:
         agent_id = await _upsert_agent_by_name(s, agent_data)
         agent_id_by_name[agent_data["name"]] = agent_id
 
-    # 2. Rewrite the graph: every agent node referencing a name gets the
-    #    resolved UUID. Names not in the map are left alone so the
-    #    compiler will surface the error at run time.
-    rewritten = _rewrite_graph(graph, agent_id_by_name)
+    # Build node_id -> agent_name from the template graph (pre-rewrite).
+    # Used below to patch stale agent_ids in existing workflows.
+    template_node_agent: dict[str, str] = {
+        n["id"]: n["data"]["agent"]
+        for n in graph.get("nodes", [])
+        if n.get("type") == "agent" and n.get("data", {}).get("agent")
+    }
 
-    # 3. Seed the workflow.
-    existing = await s.execute(select(Workflow).where(Workflow.name == name))
-    if existing.scalar_one_or_none() is not None:
-        log.info("workflow_already_exists", name=name)
+    # 2. Check if the workflow already exists.
+    existing_result = await s.execute(select(Workflow).where(Workflow.name == name))
+    existing = existing_result.scalar_one_or_none()
+
+    if existing is not None:
+        # Patch stale agent_ids without touching graph topology, positions,
+        # or any user-edited nodes. A node is stale when its agent_id is not
+        # among the currently-live agent IDs produced above.
+        live_ids = {str(v) for v in agent_id_by_name.values()}
+        existing_graph: dict[str, Any] = dict(existing.graph or {})
+        patched_nodes = []
+        updated = False
+        for node in existing_graph.get("nodes", []):
+            if node.get("type") == "agent":
+                data = dict(node.get("data", {}))
+                if data.get("agent_id") not in live_ids:
+                    agent_name = template_node_agent.get(node["id"])
+                    if agent_name and agent_name in agent_id_by_name:
+                        data["agent_id"] = str(agent_id_by_name[agent_name])
+                        node = {**node, "data": data}
+                        updated = True
+                        log.info("agent_id_refreshed", node_id=node["id"], agent=agent_name)
+            patched_nodes.append(node)
+
+        if updated:
+            # Assign a new dict so SQLAlchemy detects the JSON column change.
+            existing.graph = {**existing_graph, "nodes": patched_nodes}
+            log.info("workflow_agent_ids_refreshed", name=name)
+        else:
+            log.info("workflow_already_exists", name=name)
         return
 
+    # 3. Rewrite the template graph: every agent node referencing a name
+    #    gets the resolved UUID. Seed the workflow.
+    rewritten = _rewrite_graph(graph, agent_id_by_name)
     s.add(
         Workflow(
             name=name,
