@@ -176,7 +176,7 @@ This is the canonical end-to-end flow the project is built around. Every feature
 5. Approved brief is sent back to the user via Telegram.
 6. Throughout, the dashboard shows inter-agent messages, tool calls, and token cost in real time.
 
-A second template ("Daily Standup Summarizer", schedule-triggered) demonstrates the schedule feature.
+**Workflow: "Daily Standup Summarizer"** — A second template ("Daily Standup Summarizer", schedule-triggered) demonstrates the schedule feature.
 
 ---
 
@@ -220,35 +220,40 @@ cd web && pnpm lint && pnpm format
 
 Key packages under `api/app/` and what each owns:
 
-| Package                                             | Responsibility                                                                                                                                                                                               |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `routes/`                                         | Thin HTTP handlers — validate, delegate to services, return responses. Includes `agent_schedules.py` for `/agents/{id}/schedules` CRUD and the lazy default-workflow creation helper.                   |
-| `services/`                                       | Cross-cutting logic that doesn't belong in routes or runtime (e.g.`conversation.py` builds chat history preamble for Telegram runs)                                                                        |
-| `runtime/`                                        | LangGraph execution:`compiler.py` (workflow JSON → graph), `executor.py` (run lifecycle), `events.py` (event bus), `nodes/` (AgentNode, condition, terminal), `memory.py`, `pricing.py`         |
-| `channels/`                                       | External messaging adapters.`base.py` defines `Channel` protocol + `register_channel()`. `telegram.py` is the only concrete implementation. Missing config = channel skipped at startup, not a crash |
-| `ws/`                                             | WebSocket gateway (`gateway.py`). One route: `/ws/runs/{run_id}`. Forwards events from `runtime.events` queues to connected clients. No replay on connect                                              |
-| `models/`                                         | SQLAlchemy ORM models — the only place DB rows are defined                                                                                                                                                  |
-| `schemas/`                                        | Pydantic request/response schemas — one file per resource mirrors `models/`                                                                                                                               |
-| `tools/`                                          | Tool implementations +`registry.py`. Tools self-register on import; `import_all_tools()` is called at lifespan startup                                                                                   |
-| `db/`                                             | `session.py` (async session factory + `session_scope` context manager), `seed.py` (idempotent template seeding), `uuid7.py`                                                                          |
-| `worker.py`                                       | Two background coroutines:`run_loop` (polls for PENDING runs via `SELECT … FOR UPDATE SKIP LOCKED`, dispatches to executor) and `scheduler_loop` (fires scheduled runs via croniter)                  |
-| `channels/telegram.py` + `webhooks/telegram.py` | Webhook receiver lives in `webhooks/`, outbound delivery lives in `channels/`                                                                                                                            |
-| `skills.py`                                       | Skills registry: reads `api/skills/*.md` at import time into `SKILLS_REGISTRY`. Exposes `GET /skills` + `GET /skills/{slug}`. Supplies `get_skills_overview()` used by `AgentNode._build_system_prompt()`.  |
+| Package                                             | Responsibility                                                                                                                                                                                                         |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `routes/`                                         | Thin HTTP handlers — validate, delegate to services, return responses. Includes `agent_schedules.py` for `/agents/{id}/schedules` CRUD and the lazy default-workflow creation helper.                             |
+| `services/`                                       | Cross-cutting logic that doesn't belong in routes or runtime (e.g.`conversation.py` builds chat history preamble for Telegram runs)                                                                                  |
+| `runtime/`                                        | LangGraph execution:`compiler.py` (workflow JSON → graph), `executor.py` (run lifecycle), `events.py` (event bus), `nodes/` (AgentNode, condition, terminal), `memory.py`, `pricing.py`                   |
+| `channels/`                                       | External messaging adapters.`base.py` defines `Channel` protocol + `register_channel()`. `telegram.py` is the only concrete implementation. Missing config = channel skipped at startup, not a crash           |
+| `ws/`                                             | WebSocket gateway (`gateway.py`). One route: `/ws/runs/{run_id}`. Forwards events from `runtime.events` queues to connected clients. No replay on connect                                                        |
+| `models/`                                         | SQLAlchemy ORM models — the only place DB rows are defined                                                                                                                                                            |
+| `schemas/`                                        | Pydantic request/response schemas — one file per resource mirrors `models/`                                                                                                                                         |
+| `tools/`                                          | Tool implementations +`registry.py`. Tools self-register on import; `import_all_tools()` is called at lifespan startup                                                                                             |
+| `db/`                                             | `session.py` (async session factory + `session_scope` context manager), `seed.py` (idempotent template seeding), `uuid7.py`                                                                                    |
+| `worker.py`                                       | Two background coroutines:`run_loop` (polls for PENDING runs via `SELECT … FOR UPDATE SKIP LOCKED`, dispatches to executor) and `scheduler_loop` (fires scheduled runs via croniter)                            |
+| `channels/telegram.py` + `webhooks/telegram.py` | Webhook receiver lives in `webhooks/`, outbound delivery lives in `channels/`                                                                                                                                      |
+| `skills.py`                                       | Skills registry: reads `api/skills/*.md` at import time into `SKILLS_REGISTRY`. Exposes `GET /skills` + `GET /skills/{slug}`. Supplies `get_skills_overview()` used by `AgentNode._build_system_prompt()`. |
 
 Frontend layout under `web/`:
 
-| Path                          | Responsibility                                                                                                 |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `app/`                      | Next.js App Router pages (`agents/`, `workflows/[id]/`, `runs/`)                                        |
-| `components/`               | App-level composites (sidebar, canvas, schedule-section, run-status-badge, etc.)                               |
-| `components/schedule-section.tsx` | Inline cron schedule list with toggle / run-now / delete; uses `agentsApi` schedule methods             |
-| `components/create-schedule-dialog.tsx` | Cron builder: preset pills + 5-dropdown visual builder + timezone picker                          |
-| `components/ui/`            | shadcn/ui primitives — do not edit these directly                                                             |
-| `lib/api/schema.ts`         | Auto-generated from OpenAPI — **never hand-edit**                                                             |
-| `lib/api/client.ts`         | `openapi-fetch` wrapper used by all data hooks                                                               |
-| `lib/api/resources.ts`      | TanStack Query hooks per resource                                                                              |
-| `lib/cron-utils.ts`         | `describeCron(expr)` human-readable labels + `buildCronFromParts(min, hr, dom, mon, dow)`                     |
-| `hooks/`                    | Custom React hooks                                                                                             |
+| Path                                      | Responsibility                                                                                |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `app/`                                  | Next.js App Router pages (`agents/`, `workflows/[id]/`, `runs/`)                        |
+| `components/`                           | App-level composites (sidebar, canvas, schedule-section, run-status-badge, etc.)              |
+| `components/schedule-section.tsx`       | Inline cron schedule list with toggle / run-now / delete; uses `agentsApi` schedule methods |
+| `components/create-schedule-dialog.tsx` | Cron builder: preset pills + 5-dropdown visual builder + timezone picker                      |
+| `components/workflow-editor.tsx`        | Full React Flow editor (edit mode): owns node/edge state, toolbar, error context, save/cancel |
+| `components/node-properties-panel.tsx`  | Right panel for selected node: agent picker, condition expression builder (dropdown + raw toggle + LLM hint tab) |
+| `components/create-workflow-dialog.tsx` | "New Workflow" modal: template cards + blank option + name field → POST /workflows → navigate to editor |
+| `components/ui/`                        | shadcn/ui primitives — do not edit these directly                                            |
+| `lib/api/schema.ts`                     | Auto-generated from OpenAPI —**never hand-edit**                                       |
+| `lib/api/client.ts`                     | `openapi-fetch` wrapper used by all data hooks                                              |
+| `lib/api/resources.ts`                  | TanStack Query hooks per resource                                                             |
+| `lib/cron-utils.ts`                     | `describeCron(expr)` human-readable labels + `buildCronFromParts(min, hr, dom, mon, dow)` |
+| `lib/workflow-validation.ts`            | Pure validation functions: `validateWorkflow`, `hasBackEdge`, `getNodeErrorIds` — soft hints and save guard |
+| `hooks/`                                | Custom React hooks                                                                            |
+| `app/workflows/[id]/edit/page.tsx`      | Editor page: full-screen layout, loads workflow + agents, renders WorkflowEditor, AlertDialog on discard |
 
 ---
 
@@ -257,7 +262,7 @@ Frontend layout under `web/`:
 - The demo is the deliverable. Polish the demo path obsessively. Leave the rest at "good enough."
 - The README is read before the code. The architecture diagram is read before the README. Both must be clear.
 - Reviewers will try things you didn't anticipate. Empty states, error states, and "what happens if I click this with nothing selected" matter.
-- If something is slow, async it. If something is broken, fix it before adding the next thing. No half-finished features in `main`.
+- If something is slow, async it. If something is broken, fix it before adding the next thing. No half-finished features in `master`.
 - When you finish a chunk of work, suggest the next smallest reasonable step — don't propose a multi-day plan.
 
 ---

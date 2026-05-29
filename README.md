@@ -33,6 +33,7 @@ A local-first platform where a user can:
 4. **Talk to an agent from Telegram** and watch the multi-agent collaboration unfold live in the dashboard.
 5. **Inspect every run** — inter-agent messages, tool calls, token usage, and cost — in real time and after the fact.
 6. **Schedule any agent** to run automatically on a cron trigger — set up recurring tasks (daily reports, hourly checks) directly from the agent's detail page.
+7. **Cancel in-flight runs** from the run detail page or directly from the workflow's run history — rogue workflows stop at the next graph step boundary.
 
 The whole system runs locally with one command. No cloud account required.
 

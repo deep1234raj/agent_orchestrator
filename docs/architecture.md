@@ -67,7 +67,9 @@ directory boundaries and import linting.
 - Maintain no business logic beyond form validation and presentation.
 - Every backend interaction goes through a typed client generated from
   the API's OpenAPI spec.
-- Pages: Dashboard (live runs + stats), Agents, Workflows (React Flow canvas), Runs.
+- Pages: Dashboard (live runs + stats), Agents, Workflows (React Flow canvas + visual editor), Runs.
+- Editor: `/workflows/[id]/edit` — full React Flow editor for creating and wiring nodes; a pure validation library (`workflow-validation.ts`) enforces graph integrity before save.
+- Cancel: In-flight runs can be cancelled from the run detail page or workflow run table; the executor checks for cancellation between every graph step.
 
 ### API layer
 - Translate HTTP and WebSocket traffic into orchestration calls.
