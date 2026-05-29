@@ -6,16 +6,14 @@ This file encodes the **decisions already made**, the **scope guardrails**, and 
 
 ## 1. Project context
 
-Build a local-first platform where users create AI agents, configure them, wire them into workflows, and let them collaborate — with at least one agent reachable via Telegram.
+Build a local-first platform where users create AI agents, configure them, wire them into workflows, and let them collaborate.
 
-**Evaluation weights (these dictate priorities):**
+**Priorities:**
 
 - Working end-to-end product — **40%**
 - Architecture and code quality — **30%**
 - UI/UX and configurability — **20%**
 - Documentation — **10%**
-
-**The single most important goal:** a reviewer clones the repo, runs `docker compose up`, messages the Telegram bot, and watches a real multi-agent workflow execute in the UI. Everything that doesn't serve that goal is a distraction.
 
 ---
 
@@ -23,22 +21,22 @@ Build a local-first platform where users create AI agents, configure them, wire 
 
 These are settled. If you think one of them is wrong, **flag it and ask** — do not silently switch.
 
-| Area | Decision |
-|---|---|
-| Agent runtime | **LangGraph** |
-| Backend | **Python 3.11 + FastAPI** |
-| Frontend | **Next.js (App Router) + TypeScript** |
-| UI components | **Tailwind + shadcn/ui** |
-| Graph editor | **React Flow (xyflow)** |
-| Database | **Postgres + SQLAlchemy + Alembic** |
-| Real-time | **WebSockets via FastAPI** (no Redis pub/sub) |
-| Messaging channel | **Telegram** (not WhatsApp, not Slack) |
-| Default LLM | **Anthropic Claude** (model configurable per agent; OpenAI, Ollama as fallback) |
-| Packaging | **Docker Compose** |
-| Package manager (web) | **pnpm** |
-| Package manager (api) | **uv** (or pip if uv unavailable) |
-| Python testing | **pytest** |
-| JS testing | **vitest** |
+| Area                  | Decision                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------- |
+| Agent runtime         | **LangGraph**                                                                   |
+| Backend               | **Python 3.14 + FastAPI**                                                       |
+| Frontend              | **Next.js (App Router) + TypeScript**                                           |
+| UI components         | **Tailwind + shadcn/ui**                                                        |
+| Graph editor          | **React Flow (xyflow)**                                                         |
+| Database              | **Postgres + SQLAlchemy + Alembic**                                             |
+| Real-time             | **WebSockets via FastAPI** (no Redis pub/sub)                                   |
+| Messaging channel     | **Telegram** (not WhatsApp, not Slack)                                          |
+| Default LLM           | **Anthropic Claude** (model configurable per agent; OpenAI, Ollama as fallback) |
+| Packaging             | **Docker Compose**                                                              |
+| Package manager (web) | **pnpm**                                                                        |
+| Package manager (api) | **uv** (or pip if uv unavailable)                                               |
+| Python testing        | **pytest**                                                                      |
+| JS testing            | **vitest**                                                                      |
 
 ---
 
@@ -54,7 +52,6 @@ A common failure mode is sprawling scope. The following are explicitly **out of 
 - ❌ Workflow versioning, audit logs, rollback
 - ❌ Fancy custom-rolled UI components (use shadcn/ui)
 - ❌ Custom auth on the agent runtime (single-user, local-only)
-- ❌ More than 4–5 real tools (web search, http_get, calculator, send_message, get_time — pick from these)
 
 If you catch yourself drifting toward any of these, stop and ask.
 
@@ -78,7 +75,8 @@ When in doubt about where code belongs: the API layer orchestrates, the runtime 
 ## 5. Coding standards
 
 ### Python (api/)
-- Python 3.11+
+
+- Python 3.14+
 - Type hints everywhere. `from __future__ import annotations` at top of every module.
 - Pydantic v2 for all request/response schemas.
 - SQLAlchemy 2.0 style (`Mapped[...]`, `mapped_column`).
@@ -88,6 +86,7 @@ When in doubt about where code belongs: the API layer orchestrates, the runtime 
 - Imports sorted with `ruff`. Format with `ruff format`.
 
 ### TypeScript (web/)
+
 - Strict TS — `"strict": true`, no `any` without a comment justifying it.
 - Server components by default; `"use client"` only where interactivity demands it.
 - API client is generated from the FastAPI OpenAPI spec (we'll use `openapi-typescript`). Never hand-write request types.
@@ -95,6 +94,7 @@ When in doubt about where code belongs: the API layer orchestrates, the runtime 
 - No CSS files except `globals.css`. Tailwind everywhere else.
 
 ### General
+
 - Small files. If a Python module exceeds ~250 lines or a React component exceeds ~150, split it.
 - One concept per file. Don't bundle.
 - Tests live next to code: `foo.py` → `test_foo.py` in `tests/` mirroring structure.
@@ -176,13 +176,16 @@ This is the canonical end-to-end flow the project is built around. Every feature
 5. Approved brief is sent back to the user via Telegram.
 6. Throughout, the dashboard shows inter-agent messages, tool calls, and token cost in real time.
 
-A second template ("Daily Standup Summarizer", schedule-triggered) demonstrates the schedule feature but is secondary.
+A second template ("Daily Standup Summarizer", schedule-triggered) demonstrates the schedule feature.
 
 ---
 
 ## 11. Commands you'll run a lot
 
 ```bash
+# First-time setup: copy env template and fill in API keys
+cp .env.example .env
+
 # Bring up the whole stack
 docker compose up --build
 
@@ -197,10 +200,13 @@ cd api && uv run alembic revision --autogenerate -m "add foo table"
 cd api && uv run alembic upgrade head
 
 # Regenerate TS API client from OpenAPI
+# NOTE: API must be running at localhost:8000 first
 cd web && pnpm openapi
 
-# Tests
+# Tests — require a live Postgres at DATABASE_URL (set in .env or env var)
 cd api && uv run pytest -x
+# Run a single test file
+cd api && uv run pytest tests/test_agents_crud.py -x
 cd web && pnpm test
 
 # Lint / format
@@ -210,7 +216,40 @@ cd web && pnpm lint && pnpm format
 
 ---
 
-## 12. Things to remember
+## 12. Module map
+
+Key packages under `api/app/` and what each owns:
+
+| Package                                             | Responsibility                                                                                                                                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `routes/`                                         | Thin HTTP handlers — validate, delegate to services, return responses                                                                                                                                       |
+| `services/`                                       | Cross-cutting logic that doesn't belong in routes or runtime (e.g.`conversation.py` builds chat history preamble for Telegram runs)                                                                        |
+| `runtime/`                                        | LangGraph execution:`compiler.py` (workflow JSON → graph), `executor.py` (run lifecycle), `events.py` (event bus), `nodes/` (AgentNode, condition, terminal), `memory.py`, `pricing.py`         |
+| `channels/`                                       | External messaging adapters.`base.py` defines `Channel` protocol + `register_channel()`. `telegram.py` is the only concrete implementation. Missing config = channel skipped at startup, not a crash |
+| `ws/`                                             | WebSocket gateway (`gateway.py`). One route: `/ws/runs/{run_id}`. Forwards events from `runtime.events` queues to connected clients. No replay on connect                                              |
+| `models/`                                         | SQLAlchemy ORM models — the only place DB rows are defined                                                                                                                                                  |
+| `schemas/`                                        | Pydantic request/response schemas — one file per resource mirrors `models/`                                                                                                                               |
+| `tools/`                                          | Tool implementations +`registry.py`. Tools self-register on import; `import_all_tools()` is called at lifespan startup                                                                                   |
+| `db/`                                             | `session.py` (async session factory + `session_scope` context manager), `seed.py` (idempotent template seeding), `uuid7.py`                                                                          |
+| `worker.py`                                       | Two background coroutines:`run_loop` (polls for PENDING runs via `SELECT … FOR UPDATE SKIP LOCKED`, dispatches to executor) and `scheduler_loop` (fires scheduled runs via croniter)                  |
+| `channels/telegram.py` + `webhooks/telegram.py` | Webhook receiver lives in `webhooks/`, outbound delivery lives in `channels/`                                                                                                                            |
+| `skills.py`                                       | `/agents/{id}/skills` endpoint — exposes per-agent skill config                                                                                                                                           |
+
+Frontend layout under `web/`:
+
+| Path                     | Responsibility                                                         |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `app/`                 | Next.js App Router pages (`agents/`, `workflows/[id]/`, `runs/`) |
+| `components/`          | App-level composites (sidebar, canvas, run-status-badge, etc.)         |
+| `components/ui/`       | shadcn/ui primitives — do not edit these directly                     |
+| `lib/api/schema.ts`    | Auto-generated from OpenAPI —**never hand-edit**                |
+| `lib/api/client.ts`    | `openapi-fetch` wrapper used by all data hooks                       |
+| `lib/api/resources.ts` | TanStack Query hooks per resource                                      |
+| `hooks/`               | Custom React hooks                                                     |
+
+---
+
+## 13. Things to remember
 
 - The demo is the deliverable. Polish the demo path obsessively. Leave the rest at "good enough."
 - The README is read before the code. The architecture diagram is read before the README. Both must be clear.

@@ -7,6 +7,7 @@
 !.env.example
 secrets/
 credentials.json
+.vscode/
 
 # Local agent databases, state histories, and vector embeddings
 .chroma/
@@ -46,6 +47,7 @@ dist/
 build/
 next-env.d.ts
 .ruff_cache/
+.pytest_cache/
 
 
 # Local Claude settings
