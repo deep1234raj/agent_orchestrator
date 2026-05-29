@@ -58,6 +58,23 @@ export interface paths {
     patch: operations["update_agent_agents__agent_id__patch"];
     trace?: never;
   };
+  "/agents/{agent_id}/register-webhook": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Register Agent Webhook */
+    post: operations["register_agent_webhook_agents__agent_id__register_webhook_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/agents/{agent_id}/channels": {
     parameters: {
       query?: never;
@@ -212,6 +229,63 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/schedules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Schedules */
+    get: operations["list_schedules_schedules_get"];
+    put?: never;
+    /** Create Schedule */
+    post: operations["create_schedule_schedules_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedules/{schedule_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Schedule */
+    get: operations["get_schedule_schedules__schedule_id__get"];
+    put?: never;
+    post?: never;
+    /** Delete Schedule */
+    delete: operations["delete_schedule_schedules__schedule_id__delete"];
+    options?: never;
+    head?: never;
+    /** Update Schedule */
+    patch: operations["update_schedule_schedules__schedule_id__patch"];
+    trace?: never;
+  };
+  "/schedules/{schedule_id}/trigger": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Trigger Schedule
+     * @description Immediately create a PENDING run for this schedule (manual fire).
+     */
+    post: operations["trigger_schedule_schedules__schedule_id__trigger_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/tools": {
     parameters: {
       query?: never;
@@ -299,29 +373,6 @@ export interface paths {
     get: operations["get_skill_skills__slug__get"];
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/webhooks/telegram/setup": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Setup Telegram Webhook
-     * @description Call Telegram setWebhook on behalf of the globally configured bot.
-     *
-     *     For per-agent bot setup, register the webhook manually using the
-     *     agent's own bot_token and the URL shown on the agent edit page.
-     */
-    post: operations["setup_telegram_webhook_webhooks_telegram_setup_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -622,6 +673,20 @@ export interface components {
        */
       created_at: string;
     };
+    /** RegisterWebhookRequest */
+    RegisterWebhookRequest: {
+      /** Base Url */
+      base_url: string;
+      /** Bot Token */
+      bot_token: string;
+    };
+    /** RegisterWebhookResponse */
+    RegisterWebhookResponse: {
+      /** Ok */
+      ok: boolean;
+      /** Description */
+      description?: string | null;
+    };
     /**
      * RunDetail
      * @description Run plus its full message log and tool calls.
@@ -668,21 +733,12 @@ export interface components {
        * Format: date-time
        */
       updated_at: string;
-      /**
-       * Messages
-       * @default []
-       */
-      messages: components["schemas"]["MessageRead"][];
-      /**
-       * Tool Calls
-       * @default []
-       */
-      tool_calls: components["schemas"]["ToolCallRead"][];
-      /**
-       * Usage Events
-       * @default []
-       */
-      usage_events: components["schemas"]["UsageEventRead"][];
+      /** Messages */
+      messages?: components["schemas"]["MessageRead"][];
+      /** Tool Calls */
+      tool_calls?: components["schemas"]["ToolCallRead"][];
+      /** Usage Events */
+      usage_events?: components["schemas"]["UsageEventRead"][];
     };
     /** RunRead */
     RunRead: {
@@ -733,6 +789,27 @@ export interface components {
      * @enum {string}
      */
     RunStatus: "pending" | "running" | "succeeded" | "failed" | "cancelled";
+    /** ScheduleCreate */
+    ScheduleCreate: {
+      /**
+       * Workflow Id
+       * Format: uuid
+       */
+      workflow_id: string;
+      /** Name */
+      name: string;
+      /** Cron */
+      cron: string;
+      /**
+       * Timezone
+       * @default UTC
+       */
+      timezone: string;
+      /** Input */
+      input?: {
+        [key: string]: unknown;
+      };
+    };
     /** ScheduleRead */
     ScheduleRead: {
       /**
@@ -751,6 +828,10 @@ export interface components {
       cron: string;
       /** Timezone */
       timezone: string;
+      /** Input */
+      input: {
+        [key: string]: unknown;
+      };
       status: components["schemas"]["ScheduleStatus"];
       /** Next Fire At */
       next_fire_at: string | null;
@@ -772,17 +853,19 @@ export interface components {
      * @enum {string}
      */
     ScheduleStatus: "active" | "paused";
-    /** SetupWebhookRequest */
-    SetupWebhookRequest: {
-      /** Base Url */
-      base_url: string;
-    };
-    /** SetupWebhookResponse */
-    SetupWebhookResponse: {
-      /** Ok */
-      ok: boolean;
-      /** Description */
-      description?: string | null;
+    /** ScheduleUpdate */
+    ScheduleUpdate: {
+      /** Name */
+      name?: string | null;
+      /** Cron */
+      cron?: string | null;
+      /** Timezone */
+      timezone?: string | null;
+      /** Input */
+      input?: {
+        [key: string]: unknown;
+      } | null;
+      status?: components["schemas"]["ScheduleStatus"] | null;
     };
     /** SkillDetail */
     SkillDetail: {
@@ -1143,6 +1226,41 @@ export interface operations {
       };
     };
   };
+  register_agent_webhook_agents__agent_id__register_webhook_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterWebhookRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RegisterWebhookResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_agent_channels_agents__agent_id__channels_get: {
     parameters: {
       query?: never;
@@ -1483,6 +1601,185 @@ export interface operations {
       };
     };
   };
+  list_schedules_schedules_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"][];
+        };
+      };
+    };
+  };
+  create_schedule_schedules_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleCreate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_schedule_schedules__schedule_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_schedule_schedules__schedule_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_schedule_schedules__schedule_id__patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trigger_schedule_schedules__schedule_id__trigger_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_registered_tools_tools_get: {
     parameters: {
       query?: never;
@@ -1658,39 +1955,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SkillDetail"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  setup_telegram_webhook_webhooks_telegram_setup_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetupWebhookRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SetupWebhookResponse"];
         };
       };
       /** @description Validation Error */

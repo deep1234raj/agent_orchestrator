@@ -33,7 +33,7 @@ datasets/
 *.jsonl
 
 # ==========================================
-# Standard Python/Node.js Build & Environments
+# Standard Python/Node.js/Next.js Build & Environments
 # ==========================================
 __pycache__/
 *.py[cod]
@@ -44,3 +44,10 @@ ENV/
 node_modules/
 dist/
 build/
+next-env.d.ts
+.ruff_cache/
+
+
+# Local Claude settings
+.claude/
+
