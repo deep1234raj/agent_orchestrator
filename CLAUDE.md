@@ -233,19 +233,22 @@ Key packages under `api/app/` and what each owns:
 | `db/`                                             | `session.py` (async session factory + `session_scope` context manager), `seed.py` (idempotent template seeding), `uuid7.py`                                                                          |
 | `worker.py`                                       | Two background coroutines:`run_loop` (polls for PENDING runs via `SELECT … FOR UPDATE SKIP LOCKED`, dispatches to executor) and `scheduler_loop` (fires scheduled runs via croniter)                  |
 | `channels/telegram.py` + `webhooks/telegram.py` | Webhook receiver lives in `webhooks/`, outbound delivery lives in `channels/`                                                                                                                            |
-| `skills.py`                                       | `/agents/{id}/skills` endpoint — exposes per-agent skill config                                                                                                                                           |
+| `skills.py`                                       | Skills registry: reads `api/skills/*.md` at import time into `SKILLS_REGISTRY`. Exposes `GET /skills` + `GET /skills/{slug}`. Supplies `get_skills_overview()` used by `AgentNode._build_system_prompt()`.  |
 
 Frontend layout under `web/`:
 
-| Path                     | Responsibility                                                         |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `app/`                 | Next.js App Router pages (`agents/`, `workflows/[id]/`, `runs/`) |
-| `components/`          | App-level composites (sidebar, canvas, run-status-badge, etc.)         |
-| `components/ui/`       | shadcn/ui primitives — do not edit these directly                     |
-| `lib/api/schema.ts`    | Auto-generated from OpenAPI —**never hand-edit**                |
-| `lib/api/client.ts`    | `openapi-fetch` wrapper used by all data hooks                       |
-| `lib/api/resources.ts` | TanStack Query hooks per resource                                      |
-| `hooks/`               | Custom React hooks                                                     |
+| Path                          | Responsibility                                                                                                 |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `app/`                      | Next.js App Router pages (`agents/`, `workflows/[id]/`, `runs/`)                                        |
+| `components/`               | App-level composites (sidebar, canvas, schedule-section, run-status-badge, etc.)                               |
+| `components/schedule-section.tsx` | Inline cron schedule list with toggle / run-now / delete; uses `agentsApi` schedule methods             |
+| `components/create-schedule-dialog.tsx` | Cron builder: preset pills + 5-dropdown visual builder + timezone picker                          |
+| `components/ui/`            | shadcn/ui primitives — do not edit these directly                                                             |
+| `lib/api/schema.ts`         | Auto-generated from OpenAPI — **never hand-edit**                                                             |
+| `lib/api/client.ts`         | `openapi-fetch` wrapper used by all data hooks                                                               |
+| `lib/api/resources.ts`      | TanStack Query hooks per resource                                                                              |
+| `lib/cron-utils.ts`         | `describeCron(expr)` human-readable labels + `buildCronFromParts(min, hr, dom, mon, dow)`                     |
+| `hooks/`                    | Custom React hooks                                                                                             |
 
 ---
 
@@ -259,4 +262,4 @@ Frontend layout under `web/`:
 
 ---
 
-*Last updated at project kickoff. Update this file whenever a decision in section 2 or a guardrail in section 3 changes.*
+*Last updated 2026-05-29. Update this file whenever a decision in section 2 or a guardrail in section 3 changes.*

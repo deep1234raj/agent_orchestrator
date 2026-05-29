@@ -49,7 +49,7 @@ cp .env.example .env
 # Edit .env and add: ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN, TAVILY_API_KEY
 
 # 3. Run
-docker compose up --build
+docker compose -f infra/docker-compose.yml up --build
 ```
 
 Once up:
@@ -146,7 +146,11 @@ aaop/
 │   │   ├── errors.py               # Domain exceptions + HTTP handlers
 │   │   ├── worker.py               # In-process run dispatcher + scheduler tick
 │   │   ├── logging_config.py       # structlog setup
-│   │   ├── routes/                 # REST endpoints (agents, workflows, runs, tools, channels)
+│   │   ├── routes/                 # REST endpoints
+│   │   │   ├── agents.py           # Agent CRUD + register-webhook + /channels sub-resource
+│   │   │   ├── agent_schedules.py  # /agents/{id}/schedules CRUD + trigger; lazy default-workflow
+│   │   │   ├── workflows.py, runs.py, tools.py, channels.py, schedules.py
+│   │   ├── skills.py               # Skills registry (api/skills/*.md) + GET /skills routes
 │   │   ├── ws/gateway.py           # WebSocket per-run event stream
 │   │   ├── webhooks/telegram.py    # Inbound Telegram messages → runs
 │   │   ├── runtime/                # LangGraph compiler + executor + nodes
@@ -177,14 +181,19 @@ aaop/
 │   │   ├── layout.tsx              # Fonts, providers, sidebar shell
 │   │   ├── page.tsx                # Dashboard (live runs, stats, quick actions)
 │   │   ├── error.tsx, not-found.tsx
-│   │   ├── agents/                 # Agents CRUD (list + edit)
-│   │   └── channels/               # Channels CRUD (list + create + edit + delete)
+│   │   ├── agents/                 # Agents CRUD (list + create + edit + delete)
+│   │   ├── workflows/              # Workflow list + React Flow canvas editor
+│   │   └── runs/                   # Run list + live monitoring dashboard
 │   ├── components/
-│   │   ├── ui/                     # Hand-styled primitives (Button, Dialog, …)
-│   │   ├── sidebar.tsx, page-header.tsx, empty-state.tsx
+│   │   ├── ui/                     # shadcn/ui primitives (Button, Dialog, Badge, …)
+│   │   ├── schedule-section.tsx    # Inline schedule list + toggle/delete/trigger
+│   │   ├── create-schedule-dialog.tsx  # Cron preset pills + visual 5-dropdown builder
+│   │   ├── workflow-canvas.tsx     # React Flow canvas (4 node types, condition edges)
+│   │   ├── sidebar.tsx, page-header.tsx, empty-state.tsx, run-status-badge.tsx
 │   │   └── query-provider.tsx, toaster.tsx
 │   ├── lib/
 │   │   ├── api/                    # Typed fetch client + per-entity functions
+│   │   ├── cron-utils.ts           # describeCron() + buildCronFromParts()
 │   │   └── utils.ts                # cn() helper
 │   └── package.json
 │
@@ -358,8 +367,8 @@ All three categories are configurable from the agent edit form.
 ## Testing
 
 ```bash
-# Backend
-cd api && pytest
+# Backend (requires a live Postgres at DATABASE_URL)
+cd api && uv run pytest -x
 
 # Frontend
 cd web && pnpm test

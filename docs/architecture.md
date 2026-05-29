@@ -154,7 +154,7 @@ web/
 ├── app/
 │   ├── layout.tsx               Fonts, providers (ReactQuery, Toaster), sidebar shell
 │   ├── page.tsx                 Dashboard — active runs (5s poll), health stats, quick actions
-│   ├── agents/                  Agent CRUD (list + create + edit + delete)
+│   ├── agents/                  Agent CRUD (list + create + edit + delete); Schedules section inline
 │   ├── workflows/
 │   │   ├── page.tsx             Workflow list with template badges
 │   │   └── [id]/
@@ -169,15 +169,18 @@ web/
 │           └── cost-counter.tsx  Running token + USD cost display
 ├── components/
 │   ├── workflow-canvas.tsx      React Flow canvas — 4 custom node types; condition edges color-coded
-│   ├── telegram-setup-dialog.tsx  Dialog to call POST /webhooks/telegram/setup
+│   ├── schedule-section.tsx     Inline cron schedule list: toggle/pause, run-now, delete
+│   ├── create-schedule-dialog.tsx  Cron builder: preset pills + 5-dropdown visual builder + timezone
 │   ├── run-status-badge.tsx     Status → amber/green/red/grey badge
 │   ├── ui/                      shadcn/ui primitives (Button, Dialog, Tabs, Badge, …)
 │   ├── sidebar.tsx, page-header.tsx, empty-state.tsx
 │   └── query-provider.tsx, toaster.tsx
-└── lib/api/
-    ├── schema.ts                Auto-generated from OpenAPI (pnpm openapi)
-    ├── resources.ts             Per-entity API functions + type aliases
-    └── client.ts                fetch wrapper (uniform error shape, typed via generics)
+└── lib/
+    ├── api/
+    │   ├── schema.ts            Auto-generated from OpenAPI (pnpm openapi)
+    │   ├── resources.ts         Per-entity API functions + type aliases
+    │   └── client.ts            fetch wrapper (uniform error shape, typed via generics)
+    └── cron-utils.ts            describeCron() human-readable labels + buildCronFromParts()
 ```
 
 ---
