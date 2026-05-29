@@ -234,16 +234,61 @@ function toFlowNodes(
   });
 }
 
-function toFlowEdges(graphEdges: GraphEdge[]): Edge[] {
-  return graphEdges.map((e) => {
-    const isTrue = e.sourceHandle === "true";
-    const isFalse = e.sourceHandle === "false";
+function toFlowEdges(graphEdges: GraphEdge[], graphNodes: GraphNode[]): Edge[] {
+  // Build a lookup of condition node routing so we can restore sourceHandle
+  // on legacy edges (stored before sourceHandle was part of the format).
+  const conditionIds = new Set(
+    graphNodes.filter((n) => n.type === "condition").map((n) => n.id),
+  );
+  const conditionRouting = new Map<
+    string,
+    { on_true?: string; on_false?: string }
+  >();
+  for (const n of graphNodes) {
+    if (n.type === "condition") {
+      conditionRouting.set(n.id, {
+        on_true: n.data?.on_true as string | undefined,
+        on_false: n.data?.on_false as string | undefined,
+      });
+    }
+  }
+
+  // Deduplicate condition edges: if a sourceHandle edge already exists for
+  // (source, target), drop any plain (no-sourceHandle) edge to the same target.
+  // This fixes graphs that have both the old template edges AND user-drawn
+  // handle edges stored side-by-side.
+  const coveredByHandle = new Set<string>();
+  for (const e of graphEdges) {
+    if (conditionIds.has(e.source) && e.sourceHandle) {
+      coveredByHandle.add(`${e.source}→${e.target}`);
+    }
+  }
+  const deduped = graphEdges.filter(
+    (e) =>
+      !(
+        conditionIds.has(e.source) &&
+        !e.sourceHandle &&
+        coveredByHandle.has(`${e.source}→${e.target}`)
+      ),
+  );
+
+  return deduped.map((e) => {
+    // Restore sourceHandle from condition node data for edges that don't have it.
+    let sourceHandle = e.sourceHandle;
+    if (!sourceHandle && conditionIds.has(e.source)) {
+      const routing = conditionRouting.get(e.source);
+      if (routing?.on_true === e.target) sourceHandle = "true";
+      else if (routing?.on_false === e.target) sourceHandle = "false";
+    }
+
+    const isTrue = sourceHandle === "true";
+    const isFalse = sourceHandle === "false";
     if (isTrue || isFalse) {
       return {
         id: e.id,
         source: e.source,
         target: e.target,
-        sourceHandle: e.sourceHandle,
+        sourceHandle,
         type: "smoothstep",
         label: isTrue ? "true" : "false",
         labelStyle: {
@@ -259,7 +304,7 @@ function toFlowEdges(graphEdges: GraphEdge[]): Edge[] {
       id: e.id,
       source: e.source,
       target: e.target,
-      sourceHandle: e.sourceHandle,
+      sourceHandle,
       style: { stroke: "rgb(var(--border))", strokeWidth: 1.5 },
     };
   });
@@ -294,7 +339,7 @@ function WorkflowEditorInner({
     toFlowNodes(initialGraph.nodes, agentsById),
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    toFlowEdges(initialGraph.edges),
+    toFlowEdges(initialGraph.edges, initialGraph.nodes),
   );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
