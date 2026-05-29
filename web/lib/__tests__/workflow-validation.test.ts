@@ -139,6 +139,31 @@ describe("validateWorkflow", () => {
       ),
     ).toBe(true);
   });
+
+  it("errors when condition node has empty expression", () => {
+    const g: GraphDocument = {
+      nodes: [
+        { id: "start", type: "start", data: {}, position: { x: 0, y: 0 } },
+        {
+          id: "c1",
+          type: "condition",
+          data: { expr: "" },
+          position: { x: 100, y: 0 },
+        },
+        { id: "end", type: "end", data: {}, position: { x: 200, y: 0 } },
+      ],
+      edges: [
+        { id: "e1", source: "start", target: "c1" },
+        { id: "e2", source: "c1", target: "end", sourceHandle: "true" },
+        { id: "e3", source: "c1", target: "end", sourceHandle: "false" },
+      ],
+    };
+    expect(
+      validateWorkflow(g).some(
+        (e) => e.rule === "condition_expr" && e.nodeId === "c1",
+      ),
+    ).toBe(true);
+  });
 });
 
 describe("getNodeErrorIds", () => {
