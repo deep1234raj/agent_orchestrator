@@ -28,16 +28,23 @@ import {
 } from './agent-schema';
 
 const MODEL_OPTIONS = [
+  // Claude 4.x (latest)
+  { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (recommended)' },
+  { value: 'claude-opus-4-8', label: 'Claude Opus 4.8' },
+  { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
+  // Claude 4.x (previous)
   { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' },
-  { value: 'claude-opus-4-1', label: 'Claude Opus 4.1' },
-  { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5' },
+  { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 (older)' },
+  // OpenAI
   { value: 'gpt-4o', label: 'GPT-4o (OpenAI)' },
   { value: 'gpt-4o-mini', label: 'GPT-4o mini (OpenAI)' },
 ];
 
 const PROVIDER_BY_MODEL: Record<string, string> = {
+  'claude-sonnet-4-6': 'anthropic',
+  'claude-opus-4-8': 'anthropic',
+  'claude-haiku-4-5-20251001': 'anthropic',
   'claude-sonnet-4-5': 'anthropic',
-  'claude-opus-4-1': 'anthropic',
   'claude-haiku-4-5': 'anthropic',
   'gpt-4o': 'openai',
   'gpt-4o-mini': 'openai',
@@ -80,7 +87,7 @@ export function AgentForm({
       role: defaultValues?.role ?? '',
       system_prompt: defaultValues?.system_prompt ?? '',
       provider: defaultValues?.provider ?? 'anthropic',
-      model: defaultValues?.model ?? 'claude-sonnet-4-5',
+      model: defaultValues?.model ?? 'claude-sonnet-4-6',
       temperature: defaultValues?.temperature ?? 0.7,
       max_tokens: defaultValues?.max_tokens ?? 2048,
       tools: defaultValues?.tools ?? [],

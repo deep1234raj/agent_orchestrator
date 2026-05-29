@@ -20,7 +20,7 @@ export const agentFormSchema = z.object({
   role: z.string().min(1, 'Role is required').max(120),
   system_prompt: z.string().min(1, 'System prompt is required'),
   provider: z.string().min(1).default('anthropic'),
-  model: z.string().min(1).default('claude-sonnet-4-5'),
+  model: z.string().min(1).default('claude-sonnet-4-6'),
   temperature: z.coerce.number().min(0).max(2).default(0.7),
   max_tokens: z.coerce.number().int().min(1).max(200_000).default(2048),
   tools: z.array(z.string()).default([]),
