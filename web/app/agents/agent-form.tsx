@@ -75,8 +75,8 @@ export function AgentForm({
       tools: defaultValues?.tools ?? [],
       memory_mode: defaultValues?.memory_mode ?? 'summary',
       memory_window: defaultValues?.memory_window ?? 10,
-      max_iterations: guardrails.max_iterations,
-      max_cost_usd: guardrails.max_cost_usd,
+      max_iterations: guardrails.max_iterations ?? 25,
+      max_cost_usd: guardrails.max_cost_usd ?? 1.0,
       // Skills
       skills: defaultValues?.skills ?? [],
       // Channel

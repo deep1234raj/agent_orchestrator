@@ -54,3 +54,5 @@ next-env.d.ts
 .claude/
 .superpowers/
 superpowers/
+.playwright-mcp/
+.frames/

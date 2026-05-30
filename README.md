@@ -2,14 +2,13 @@
 
 > Build, configure, and orchestrate collaborative AI agents that run on a real runtime, execute real tools, and talk to humans through Telegram.
 
-<!-- Replace with a real GIF once recorded -->
-
-<!-- ![demo](docs/demo.gif) -->
+![dashboard](demo-gifs/01-dashboard.gif)
 
 ---
 
 ## Table of Contents
 
+- [Feature demos](#feature-demos)
 - [What this is](#what-this-is)
 - [Quickstart](#quickstart)
 - [Architecture](#architecture)
@@ -20,6 +19,28 @@
 - [Extending the platform](#extending-the-platform)
 - [Testing](#testing)
 - [What I&#39;d build next](#what-id-build-next)
+
+---
+
+## Feature demos
+
+### Dashboard — live stats and quick actions
+![dashboard](demo-gifs/01-dashboard.gif)
+
+### Create an agent — model, tools, guardrails
+![create-agent](demo-gifs/02-create-agent.gif)
+
+### Workflow editor — visual React Flow graph builder
+![workflow-editor](demo-gifs/03-workflow-editor.gif)
+
+### Trigger a run — one-click launch with input
+![trigger-run](demo-gifs/04-trigger-run.gif)
+
+### Live run monitoring — real-time WebSocket event feed
+![live-run](demo-gifs/05-live-run.gif)
+
+### Schedule creation — cron builder with presets
+![schedule](demo-gifs/06-schedule.gif)
 
 ---
 
